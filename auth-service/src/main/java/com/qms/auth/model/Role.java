@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,6 +19,8 @@ import javax.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.qms.auth.constant.RoleName;
+
 import lombok.Data;
 
 @Data
@@ -27,10 +31,11 @@ public class Role {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	private Long id;
 	
-	@Column(name = "String", nullable = false ) // TODO: change the name of field in database
-	private String role;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "name", nullable = false )
+	private RoleName roleName;
 	
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
@@ -39,11 +44,11 @@ public class Role {
 			inverseJoinColumns = @JoinColumn(name = "user_id"))
 	private List<User> users;
 	
-	@CreatedDate
-    @Column(name = "created_on", nullable = false, updatable = false)
-    private OffsetDateTime createdOn;
-
-    @LastModifiedDate
-    @Column(name = "updated_on", nullable = false)
-    private OffsetDateTime updatedOn;
+//	@CreatedDate
+//    @Column(name = "created_on", nullable = false, updatable = false)
+//    private OffsetDateTime createdOn;
+//
+//    @LastModifiedDate
+//    @Column(name = "updated_on", nullable = false)
+//    private OffsetDateTime updatedOn;
 }
