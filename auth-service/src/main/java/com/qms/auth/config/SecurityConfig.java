@@ -18,18 +18,13 @@ import com.qms.auth.filter.CustomAuthorizationFilter;
 import com.qms.auth.security.AuthEntryPoint;
 import com.qms.auth.service.impl.UserDetailsServiceImpl;
 
-////import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-////import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-////import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
-//import com.bezkoder.springjwt.security.jwt.AuthEntryPointJwt;
-//import com.bezkoder.springjwt.security.jwt.AuthTokenFilter;
-//import com.bezkoder.springjwt.security.services.UserDetailsServiceImpl;
+/* OLD WAY */
 
 /**
- * @author Get Arrays (https://www.getarrays.io/)
- * @version 1.0
- * @since 7/10/2021
+ * @author
+ * @version
+ * @since
  */
 //@Configuration @EnableWebSecurity @RequiredArgsConstructor
 //public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -62,15 +57,16 @@ import com.qms.auth.service.impl.UserDetailsServiceImpl;
 //    }
 //}
 
+/* NEW WAY */
 @Configuration
 @EnableGlobalMethodSecurity(
 		// securedEnabled = true, // TODO: ??
 		// jsr250Enabled = true, // TODO: ??
 		prePostEnabled = true)
-public class SecurityConfig { // extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
 
 	@Autowired
-	UserDetailsServiceImpl userDetailsService;
+	private UserDetailsServiceImpl userDetailsService;
 
 	@Autowired
 	private AuthEntryPoint unauthorizedHandler;
@@ -128,7 +124,7 @@ public class SecurityConfig { // extends WebSecurityConfigurerAdapter {
 		http.cors().and().csrf().disable() // TODO: explain use of '.and' and what the way if not used '.and'
 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and() // TODO: explain
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and() // TODO: explain
-				.authorizeRequests().antMatchers("/api/v1/auth/**").permitAll().antMatchers("/api/test/**").permitAll()
+				.authorizeRequests().antMatchers("/api/v1/auth/**").permitAll().antMatchers("/api/dummy/**").permitAll()
 				.anyRequest().authenticated();
 
 		http.authenticationProvider(authenticationProvider());

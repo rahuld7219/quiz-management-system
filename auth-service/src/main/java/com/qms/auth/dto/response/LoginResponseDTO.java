@@ -8,12 +8,13 @@ import lombok.Data;
 public class LoginResponseDTO {
 
 	private String accessToken;
-	private String type = "Bearer"; // TODO: Constant separate
+	private String refreshToken;
 	private String emailId;
 	private List<String> roles;
 
-	public LoginResponseDTO(String accessToken, String emailId, List<String> roles) {
+	public LoginResponseDTO(String accessToken, String refreshToken, String emailId, List<String> roles) {
 		this.accessToken = accessToken;
+		this.refreshToken = refreshToken;
 		this.emailId = emailId;
 		this.roles = roles;
 	}

@@ -51,22 +51,25 @@ public class User {
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-	private Set<Role> roles;// = new HashSet<>(); // so that if there is no role then empty set will be returned (not null)
+	private Set<Role> roles;// = new HashSet<>(); // so that if there is no role then empty set will be
+							// returned (not null)
 
-//	@CreatedDate
-//	@Column(name = "created_on", nullable = false, updatable = false)
-//	private OffsetDateTime createdOn;
-//
-//	@LastModifiedDate
-//	@Column(name = "updated_on", nullable = false)
-//	private OffsetDateTime updatedOn;
+	@CreatedDate
+	@Column(name = "created_on", nullable = false, updatable = false)
+	private OffsetDateTime createdOn;
 
-	public User(String firstName, String lastName, String emailId, String password, String mobileNumber) {
+	@LastModifiedDate
+	@Column(name = "updated_on", nullable = false)
+	private OffsetDateTime updatedOn;
+
+	public User(String firstName, String lastName, String emailId, String password, String mobileNumber,
+			Set<Role> roles) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.emailId = emailId;
 		this.password = password;
 		this.mobileNumber = mobileNumber;
+		this.roles = roles;
 	}
 
 }
