@@ -1,5 +1,6 @@
 package com.qms.auth.service.impl;
 
+import com.qms.auth.dto.request.ChangePasswordRequestDTO;
 import com.qms.auth.dto.request.LoginRequestDTO;
 import com.qms.auth.dto.request.SignUpRequestDTO;
 import com.qms.auth.dto.request.TokenRefreshRequestDTO;
@@ -24,6 +25,12 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public TokenRefreshResponseDTO tokenRefresh(TokenRefreshRequestDTO tokenRefreshRequestDTO) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResponseMessageDTO changePassword(ChangePasswordRequestDTO changePasswordRequest) {
 		// TODO Auto-generated method stub
 		return null;
 	}

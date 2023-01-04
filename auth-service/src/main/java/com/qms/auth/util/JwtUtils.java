@@ -1,8 +1,6 @@
 package com.qms.auth.util;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +11,7 @@ import com.qms.auth.model.Role;
 import com.qms.auth.model.User;
 import com.qms.auth.repository.UserRepository;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -38,22 +37,34 @@ public class JwtUtils {
 	private UserRepository userRepository;
 
 	public String generateJwtAccessToken(String username) {
-		Map<String, Object> claims = new HashMap<>();
+		
+//		SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+//		String secretString = Encoders.BASE64.encode(key.getEncoded());
+		
+		Claims claims = Jwts.claims();
+		populate(claims, username, jwtAccessExpiration);
 		User user = userRepository.findByEmailId(username).orElseThrow(() -> new RuntimeException("User not exist.")); // TODO: throw custom exception
-		claims.put("roles", user.getRoles().stream().map(Role::getRoleName).collect(Collectors.toList()));
 		return Jwts.builder()
-				.setSubject(username)
-				.setIssuedAt(new Date())
-				.setExpiration(new Date((new Date()).getTime() + jwtAccessExpiration)) // TODO: convert to LocalDateTime
 				.setClaims(claims)
-				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
+				.claim("role", user.getRoles().stream().map(Role::getRoleName).collect(Collectors.toList()))
+				.signWith(SignatureAlgorithm.HS512, jwtSecret)
+				.compact();
+	}
+
+	private void populate(Claims claims, String username, int expirationTime) {
+		claims
+		.setSubject(username)
+		.setIssuedAt(new Date())
+		.setExpiration(new Date((new Date()).getTime() + expirationTime));
 	}
 
 	public String generateJwtRefreshToken(String username) {
-		return Jwts.builder().setSubject(username)
-				.setIssuedAt(new Date())
-				.setExpiration(new Date((new Date()).getTime() + jwtRefreshExpiration)) // TODO: convert toLocalDateTime
-				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
+		Claims claims = Jwts.claims();
+		populate(claims, username, jwtRefreshExpiration);
+		return Jwts.builder()
+				.setClaims(claims)
+				.signWith(SignatureAlgorithm.HS512, jwtSecret)
+				.compact();
 	}
 
 	public String getUserNameFromJwtToken(String token) {

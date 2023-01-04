@@ -57,8 +57,9 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 							userDetails, null, userDetails.getAuthorities());
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request)); // TODO:
 																											// explain
-
 					SecurityContextHolder.getContext().setAuthentication(authentication);
+				} else {
+					throw new RuntimeException("Authentication token is not valid.");
 				}
 				// TODO: throw custom standard response error
 			} catch (Exception exception) {

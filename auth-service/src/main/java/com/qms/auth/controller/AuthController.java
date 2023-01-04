@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.qms.auth.constant.RoleName;
+import com.qms.auth.dto.request.ChangePasswordRequestDTO;
 import com.qms.auth.dto.request.LoginRequestDTO;
 import com.qms.auth.dto.request.SignUpRequestDTO;
 import com.qms.auth.dto.request.TokenRefreshRequestDTO;
@@ -117,6 +118,26 @@ public class AuthController {
 		} else {
 			throw new RuntimeException("Refresh token is not valid"); // TODO: refactor, throw custom exception
 		}
+	}
+	
+	@PostMapping("/changePassword")
+	public ResponseEntity<?> changePassword(@Valid @RequestBody final ChangePasswordRequestDTO changePasswordRequest) {
+		if (changePasswordRequest.getOldPassword().equalsIgnoreCase(changePasswordRequest.getNewPassword()) ) {
+			throw new RuntimeException("New password cannot be similar to old password.");
+		}
+		if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getAgainNewPassword())) {
+			throw new RuntimeException("Re-entered new password do not match."); // TODO: use custom Exception
+		}
+		
+		String email = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+		User user = userRepository.findByEmailId(email).get(); // TODO: use isPresent()
+		
+		if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+			throw new RuntimeException("Wrong password provided."); // TODO: use custome Exception
+		}
+		user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+		userRepository.save(user);
+		return ResponseEntity.ok(new ResponseMessageDTO("Password change successful.")); // TODO: use custome Exception
 	}
 
 //	@GetMapping("/logout")
