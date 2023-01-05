@@ -40,16 +40,16 @@ public class User {
 	@Column(name = "last_name", nullable = false)
 	private String lastName;
 
-	@Column(name = "email_id", nullable = false)
+	@Column(name = "email_id", nullable = false, unique = true) // TODO: throw proper standard formatted exception on any constraint validation for any table
 	private String emailId;
 
 	@Column(name = "password", nullable = false)
 	private String password;
 
-	@Column(name = "mobile_number", nullable = false)
+	@Column(name = "mobile_number", nullable = false, unique = true)
 	private String mobileNumber;
 
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY) // TODO: what could be the cascading rule? check in every entity class
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;// = new HashSet<>(); // so that if there is no role then empty set will be
 							// returned (not null)

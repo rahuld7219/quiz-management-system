@@ -124,7 +124,7 @@ public class SecurityConfig {
 		http.cors().and().csrf().disable() // TODO: explain use of '.and' and what the way if not used '.and'
 				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and() // TODO: explain
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and() // TODO: explain
-				.authorizeRequests().antMatchers("/api/v1/auth/**").permitAll().antMatchers("/api/dummy/**").permitAll()
+				.authorizeRequests().antMatchers("/api/v1/auth/**", "/api/v1/admin/**").permitAll().antMatchers("/api/dummy/**").permitAll()
 				.anyRequest().authenticated();
 
 		http.authenticationProvider(authenticationProvider());
