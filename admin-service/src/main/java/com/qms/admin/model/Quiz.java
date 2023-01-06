@@ -1,7 +1,6 @@
 package com.qms.admin.model;
 
 import java.time.OffsetDateTime;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,7 +9,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -38,11 +38,9 @@ public class Quiz {
 	@Column(name = "deleted", columnDefinition = "varchar(1) default 'N'")
 	private String deleted;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "quiz") // TODO: what could be the cascade?
-	private Set<QuizQuestion> quizQuestions;
-
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "quiz") // TODO: what could be the cascade?
-	private Set<QuizCategory> quizCategories;
+	@ManyToOne(fetch = FetchType.LAZY) // TODO: what could be the cascade?
+	@JoinColumn(name = "category_id")
+	private Category category;
 
 	@CreatedDate
 	@Column(name = "created_on", nullable = false, updatable = false)

@@ -1,4 +1,4 @@
-package com.qms.admin.dto;
+package com.qms.admin.dto.response;
 
 import org.springframework.http.HttpStatus;
 
