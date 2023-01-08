@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.qms.auth.constant.RoleName;
 import com.qms.auth.dto.request.ChangePasswordRequestDTO;
@@ -29,6 +30,7 @@ import com.qms.auth.service.AuthService;
 import com.qms.auth.util.JwtUtils;
 import com.qms.auth.util.RedisCacheUtil;
 
+@Service
 public class AuthServiceImpl implements AuthService {
 
 	@Autowired
@@ -59,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
 		
 		Role userRole = roleRepository.findByRoleName(RoleName.ATTENDEE)
 				.orElseThrow(() -> new RuntimeException("Error: Role is not found.")); // TODO: create custom formatted exception
-		roles.add(userRole);
+		roles.add(userRole); // TODO: put this adding Role entity class (see hibernate CD doc)
 		
 		// TODO: use DTO <-> model mapper
 		User user = new User(signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getEmailId(),

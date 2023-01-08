@@ -1,6 +1,5 @@
 package com.qms.auth.model;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -15,9 +14,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import com.qms.auth.constant.RoleName;
 
@@ -34,7 +30,7 @@ public class Role {
 	private Long id;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(name = "name", nullable = false )
+	@Column(name = "name", nullable = false, unique = true)
 	private RoleName roleName;
 	
 	@ManyToMany(fetch = FetchType.LAZY)
