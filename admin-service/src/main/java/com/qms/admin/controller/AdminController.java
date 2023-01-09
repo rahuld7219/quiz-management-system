@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +31,7 @@ public class AdminController {
 																						// add URI where created
 	}
 
-	@PatchMapping("/category")
+	@PutMapping("/category")
 	public ResponseEntity<?> updateCategory(@RequestBody UpdateCategoryRequestDTO updateCategoryRequest) {
 		ResponseMessageDTO response = categoryService.updateCategory(updateCategoryRequest);
 		return ResponseEntity.status(response.getStatus()).body(response.getMessage()); // create standard response and
@@ -44,8 +45,11 @@ public class AdminController {
 																						// add URI where created
 	}
 
-	@GetMapping("/category")
-	public ResponseEntity<?> getCategory(@RequestParam String categoryName) {
+	@GetMapping("/category/{categoryName}")
+	public ResponseEntity<?> getCategory(@PathVariable(required = false) String categoryName) {
+		if (categoryName != null) {
+			return ResponseEntity.ok().body(categoryService.getCategory(categoryName));
+		}
 		return ResponseEntity.ok().body(categoryService.listCategories());
 	}
 }
