@@ -8,6 +8,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class GetCategoryResponseDTO {
+	
+	private Long id;
 
 	private String name;
 

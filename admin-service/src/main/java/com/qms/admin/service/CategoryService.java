@@ -11,11 +11,11 @@ public interface CategoryService {
 
 	ResponseMessageDTO addCategory(AddCategoryRequestDTO addCategoryRequest);
 
-	ResponseMessageDTO updateCategory(UpdateCategoryRequestDTO updateCategoryRequest);
+	ResponseMessageDTO updateCategory(String categoryId, UpdateCategoryRequestDTO updateCategoryRequest);
 
-	ResponseMessageDTO deleteCategory(String categoryName);
+	ResponseMessageDTO deleteCategory(String categoryId);
 
-	GetCategoryResponseDTO getCategory(String categoryName);
+	GetCategoryResponseDTO getCategory(String categoryId);
 
 	List<GetCategoryResponseDTO> listCategories();
 }

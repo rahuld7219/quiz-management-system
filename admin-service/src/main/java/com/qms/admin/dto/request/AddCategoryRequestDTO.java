@@ -6,4 +6,5 @@ import lombok.Data;
 public class AddCategoryRequestDTO {
 
 	private String name;
+	private Long categoryId;
 }
