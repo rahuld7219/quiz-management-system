@@ -1,27 +1,27 @@
 package com.qms.auth.util;
 
+import java.security.Key;
 import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import com.qms.auth.model.Role;
-import com.qms.auth.model.User;
-import com.qms.auth.repository.UserRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
+@Slf4j
 public class JwtUtils {
 
 	@Value("${qms.app.jwtSecret}")
@@ -33,48 +33,46 @@ public class JwtUtils {
 	@Value("${qms.app.jwtRefreshExpirationTime}")
 	private int jwtRefreshExpiration;
 
-	@Autowired
-	private UserRepository userRepository;
-
-	public String generateJwtAccessToken(String username) {
-		
-//		SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
-//		String secretString = Encoders.BASE64.encode(key.getEncoded());
-		
-		Claims claims = Jwts.claims();
-		populate(claims, username, jwtAccessExpiration);
-		User user = userRepository.findByEmailId(username).orElseThrow(() -> new RuntimeException("User not exist.")); // TODO: throw custom exception
-		return Jwts.builder()
-				.setClaims(claims)
-				.claim("role", user.getRoles().stream().map(Role::getRoleName).collect(Collectors.toList()))
-				.signWith(SignatureAlgorithm.HS512, jwtSecret)
-				.compact();
+	/**
+	 * 
+	 * @param userDetails
+	 * @return
+	 */
+	public String generateAccessToken(UserDetails userDetails) {
+		Map<String, Object> extraClaim = new HashMap<>();
+		extraClaim.put("roles", userDetails.getAuthorities()); // TODO: put in constant
+		return generateToken(extraClaim, userDetails.getUsername(), jwtAccessExpiration);
 	}
 
-	private void populate(Claims claims, String username, int expirationTime) {
-		claims
-		.setSubject(username)
-		.setIssuedAt(new Date())
-		.setExpiration(new Date((new Date()).getTime() + expirationTime));
+	/**
+	 * 
+	 * @param userDetails
+	 * @return
+	 */
+	public String generateRefreshToken(UserDetails userDetails) {
+		return generateToken(new HashMap<>(), userDetails.getUsername(), jwtRefreshExpiration);
 	}
 
-	public String generateJwtRefreshToken(String username) {
-		Claims claims = Jwts.claims();
-		populate(claims, username, jwtRefreshExpiration);
-		return Jwts.builder()
-				.setClaims(claims)
-				.signWith(SignatureAlgorithm.HS512, jwtSecret)
-				.compact();
+	/**
+	 * 
+	 * @param extraClaims
+	 * @param userDetails
+	 * @return
+	 */
+	public String generateToken(Map<String, Object> extraClaims, String username, int expirationTime) {
+		return Jwts.builder().setClaims(extraClaims).setSubject(username)
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + expirationTime)).signWith(getSignKey()).compact();
 	}
 
-	public String getUserNameFromJwtToken(String token) {
-		return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
+	public String extractUsername(String token) {
+		return extractClaim(token, Claims::getSubject);
 	}
 
-	// TODO: Throw a common Invalid Token Exception
-	public boolean validateJwtToken(String token) {
+	public boolean isTokenValid(String token) {
+		// TODO: Throw a common Invalid Token Exception, with e.getMessage
 		try {
-			Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+			Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token);
 			return true;
 		} catch (SignatureException e) {
 			log.error("Invalid JWT signature: {}", e.getMessage());
@@ -89,5 +87,27 @@ public class JwtUtils {
 		}
 
 		return false;
+	}
+
+	private Key getSignKey() {
+		byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+		return Keys.hmacShaKeyFor(keyBytes);
+	}
+
+	public Claims extractAllClaims(String token) {
+		return Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
+	}
+
+	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+		final Claims claims = extractAllClaims(token);
+		return claimsResolver.apply(claims);
+	}
+
+	private Date extractExpiration(String token) {
+		return extractClaim(token, Claims::getExpiration);
+	}
+
+	private boolean isTokenExpired(String token) {
+		return extractExpiration(token).before(new Date());
 	}
 }

@@ -1,23 +1,27 @@
 package com.qms.auth.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.qms.auth.filter.CustomAuthorizationFilter;
+import com.qms.auth.filter.JwtAuthenticationFilter;
+import com.qms.auth.repository.UserRepository;
 import com.qms.auth.security.AuthEntryPoint;
-import com.qms.auth.service.impl.UserDetailsServiceImpl;
 
+import lombok.RequiredArgsConstructor;
 
 /* OLD WAY */
 
@@ -39,7 +43,7 @@ import com.qms.auth.service.impl.UserDetailsServiceImpl;
 //    @Override
 //    protected void configure(HttpSecurity http) throws Exception {
 //        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean());
-//        customAuthenticationFilter.setFilterProcessesUrl("/api/login");
+//        customAuthenticationFilter.setFilterProcessesUrl("/api/login"); // changes the URL for login from /login to /api/login
 //        http.csrf().disable();
 //        http.sessionManagement().sessionCreationPolicy(STATELESS);
 //        http.authorizeRequests().antMatchers("/api/login/**", "/api/token/refresh/**").permitAll();
@@ -59,47 +63,35 @@ import com.qms.auth.service.impl.UserDetailsServiceImpl;
 
 /* NEW WAY */
 @Configuration
+@RequiredArgsConstructor // for DI for final fields, it creates constructor for final fields and Spring
+							// automatically so constructor injection, i.e. find and provide the required
+							// objects for the constructor
+@EnableWebSecurity
 @EnableGlobalMethodSecurity(
 		// securedEnabled = true, // TODO: ??
 		// jsr250Enabled = true, // TODO: ??
 		prePostEnabled = true)
 public class SecurityConfig {
 
-	@Autowired
-	private UserDetailsServiceImpl userDetailsService;
+	private final UserRepository userRepository;
+	
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-	@Autowired
-	private AuthEntryPoint unauthorizedHandler;
+//	@Autowired
+//	private UserDetailsServiceImpl userDetailsService;
 
+	private final AuthEntryPoint unauthorizedHandler;
+
+	/**
+	 * provide implementation for public UserDetails loadUserByUsername(String
+	 * emailId) throws UsernameNotFoundException {}
+	 * 
+	 * @return
+	 */
 	@Bean
-	public CustomAuthorizationFilter jwtAuthTokenFilter() {
-		return new CustomAuthorizationFilter();
-	}
-
-//  @Override
-//  public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-//    authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-//  }
-
-	@Bean
-	public DaoAuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
-		authProvider.setUserDetailsService(userDetailsService);
-		authProvider.setPasswordEncoder(passwordEncoder());
-
-		return authProvider;
-	}
-
-//  @Bean
-//  @Override
-//  public AuthenticationManager authenticationManagerBean() throws Exception {
-//    return super.authenticationManagerBean();
-//  }
-
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-		return authConfig.getAuthenticationManager();
+	public UserDetailsService userDetailsService() {
+		return username -> userRepository.findByEmailId(username)
+				.orElseThrow(() -> new UsernameNotFoundException("User Not Found with email Id: " + username)); // TODO: put in message constant
 	}
 
 	@Bean
@@ -107,30 +99,61 @@ public class SecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
-//  @Override
-//  protected void configure(HttpSecurity http) throws Exception {
-//    http.cors().and().csrf().disable()
-//      .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-//      .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-//      .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-//      .antMatchers("/api/test/**").permitAll()
-//      .anyRequest().authenticated();
-//
-//    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-//  }
-
+//	@Bean
+//	public CustomAuthorizationFilter jwtAuthTokenFilter() {
+//		return new CustomAuthorizationFilter();
+//	}
+	
+	/**
+	 * 
+	 * @return
+	 */
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.cors().and().csrf().disable() // TODO: explain use of '.and' and what the way if not used '.and'
-				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and() // TODO: explain
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and() // TODO: explain
-				.authorizeRequests().antMatchers("/api/v1/auth/**", "/api/v1/admin/**").permitAll().antMatchers("/api/dummy/**").permitAll()
+	public AuthenticationProvider authenticationProvider() {
+		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+
+		authProvider.setUserDetailsService(userDetailsService());
+		authProvider.setPasswordEncoder(passwordEncoder());
+
+		return authProvider;
+	}
+
+	/**
+	 * 
+	 * @param authConfig
+	 * @return
+	 * @throws Exception
+	 */
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+		return authConfig.getAuthenticationManager();
+	}
+
+	/**
+	 * 
+	 * @param http
+	 * @return
+	 * @throws Exception
+	 */
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http
+		.cors().and().csrf().disable() // TODO: explore csrf and cors
+		.exceptionHandling().authenticationEntryPoint(unauthorizedHandler) // handles Unauthorized request like if not having required authority to access an endpoint 
+		.and()
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session will not be stored
+		.and() 
+		.authorizeRequests()
+				.antMatchers("/api/v1/auth/**").permitAll()
+				.antMatchers("/api/v1/dummyAdmin/**").hasAnyAuthority("ADMIN")
 				.anyRequest().authenticated();
 
 		http.authenticationProvider(authenticationProvider());
 
-		http.addFilterBefore(jwtAuthTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // add jwtAuthentication filter before UsernamePasswordAuthenticationFilter
 
 		return http.build();
+		
+		// TODO: explain use of '.and' and what the way if not used '.and'
 	}
 }

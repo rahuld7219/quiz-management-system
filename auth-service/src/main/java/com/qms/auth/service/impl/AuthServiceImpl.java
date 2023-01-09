@@ -11,6 +11,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,11 +39,14 @@ public class AuthServiceImpl implements AuthService {
 	private UserRepository userRepository;
 
 	@Autowired
+	private UserDetailsService userDetailsService;
+
+	@Autowired
 	private RoleRepository roleRepository;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
@@ -49,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
 	private JwtUtils jwtUtils;
 
 	@Autowired
-	private RedisCacheUtil redisCache;
+	private RedisCacheUtil redisCacheUtil;
 
 	@Override
 	public ResponseMessageDTO register(SignUpRequestDTO signUpRequest) {
@@ -57,12 +62,14 @@ public class AuthServiceImpl implements AuthService {
 			return new ResponseMessageDTO(HttpStatus.BAD_REQUEST, "Error: Username is already taken!");
 		}
 
-		Set<Role> roles = new HashSet<>(); // TODO: how to use design pattern(like factory if have to choose from many roles, i.e., if signuprequest also have role info)
-		
+		Set<Role> roles = new HashSet<>(); // TODO: how to use design pattern(like factory if have to choose from many
+											// roles, i.e., if signuprequest also have role info)
+
 		Role userRole = roleRepository.findByRoleName(RoleName.ATTENDEE)
-				.orElseThrow(() -> new RuntimeException("Error: Role is not found.")); // TODO: create custom formatted exception
+				.orElseThrow(() -> new RuntimeException("Error: Role is not found.")); // TODO: create custom formatted
+																						// exception
 		roles.add(userRole); // TODO: put this adding Role entity class (see hibernate CD doc)
-		
+
 		// TODO: use DTO <-> model mapper
 		User user = new User(signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getEmailId(),
 				passwordEncoder.encode(signUpRequest.getPassword()), signUpRequest.getMobileNumber(), roles);
@@ -77,15 +84,12 @@ public class AuthServiceImpl implements AuthService {
 				new UsernamePasswordAuthenticationToken(loginRequest.getEmailId(), loginRequest.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
-		String jwtAccess = jwtUtils.generateJwtAccessToken(user.getUsername());
-		String jwtRefresh = jwtUtils.generateJwtRefreshToken(user.getUsername());
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		String jwtAccess = jwtUtils.generateAccessToken(userDetails);
+		String jwtRefresh = jwtUtils.generateRefreshToken(userDetails);
 
-//		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		redisCacheUtil.cacheValue(userDetails.getUsername(), jwtRefresh);
 
-		redisCache.cacheValue(user.getUsername(), jwtRefresh);
-
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 
@@ -95,33 +99,42 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public TokenRefreshResponseDTO tokenRefresh(TokenRefreshRequestDTO tokenRefreshRequest) {
 		String refreshToken = tokenRefreshRequest.getRefreshToken();
-		if (jwtUtils.validateJwtToken(refreshToken)) {
-			String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
-			String storedRefreshToken = redisCache.getCachedValue(username);
-			if (Boolean.FALSE.equals(userRepository.existsByEmailId(username)) || !refreshToken.equals(storedRefreshToken)) {
-				throw new RuntimeException("Refresh token is not in database or user is not present"); // TODO: throw custom exception
+		if (jwtUtils.isTokenValid(refreshToken)) {
+			String username = jwtUtils.extractUsername(refreshToken);
+			String storedRefreshToken = redisCacheUtil.getCachedValue(username);
+			if (Boolean.FALSE.equals(userRepository.existsByEmailId(username))
+					|| !refreshToken.equals(storedRefreshToken)) {
+				throw new RuntimeException("Refresh token is not in database or user is not present"); // TODO: throw
+																										// custom
+																										// exception
 			}
-			String newAccessToken = jwtUtils.generateJwtAccessToken(username);
-			String newRefreshToken = jwtUtils.generateJwtRefreshToken(username);
-			redisCache.cacheValue(username, newRefreshToken);
+
+			// TODO: check here the security context on debugging
+			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
+			String newAccessToken = jwtUtils.generateAccessToken(userDetails);
+			String newRefreshToken = jwtUtils.generateRefreshToken(userDetails);
+			redisCacheUtil.cacheValue(username, newRefreshToken);
 			return new TokenRefreshResponseDTO(newAccessToken, newRefreshToken);
 		} else {
-			throw new RuntimeException("Refresh token is not valid"); // TODO: throw custom exception
+			throw new RuntimeException("Refresh token is not valid"); // TODO: throw custom exception inside the
+																		// isTokenValid
 		}
 	}
 
 	@Override
 	public ResponseMessageDTO changePassword(ChangePasswordRequestDTO changePasswordRequest) {
-		if (changePasswordRequest.getOldPassword().equalsIgnoreCase(changePasswordRequest.getNewPassword()) ) {
+		if (changePasswordRequest.getOldPassword().equalsIgnoreCase(changePasswordRequest.getNewPassword())) {
 			throw new RuntimeException("New password cannot be similar to old password.");
 		}
 		if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getAgainNewPassword())) {
 			throw new RuntimeException("Re-entered new password do not match."); // TODO: use custom Exception
 		}
-		
-		String email = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+
+		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+				.getUsername();
 		User user = userRepository.findByEmailId(email).get(); // TODO: use isPresent()
-		
+
 		if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
 			throw new RuntimeException("Wrong password provided."); // TODO: use custom Exception
 		}
