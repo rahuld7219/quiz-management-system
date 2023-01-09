@@ -12,5 +12,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
 	Optional<Quiz> findByCategoryId(Long id);
 
+	boolean existsByQuestionId(Long questionId);
+	
 //	boolean existsById(Long id);
 }

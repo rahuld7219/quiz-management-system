@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.qms.admin.dto.request.QuizDTO;
+import com.qms.admin.dto.QuizDTO;
 import com.qms.admin.model.Category;
 import com.qms.admin.model.Quiz;
 import com.qms.admin.repository.CategoryRepository;
@@ -26,7 +26,7 @@ public class QuizServiceImpl implements QuizService {
 	@Override
 	public Long addQuiz(final QuizDTO quizDTO) {
 
-		return quizRepository.save(mapToModel(quizDTO)).getId();
+		return quizRepository.save(mapToModel(new Quiz(), quizDTO)).getId();
 	}
 
 	@Override
@@ -36,21 +36,19 @@ public class QuizServiceImpl implements QuizService {
 
 		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
 				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: create custom exception
-		final Category category = categoryRepository.findById(quizDTO.getCategoryId())
-				.orElseThrow(() -> new RuntimeException("Category not exist.")); // TODO: create custom exception
-		quiz.setCategory(category).setTitle(quizDTO.getTitle());
-		quizRepository.save(quiz);
+
+		quizRepository.save(mapToModel(quiz, quizDTO));
 	}
 
 	@Override
-	public void deleteQuiz(String quizId) {
+	public void deleteQuiz(final String quizId) {
 		// TODO check if quiz exist -> hard delete if quiz not have any question
 		// else soft delete iff quiz not have been attempted
 
 	}
 
 	@Override
-	public QuizDTO getQuiz(String quizId) {
+	public QuizDTO getQuiz(final String quizId) {
 		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
 				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: create custom exception
 
@@ -59,17 +57,16 @@ public class QuizServiceImpl implements QuizService {
 
 	@Override
 	public List<QuizDTO> getQuizList() {
-		return quizRepository.findAll().stream().map(this::mapToDTO)
-				.collect(Collectors.toCollection(ArrayList::new));
+		return quizRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toCollection(ArrayList::new));
 	}
 
-	private Quiz mapToModel(final QuizDTO quizDTO) {
+	private Quiz mapToModel(final Quiz quiz, final QuizDTO quizDTO) {
 		final Category category = categoryRepository.findById(quizDTO.getCategoryId())
 				.orElseThrow(() -> new RuntimeException("Category not exist.")); // TODO: create custom
-		return new Quiz().setTitle(quizDTO.getTitle()).setCategory(category);
+		return quiz.setTitle(quizDTO.getTitle()).setCategory(category);
 	}
 
-	private QuizDTO mapToDTO(Quiz quiz) {
+	private QuizDTO mapToDTO(final Quiz quiz) {
 		return new QuizDTO().setTitle(quiz.getTitle()).setCategoryId(quiz.getCategory().getId());
 	}
 

@@ -2,7 +2,7 @@ package com.qms.admin.service;
 
 import java.util.List;
 
-import com.qms.admin.dto.request.QuizDTO;
+import com.qms.admin.dto.QuizDTO;
 
 public interface QuizService {
 //	Get Quiz

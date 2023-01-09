@@ -19,10 +19,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Data
 @NoArgsConstructor
 @Entity
+@Accessors(chain = true)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "question")
 public class Question {

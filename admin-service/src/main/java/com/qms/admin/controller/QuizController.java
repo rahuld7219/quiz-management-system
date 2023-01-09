@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qms.admin.dto.request.QuizDTO;
+import com.qms.admin.dto.QuizDTO;
 import com.qms.admin.service.QuizService;
 
 @RestController
