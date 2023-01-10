@@ -20,13 +20,13 @@ import com.qms.admin.dto.QuizDTO;
 import com.qms.admin.service.QuizService;
 
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/api/v1/admin/quiz")
 public class QuizController {
 
 	@Autowired
 	private QuizService quizService;
 
-	@PostMapping("/quiz")
+	@PostMapping()
 	public ResponseEntity<String> addQuiz(@Valid @RequestBody final QuizDTO quizDTO) {
 		Long id = quizService.addQuiz(quizDTO);
 //		URI location = new URI("/category/" + id);
@@ -34,26 +34,31 @@ public class QuizController {
 		return ResponseEntity.created(location).body("Quiz added successfully.");
 	}
 
-	@PutMapping("/quiz/{quizId}")
+	@PutMapping("/{quizId}")
 	public ResponseEntity<String> updateQuiz(@Valid @PathVariable final String quizId,
 			@RequestBody final QuizDTO quizDTO) {
 		quizService.updateQuiz(quizId, quizDTO);
 		return ResponseEntity.ok("Quiz updated successfully.");
 	}
 
-	@DeleteMapping("/quiz/{quizId}")
+	@DeleteMapping("/{quizId}")
 	public ResponseEntity<String> deleteQuiz(@PathVariable final String quizId) {
 		quizService.deleteQuiz(quizId);
 		return ResponseEntity.ok("Quiz delete successfully.");
 	}
 
-	@GetMapping("/quiz/{quizId}")
+	@GetMapping("/{quizId}")
 	public ResponseEntity<QuizDTO> getQuiz(@PathVariable final String quizId) {
 		return ResponseEntity.ok(quizService.getQuiz(quizId));
 	}
 
-	@GetMapping("/quiz")
+	@GetMapping()
 	public ResponseEntity<List<QuizDTO>> getQuiz() {
 		return ResponseEntity.ok(quizService.getQuizList());
+	}
+
+	@GetMapping("/count")
+	public ResponseEntity<Long> getQuizCount() {
+		return ResponseEntity.ok(quizService.getQuizCount());
 	}
 }

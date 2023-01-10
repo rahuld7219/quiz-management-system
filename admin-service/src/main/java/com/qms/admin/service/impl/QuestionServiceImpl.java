@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.qms.admin.dto.QuestionDTO;
 import com.qms.admin.model.Question;
 import com.qms.admin.repository.QuestionRepository;
+import com.qms.admin.repository.QuizQuestionRepository;
 import com.qms.admin.repository.QuizRepository;
 import com.qms.admin.service.QuestionService;
 
@@ -21,6 +22,9 @@ public class QuestionServiceImpl implements QuestionService {
 
 	@Autowired
 	private QuizRepository quizRepository;
+	
+	@Autowired
+	QuizQuestionRepository quizQuestionRepository;
 
 	@Override
 	public Long addQuestion(final QuestionDTO questionDTO) {
@@ -43,7 +47,7 @@ public class QuestionServiceImpl implements QuestionService {
 	public void deleteQuestion(final String questionId) {
 		// find Quiz by question Id -> if exist then cannot delete the Question
 		// else soft delete the Question
-		if (quizRepository.existsByQuestionId(Long.valueOf(questionId))) {
+		if (quizQuestionRepository.existsByQuestionId(Long.valueOf(questionId))) { //TODO: also check id deleted is "N" //TODO: use quizService, check everywhere
 			throw new RuntimeException("Cannot delete the question, it has quiz association."); // TODO: throw custom
 																								// exception
 		}

@@ -20,4 +20,6 @@ public interface QuizService {
 	QuizDTO getQuiz(final String quizId);
 
 	List<QuizDTO> getQuizList();
+
+	Long getQuizCount();
 }

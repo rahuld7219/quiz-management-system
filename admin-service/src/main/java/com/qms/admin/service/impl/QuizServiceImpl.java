@@ -11,7 +11,10 @@ import com.qms.admin.dto.QuizDTO;
 import com.qms.admin.model.Category;
 import com.qms.admin.model.Quiz;
 import com.qms.admin.repository.CategoryRepository;
+import com.qms.admin.repository.QuestionRepository;
+import com.qms.admin.repository.QuizQuestionRepository;
 import com.qms.admin.repository.QuizRepository;
+import com.qms.admin.repository.ScoreRepository;
 import com.qms.admin.service.QuizService;
 
 @Service
@@ -22,6 +25,15 @@ public class QuizServiceImpl implements QuizService {
 
 	@Autowired
 	private CategoryRepository categoryRepository;
+
+	@Autowired
+	private QuestionRepository questionRepository;
+
+	@Autowired
+	private ScoreRepository scoreRepository;
+
+	@Autowired
+	private QuizQuestionRepository quizQuestionRepository;
 
 	@Override
 	public Long addQuiz(final QuizDTO quizDTO) {
@@ -42,8 +54,26 @@ public class QuizServiceImpl implements QuizService {
 
 	@Override
 	public void deleteQuiz(final String quizId) {
-		// TODO check if quiz exist -> hard delete if quiz not have any question
+		// check if quiz exist -> hard delete the quiz if quiz not have any
+		// question(also consider if deleted is Y)
 		// else soft delete iff quiz not have been attempted
+
+		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
+				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: create custom exception
+
+		if (!quizQuestionRepository.existsByQuizId(Long.valueOf(quizId))) { // TODO: put in questionService, also
+																			// consider if deleted is 'Y' ==>
+																			// quizQuestionRepository.existsByQuizIdAndDeleted(quizId,
+																			// "N")
+			quizRepository.delete(quiz);
+			return;
+		}
+
+		if (scoreRepository.existsByQuizId(Long.valueOf(quizId))) { // TODO: put in scoreService
+			throw new RuntimeException("Cannot delete quiz, it has been attempted.");
+		}
+
+		quizRepository.save(quiz.setDeleted("Y"));
 
 	}
 
@@ -60,8 +90,13 @@ public class QuizServiceImpl implements QuizService {
 		return quizRepository.findAll().stream().map(this::mapToDTO).collect(Collectors.toCollection(ArrayList::new));
 	}
 
+	@Override
+	public Long getQuizCount() {
+		return quizRepository.countByDeleted("N");
+	}
+
 	private Quiz mapToModel(final Quiz quiz, final QuizDTO quizDTO) {
-		final Category category = categoryRepository.findById(quizDTO.getCategoryId())
+		final Category category = categoryRepository.findById(quizDTO.getCategoryId()) // TODO: put in categoryService
 				.orElseThrow(() -> new RuntimeException("Category not exist.")); // TODO: create custom
 		return quiz.setTitle(quizDTO.getTitle()).setCategory(category);
 	}

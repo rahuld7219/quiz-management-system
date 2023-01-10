@@ -3,6 +3,7 @@ package com.qms.auth.model;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
@@ -64,6 +66,9 @@ public class User implements UserDetails {
 	@ManyToMany(fetch = FetchType.LAZY) // TODO: what could be the cascading rule? check in every entity class
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+//	TODO: private List<Score> scores;
 
 	@CreatedDate
 	@Column(name = "created_on", nullable = false, updatable = false)
