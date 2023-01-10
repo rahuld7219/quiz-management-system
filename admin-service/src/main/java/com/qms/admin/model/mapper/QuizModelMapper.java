@@ -1,8 +1,5 @@
 package com.qms.admin.model.mapper;
 
-import com.qms.admin.dto.QuizDTO;
-import com.qms.admin.model.Quiz;
-
 // TODO: ASK for this approach
 public class QuizModelMapper {
 //	public Quiz mapToModel(final QuizDTO dto) {

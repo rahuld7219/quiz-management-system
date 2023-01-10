@@ -1,5 +1,7 @@
 package com.qms.admin.service.impl;
 
-public class AdminServiceImpl {
+import com.qms.admin.service.AdminService;
+
+public class AdminServiceImpl implements AdminService {
 
 }

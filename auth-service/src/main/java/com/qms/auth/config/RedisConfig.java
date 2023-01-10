@@ -10,9 +10,14 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-	// To communicate to the redis server via the connection made(by properties
-	// config) we need RedisTemplate, spring automatically pass the
-	// redisConnectionFactory created using properties config
+	/**
+	 * To communicate to the redis server via the connection made(by properties
+	 * config) we need RedisTemplate, spring automatically pass the
+	 * redisConnectionFactory created using properties config
+	 * 
+	 * @param redisConnectionFactory
+	 * @return
+	 */
 	@Bean
 	public RedisTemplate<String, Object> getRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
 

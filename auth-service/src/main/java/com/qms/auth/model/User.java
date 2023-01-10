@@ -2,6 +2,7 @@ package com.qms.auth.model;
 
 import java.time.OffsetDateTime;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,8 +28,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 @NoArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -81,6 +84,13 @@ public class User implements UserDetails {
 	}
 
 	private transient Collection<? extends GrantedAuthority> authorities;
+
+	public void addRole(Role role) {
+		if (this.roles == null) {
+			this.roles = new HashSet<>();
+		}
+		this.roles.add(role);
+	}
 
 	@PostLoad
 	public void initAuthorities() {

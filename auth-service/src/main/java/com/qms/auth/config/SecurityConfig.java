@@ -77,9 +77,6 @@ public class SecurityConfig {
 	
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-//	@Autowired
-//	private UserDetailsServiceImpl userDetailsService;
-
 	private final AuthEntryPoint unauthorizedHandler;
 
 	/**
@@ -98,11 +95,6 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
-//	@Bean
-//	public CustomAuthorizationFilter jwtAuthTokenFilter() {
-//		return new CustomAuthorizationFilter();
-//	}
 	
 	/**
 	 * 

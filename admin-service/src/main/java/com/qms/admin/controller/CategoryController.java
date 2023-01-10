@@ -1,5 +1,6 @@
 package com.qms.admin.controller;
 
+import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qms.admin.dto.request.AddCategoryRequestDTO;
-import com.qms.admin.dto.request.UpdateCategoryRequestDTO;
-import com.qms.admin.dto.response.ResponseMessageDTO;
+import com.qms.admin.dto.CategoryDTO;
 import com.qms.admin.service.CategoryService;
 
 @RestController
@@ -26,27 +25,24 @@ public class CategoryController {
 	private CategoryService categoryService;
 
 	@PostMapping("/category")
-	public ResponseEntity<?> addCategory(@RequestBody final AddCategoryRequestDTO addCategoryRequest) {
-		ResponseMessageDTO response = categoryService.addCategory(addCategoryRequest);
+	public ResponseEntity<String> addCategory(@RequestBody final CategoryDTO categoryDTO) {
+		Long id = categoryService.addCategory(categoryDTO);
 //		URI location = new URI("/category/"+ id);
-//		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/category").toUriString());
-		return ResponseEntity.status(response.getStatus()).body(response.getMessage()); // create standard response and
-																						// add URI where created
+		URI location = URI.create("/api/v1/admin/category/" + id);
+		return ResponseEntity.created(location).body("Category created successfully.");
 	}
 
 	@PutMapping("/category/{categoryId}") // TODO: can use uuid in here?
-	public ResponseEntity<?> updateCategory(@PathVariable final String categoryId,
-			@RequestBody final UpdateCategoryRequestDTO updateCategoryRequest) {
-		ResponseMessageDTO response = categoryService.updateCategory(categoryId, updateCategoryRequest);
-		return ResponseEntity.status(response.getStatus()).body(response.getMessage()); // create standard response and
-																						// add URI where created
+	public ResponseEntity<String> updateCategory(@PathVariable final String categoryId,
+			@RequestBody final CategoryDTO categoryDTO) {
+		categoryService.updateCategory(categoryId, categoryDTO);
+		return ResponseEntity.ok("Category updated successfully.");
 	}
 
 	@DeleteMapping("/category/{categoryId}")
-	public ResponseEntity<?> deleteCategory(@PathVariable final String categoryId) {
-		ResponseMessageDTO response = categoryService.deleteCategory(categoryId);
-		return ResponseEntity.status(response.getStatus()).body(response.getMessage()); // create standard response and
-																						// add URI where created
+	public ResponseEntity<String> deleteCategory(@PathVariable final String categoryId) {
+		categoryService.deleteCategory(categoryId);
+		return ResponseEntity.ok("Category deleted Successfully.");
 	}
 
 	@GetMapping(value = { "/category/{categoryId}", "/category" })
