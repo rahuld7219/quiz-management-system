@@ -47,7 +47,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<Tokens> renewTokens(@RequestBody RenewTokenRequestDTO tokenRefreshRequest) {
+	public ResponseEntity<Tokens> renewTokens(@Valid @RequestBody final RenewTokenRequestDTO tokenRefreshRequest) {
 		return ResponseEntity.ok(authService.renewTokens(tokenRefreshRequest));
 	}
 

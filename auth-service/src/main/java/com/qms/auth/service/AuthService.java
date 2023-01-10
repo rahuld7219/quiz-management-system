@@ -6,7 +6,6 @@ import com.qms.auth.dto.request.LoginRequestDTO;
 import com.qms.auth.dto.request.RenewTokenRequestDTO;
 import com.qms.auth.dto.request.SignUpRequestDTO;
 import com.qms.auth.dto.response.LoginResponseDTO;
-import com.qms.auth.dto.response.ResponseMessageDTO;
 
 // TODO: make separate service for role and user
 public interface AuthService {

@@ -74,12 +74,6 @@ public class AuthServiceImpl implements AuthService {
 		return userRepository.save(mapToModel(user, signUpRequest)).getId();
 	}
 
-	private User mapToModel(User user, SignUpRequestDTO signUpRequest) {
-		return user.setFirstName(signUpRequest.getFirstName()).setLastName(signUpRequest.getLastName())
-				.setMobileNumber(signUpRequest.getMobileNumber())
-				.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-	}
-
 	@Override
 	public LoginResponseDTO login(final LoginRequestDTO loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
@@ -96,10 +90,6 @@ public class AuthServiceImpl implements AuthService {
 
 		return new LoginResponseDTO(tokens.getAccessToken(), tokens.getRefreshToken(), userDetails.getUsername(),
 				roles);
-	}
-
-	private Tokens generateTokens(UserDetails userDetails) {
-		return new Tokens(jwtUtils.generateAccessToken(userDetails), jwtUtils.generateRefreshToken(userDetails));
 	}
 
 	@Override
@@ -127,10 +117,6 @@ public class AuthServiceImpl implements AuthService {
 		}
 	}
 
-	private boolean doesTokenMatches(String refreshToken, String storedRefreshToken) {
-		return refreshToken.equals(storedRefreshToken);
-	}
-
 	@Override
 	public void changePassword(ChangePasswordRequestDTO changePasswordRequest) {
 		if (changePasswordRequest.getOldPassword().equalsIgnoreCase(changePasswordRequest.getNewPassword())) {
@@ -156,4 +142,17 @@ public class AuthServiceImpl implements AuthService {
 		userRepository.save(userOpt.get());
 	}
 
+	private User mapToModel(User user, SignUpRequestDTO signUpRequest) {
+		return user.setFirstName(signUpRequest.getFirstName()).setLastName(signUpRequest.getLastName())
+				.setMobileNumber(signUpRequest.getMobileNumber())
+				.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+	}
+
+	private Tokens generateTokens(UserDetails userDetails) {
+		return new Tokens(jwtUtils.generateAccessToken(userDetails), jwtUtils.generateRefreshToken(userDetails));
+	}
+
+	private boolean doesTokenMatches(String refreshToken, String storedRefreshToken) {
+		return refreshToken.equals(storedRefreshToken);
+	}
 }
