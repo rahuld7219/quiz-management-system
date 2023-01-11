@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -64,9 +65,7 @@ public class AuthServiceImpl implements AuthService {
 		// roles, i.e., if signuprequest also have role info)
 
 		Role userRole = roleRepository.findByRoleName(RoleName.ATTENDEE)
-				.orElseThrow(() -> new RuntimeException("Error: Role is not found.")); // TODO: create custom formatted
-																						// exception
-		// TODO: use DTO <-> model mapper
+				.orElseThrow(() -> new RuntimeException("Error: Role is not found.")); // TODO: create custom
 
 		User user = new User();
 		user.addRole(userRole);
@@ -120,10 +119,10 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public void changePassword(ChangePasswordRequestDTO changePasswordRequest) {
 		if (changePasswordRequest.getOldPassword().equalsIgnoreCase(changePasswordRequest.getNewPassword())) {
-			throw new RuntimeException("New password cannot be similar to old password.");
+			throw new RuntimeException("New password cannot be similar to old password."); // TODO: use custom Exception
 		}
 		if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getAgainNewPassword())) {
-			throw new RuntimeException("Re-entered new password do not match."); // TODO: use custom Exception
+			throw new RuntimeException("Re-entered new password does not match."); // TODO: use custom Exception
 		}
 
 		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
@@ -132,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
 		// TODO: whether to use instead ?? ->
 		// this.userDetailsService.loadUserByUsername(email)
 		if (!userOpt.isPresent()) {
-			throw new RuntimeException("User not exists."); // TODO: custom
+			throw new UsernameNotFoundException("User not exist."); // TODO: custom
 		}
 
 		if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), userOpt.get().getPassword())) {
@@ -144,6 +143,7 @@ public class AuthServiceImpl implements AuthService {
 
 	private User mapToModel(User user, SignUpRequestDTO signUpRequest) {
 		return user.setFirstName(signUpRequest.getFirstName()).setLastName(signUpRequest.getLastName())
+				.setEmailId(signUpRequest.getEmailId())
 				.setMobileNumber(signUpRequest.getMobileNumber())
 				.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 	}

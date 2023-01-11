@@ -3,9 +3,7 @@ package com.qms.auth.model;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,15 +16,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,9 +33,7 @@ import lombok.experimental.Accessors;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "user")
-public class User implements UserDetails {
-
-	private static final long serialVersionUID = 6499574600584484185L;
+public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,8 +59,8 @@ public class User implements UserDetails {
 	@ManyToMany(fetch = FetchType.LAZY) // TODO: what could be the cascading rule? check in every entity class
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;
-	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+
+//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
 //	TODO: private List<Score> scores;
 
 	@CreatedDate
@@ -88,8 +81,6 @@ public class User implements UserDetails {
 		this.roles = roles;
 	}
 
-	private transient Collection<? extends GrantedAuthority> authorities;
-
 	public void addRole(Role role) {
 		if (this.roles == null) {
 			this.roles = new HashSet<>();
@@ -97,45 +88,45 @@ public class User implements UserDetails {
 		this.roles.add(role);
 	}
 
-	@PostLoad
-	public void initAuthorities() {
-		this.authorities = roles.stream().map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return this.authorities;
-	}
-
-	@Override
-	public String getPassword() {
-		return this.password;
-	}
-
-	@Override
-	public String getUsername() {
-		return this.emailId;
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-		return true;
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		return true;
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return true;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return true;
-	}
+//	@PostLoad
+//	public void initAuthorities() {
+//		this.authorities = roles.stream().map(role -> new SimpleGrantedAuthority(role.getRoleName().name()))
+//				.collect(Collectors.toList());
+//	}
+//
+//	@Override
+//	public Collection<? extends GrantedAuthority> getAuthorities() {
+//		return this.authorities;
+//	}
+//
+//	@Override
+//	public String getPassword() {
+//		return this.password;
+//	}
+//
+//	@Override
+//	public String getUsername() {
+//		return this.emailId;
+//	}
+//
+//	@Override
+//	public boolean isAccountNonExpired() {
+//		return true;
+//	}
+//
+//	@Override
+//	public boolean isAccountNonLocked() {
+//		return true;
+//	}
+//
+//	@Override
+//	public boolean isCredentialsNonExpired() {
+//		return true;
+//	}
+//
+//	@Override
+//	public boolean isEnabled() {
+//		return true;
+//	}
 
 }

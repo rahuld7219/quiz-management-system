@@ -11,14 +11,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.qms.auth.filter.JwtAuthenticationFilter;
-import com.qms.auth.repository.UserRepository;
 import com.qms.auth.security.AuthEntryPoint;
 
 import lombok.RequiredArgsConstructor;
@@ -73,29 +71,17 @@ import lombok.RequiredArgsConstructor;
 		prePostEnabled = true)
 public class SecurityConfig {
 
-	private final UserRepository userRepository;
-	
+	private final UserDetailsService userDetailsService;
+
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	private final AuthEntryPoint unauthorizedHandler;
-
-	/**
-	 * provide implementation for public UserDetails loadUserByUsername(String
-	 * emailId) throws UsernameNotFoundException {}
-	 * 
-	 * @return
-	 */
-	@Bean
-	public UserDetailsService userDetailsService() {
-		return username -> userRepository.findByEmailId(username)
-				.orElseThrow(() -> new UsernameNotFoundException("User Not Found with email Id: " + username)); // TODO: put in message constant
-	}
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	/**
 	 * 
 	 * @return
@@ -104,7 +90,7 @@ public class SecurityConfig {
 	public AuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 
-		authProvider.setUserDetailsService(userDetailsService());
+		authProvider.setUserDetailsService(userDetailsService);
 		authProvider.setPasswordEncoder(passwordEncoder());
 
 		return authProvider;
@@ -129,23 +115,24 @@ public class SecurityConfig {
 	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-		.cors().and().csrf().disable() // TODO: explore csrf and cors
-		.exceptionHandling().authenticationEntryPoint(unauthorizedHandler) // handles Unauthorized request like if not having required authority to access an endpoint 
-		.and()
-		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session will not be stored
-		.and() 
-		.authorizeRequests()
-				.antMatchers("/api/v1/auth/**").permitAll()
-				.antMatchers("/api/v1/dummyAdmin/**").hasAnyAuthority("ADMIN")
-				.anyRequest().authenticated();
+		http.cors().and().csrf().disable() // TODO: explore csrf and cors
+				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler) // handles Unauthorized request like
+																					// if not having required authority
+																					// to access an endpoint
+				.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session will not be
+																									// stored
+				.and().authorizeRequests().antMatchers("/api/v1/auth/**").permitAll()
+				.antMatchers("/api/v1/dummyAdmin/**").hasAnyAuthority("ADMIN").anyRequest().authenticated();
 
 		http.authenticationProvider(authenticationProvider());
 
-		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // add jwtAuthentication filter before UsernamePasswordAuthenticationFilter
+		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // add
+																									// jwtAuthentication
+																									// filter before
+																									// UsernamePasswordAuthenticationFilter
 
 		return http.build();
-		
+
 		// TODO: explain use of '.and' and what the way if not used '.and'
 	}
 }

@@ -34,27 +34,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 			@NonNull FilterChain filterChain) throws ServletException, IOException {
 //		try {
-			final String jwt = parseForJwt(request);
+		final String jwt = parseForJwt(request);
 
-			if (jwt == null) { // in case some API not requires jwt, so we don't throw error here, we let it
-								// pass for next thing
-				filterChain.doFilter(request, response);
-				return;
-			}
+		if (jwt == null) { // in case some API not requires jwt, so we don't throw error here, we let it
+							// pass for next thing
+			filterChain.doFilter(request, response);
+			return;
+		}
 
-			// NOTE: Refresh token not come to this point as we send refresh token in body
-			// to renew the token
+		// NOTE: Refresh token not come to this point as we send refresh token in body
+		// to renew the token
 
-			if (jwtUtils.isTokenValid(jwt)) { // TODO: if storing accessToken then also check if the emailId of the
-												// token
-												// have the same access token as stored in redis cache
-				final String userEmail = this.jwtUtils.extractUsername(jwt);
-				UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
-						null, userDetails.getAuthorities());
-				authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				SecurityContextHolder.getContext().setAuthentication(authToken);
-			}
+		if (jwtUtils.isTokenValid(jwt)) { // TODO: if storing accessToken then also check if the emailId of the
+											// token
+											// have the same access token as stored in redis cache
+			final String userEmail = this.jwtUtils.extractUsername(jwt);
+			UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null,
+					userDetails.getAuthorities());
+			authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+			SecurityContextHolder.getContext().setAuthentication(authToken);
+		}
 //		} catch (Exception exception) {
 //			log.error("Cannot set user authentication: {}", exception);
 //			log.error("Error logging in: {}", exception.getMessage());
