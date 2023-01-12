@@ -18,4 +18,6 @@ public interface AdminService {
 
 	Dashboard dashboard();
 
+	List<Map<String, Object>> leaderboard();
+
 }

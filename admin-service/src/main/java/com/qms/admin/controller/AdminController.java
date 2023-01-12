@@ -54,4 +54,9 @@ public class AdminController {
 	public ResponseEntity<Dashboard> dashboard() {
 		return ResponseEntity.ok(adminService.dashboard());
 	}
+	
+	@GetMapping("/leaderboard")
+	public ResponseEntity<List<Map<String, Object>>> leaderboard() {
+		return ResponseEntity.ok(adminService.leaderboard());
+	}
 }

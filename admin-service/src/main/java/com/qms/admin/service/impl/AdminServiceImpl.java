@@ -106,4 +106,10 @@ public class AdminServiceImpl implements AdminService {
 				.setTopFiveAttendedQuizzes(this.countTopFiveQuizWithAttendee());
 	}
 
+	@Override
+	public List<Map<String, Object>> leaderboard() {
+		return scoreRepository.getRecordFilteredByCategoryThenQuizThenAttendeeScore();
+		// TODO: add pagination and also limit by category and limit by quiz per category and also limit by users per category per quiz
+	}
+
 }

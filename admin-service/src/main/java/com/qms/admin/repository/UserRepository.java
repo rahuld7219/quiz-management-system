@@ -12,7 +12,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	Long countByRolesRoleName(RoleName roleName);
 
-	Long countDistinctByScoresUserRolesRoleName(RoleName roleName); // TODO: optimize it
+//	Long countDistinctByScoresUserRolesRoleName(RoleName roleName); // TODO: optimize it
 
 	// TODO: optimize it, find way to write using only JPA method OR use JPQL
 	// instead of native, (native vs JPQL ??)
