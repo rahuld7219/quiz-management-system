@@ -10,6 +10,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.qms.auth.dto.response.ErrorResponse;
+import com.qms.auth.dto.response.FieldError;
+
 @RestControllerAdvice
 public class RestExceptionHandler {
 
