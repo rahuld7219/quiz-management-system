@@ -19,10 +19,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Data
 @NoArgsConstructor
 @Entity
+@Accessors(chain = true)
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "question")
 public class Question {
@@ -54,7 +56,7 @@ public class Question {
 	private int marks;
 
 	@Column(name = "deleted", columnDefinition = "varchar(1) default 'N'")
-	private String deleted; // TODO: use ENUM
+	private String deleted = "N"; // TODO: use ENUM, why default not inserting??
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "question") // TODO: what could be the cascade?
 	private Set<QuizQuestion> quizQuestions;

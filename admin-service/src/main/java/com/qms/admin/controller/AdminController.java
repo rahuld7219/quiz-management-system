@@ -1,51 +1,62 @@
 package com.qms.admin.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qms.admin.dto.request.AddCategoryRequestDTO;
-import com.qms.admin.dto.request.UpdateCategoryRequestDTO;
-import com.qms.admin.dto.response.ResponseMessageDTO;
-import com.qms.admin.service.CategoryService;
+import com.qms.admin.dto.Dashboard;
+import com.qms.admin.dto.LinkQuizQuestionDTO;
+import com.qms.admin.service.AdminService;
 
 @RestController
 @RequestMapping("/api/v1/admin")
 public class AdminController {
 
 	@Autowired
-	private CategoryService categoryService;
+	private AdminService adminService;
 
-	@PostMapping("/category")
-	public ResponseEntity<?> addCategory(@RequestBody AddCategoryRequestDTO addCategoryRequest) {
-		ResponseMessageDTO response = categoryService.addCategory(addCategoryRequest);
-		return ResponseEntity.status(response.getStatus()).body(response.getMessage()); // create standard response and
-																						// add URI where created
+	/**
+	 * 
+	 * @return
+	 */
+	@PostMapping("/linkQuizQuestion")
+	public ResponseEntity<String> linkQuestionToQuiz(
+			@Valid @RequestBody final LinkQuizQuestionDTO linkQuizQuestionDTO) { // TODO: link multiple question to quiz
+		adminService.linkQuestionToQuiz(linkQuizQuestionDTO);
+		return ResponseEntity.ok("Question added successfully to the quiz");
 	}
 
-	@PatchMapping("/category")
-	public ResponseEntity<?> updateCategory(@RequestBody UpdateCategoryRequestDTO updateCategoryRequest) {
-		ResponseMessageDTO response = categoryService.updateCategory(updateCategoryRequest);
-		return ResponseEntity.status(response.getStatus()).body(response.getMessage()); // create standard response and
-																						// add URI where created
+	@GetMapping("/countAttendees")
+	public ResponseEntity<Long> countAttendees() {
+		return ResponseEntity.ok(adminService.countAttendess());
 	}
 
-	@DeleteMapping("/category")
-	public ResponseEntity<?> deleteCategory(@RequestParam String categoryName) {
-		ResponseMessageDTO response = categoryService.deleteCategory(categoryName);
-		return ResponseEntity.status(response.getStatus()).body(response.getMessage()); // create standard response and
-																						// add URI where created
+	@GetMapping("/countAttendeesAttemptedQuiz")
+	public ResponseEntity<Long> countAttendeesAttemptedQuiz() {
+		return ResponseEntity.ok(adminService.countAttendeesAttemptedQuiz());
 	}
 
-	@GetMapping("/category")
-	public ResponseEntity<?> getCategory(@RequestParam String categoryName) {
-		return ResponseEntity.ok().body(categoryService.listCategories());
+	@GetMapping("/topFiveQuiz")
+	public ResponseEntity<List<Map<String, Object>>> countTopFiveQuizWithAttendee() {
+		return ResponseEntity.ok(adminService.countTopFiveQuizWithAttendee());
+	}
+
+	@GetMapping("/dashboard")
+	public ResponseEntity<Dashboard> dashboard() {
+		return ResponseEntity.ok(adminService.dashboard());
+	}
+	
+	@GetMapping("/leaderboard")
+	public ResponseEntity<List<Map<String, Object>>> leaderboard() {
+		return ResponseEntity.ok(adminService.leaderboard());
 	}
 }

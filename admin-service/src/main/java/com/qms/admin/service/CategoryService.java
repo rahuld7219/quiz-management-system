@@ -2,20 +2,17 @@ package com.qms.admin.service;
 
 import java.util.List;
 
-import com.qms.admin.dto.request.AddCategoryRequestDTO;
-import com.qms.admin.dto.request.UpdateCategoryRequestDTO;
-import com.qms.admin.dto.response.GetCategoryResponseDTO;
-import com.qms.admin.dto.response.ResponseMessageDTO;
+import com.qms.admin.dto.CategoryDTO;
 
 public interface CategoryService {
 
-	ResponseMessageDTO addCategory(AddCategoryRequestDTO addCategoryRequest);
+	Long addCategory(final CategoryDTO categoryDTO);
 
-	ResponseMessageDTO updateCategory(UpdateCategoryRequestDTO updateCategoryRequest);
+	void updateCategory(final String categoryId, final CategoryDTO categoryDTO);
 
-	ResponseMessageDTO deleteCategory(String categoryName);
+	void deleteCategory(final String categoryId);
 
-	GetCategoryResponseDTO getCategory(String categoryName);
+	CategoryDTO getCategory(final String categoryId);
 
-	List<GetCategoryResponseDTO> listCategories();
+	List<CategoryDTO> listCategories();
 }

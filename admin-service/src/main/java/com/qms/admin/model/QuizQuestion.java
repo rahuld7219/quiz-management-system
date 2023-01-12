@@ -41,7 +41,7 @@ public class QuizQuestion {
 	private Question question;
 
 	@Column(name = "deleted", columnDefinition = "varchar(1) default 'N'")
-	private String deleted; // TODO: use enum
+	private String deleted = "N"; // TODO: use enum, TODO: why default "N" not working
 
 	@CreatedDate
 	@Column(name = "created_on", nullable = false, updatable = false)

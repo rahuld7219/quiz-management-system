@@ -1,0 +1,36 @@
+ URI uri = new URI("/product/"+product.getId());
+        return ResponseEntity.created(uri).body(product);
+		
+		
+		
+validation response
+exception response
+response
+
+mapper
+
+runner
+messages constant
+other constant
+ResponseStatusException
+
+Add logs in every class
+
+use yml
+
+put doc comment over every method and class
+
+DO method structure
+
+throw UserNOtFoundEception everywhere if user not exist and catch it in RestControllerAdvice
+
+
+Inherited Problems:
+
+1. after login again(same user, may be from other system) we get new access token and refresh token but old access token still works but in redis cache we have new refresh token so when the old access token expires it cannot be renewed as refresh token not matches in redis cache as that old refresh token has been overwritten in redis cache. This problem goes on if user login again (or in other system) then old one logged in cannot access once old one's access token expires as their refresh token not exist, they have to login again and this forms a chain
+
+possible solution: store refresh and access token both in redis cache for each login as a key value pair
+
+How to make redis repo?? is is possible?? find different ways of storing data in redis??
+
+make constant file and put all literals there

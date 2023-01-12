@@ -1,27 +1,28 @@
 package com.qms.auth.service.impl;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.qms.auth.constant.RoleName;
+import com.qms.auth.dto.Tokens;
 import com.qms.auth.dto.request.ChangePasswordRequestDTO;
 import com.qms.auth.dto.request.LoginRequestDTO;
+import com.qms.auth.dto.request.RenewTokenRequestDTO;
 import com.qms.auth.dto.request.SignUpRequestDTO;
-import com.qms.auth.dto.request.TokenRefreshRequestDTO;
 import com.qms.auth.dto.response.LoginResponseDTO;
-import com.qms.auth.dto.response.ResponseMessageDTO;
-import com.qms.auth.dto.response.TokenRefreshResponseDTO;
 import com.qms.auth.model.Role;
 import com.qms.auth.model.User;
 import com.qms.auth.repository.RoleRepository;
@@ -37,11 +38,14 @@ public class AuthServiceImpl implements AuthService {
 	private UserRepository userRepository;
 
 	@Autowired
+	private UserDetailsService userDetailsService;
+
+	@Autowired
 	private RoleRepository roleRepository;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
@@ -49,85 +53,106 @@ public class AuthServiceImpl implements AuthService {
 	private JwtUtils jwtUtils;
 
 	@Autowired
-	private RedisCacheUtil redisCache;
+	private RedisCacheUtil redisCacheUtil;
 
 	@Override
-	public ResponseMessageDTO register(SignUpRequestDTO signUpRequest) {
+	public Long register(final SignUpRequestDTO signUpRequest) {
 		if (userRepository.existsByEmailId(signUpRequest.getEmailId())) {
-			return new ResponseMessageDTO(HttpStatus.BAD_REQUEST, "Error: Username is already taken!");
+			throw new RuntimeException("Error: Username is already taken!"); // BAD request, throw custom exception
 		}
 
-		Set<Role> roles = new HashSet<>(); // TODO: how to use design pattern(like factory if have to choose from many roles, i.e., if signuprequest also have role info)
-		
-		Role userRole = roleRepository.findByRoleName(RoleName.ATTENDEE)
-				.orElseThrow(() -> new RuntimeException("Error: Role is not found.")); // TODO: create custom formatted exception
-		roles.add(userRole); // TODO: put this adding Role entity class (see hibernate CD doc)
-		
-		// TODO: use DTO <-> model mapper
-		User user = new User(signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getEmailId(),
-				passwordEncoder.encode(signUpRequest.getPassword()), signUpRequest.getMobileNumber(), roles);
-		userRepository.save(user);
+		// TODO: how to use design pattern(like factory if have to choose from many
+		// roles, i.e., if signuprequest also have role info)
 
-		return new ResponseMessageDTO(HttpStatus.CREATED, "User registered successfully!");
+		Role userRole = roleRepository.findByRoleName(RoleName.ATTENDEE)
+				.orElseThrow(() -> new RuntimeException("Error: Role is not found.")); // TODO: create custom
+
+		User user = new User();
+		user.addRole(userRole);
+
+		return userRepository.save(mapToModel(user, signUpRequest)).getId();
 	}
 
 	@Override
-	public LoginResponseDTO login(LoginRequestDTO loginRequest) {
+	public LoginResponseDTO login(final LoginRequestDTO loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getEmailId(), loginRequest.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
-		String jwtAccess = jwtUtils.generateJwtAccessToken(user.getUsername());
-		String jwtRefresh = jwtUtils.generateJwtRefreshToken(user.getUsername());
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		final Tokens tokens = generateTokens(userDetails);
 
-//		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		redisCacheUtil.cacheValue(userDetails.getUsername(), tokens.getRefreshToken());
 
-		redisCache.cacheValue(user.getUsername(), jwtRefresh);
-
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+		List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());
 
-		return new LoginResponseDTO(jwtAccess, jwtRefresh, userDetails.getUsername(), roles);
+		return new LoginResponseDTO(tokens.getAccessToken(), tokens.getRefreshToken(), userDetails.getUsername(),
+				roles);
 	}
 
 	@Override
-	public TokenRefreshResponseDTO tokenRefresh(TokenRefreshRequestDTO tokenRefreshRequest) {
+	public Tokens renewTokens(final RenewTokenRequestDTO tokenRefreshRequest) {
 		String refreshToken = tokenRefreshRequest.getRefreshToken();
-		if (jwtUtils.validateJwtToken(refreshToken)) {
-			String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
-			String storedRefreshToken = redisCache.getCachedValue(username);
-			if (Boolean.FALSE.equals(userRepository.existsByEmailId(username)) || !refreshToken.equals(storedRefreshToken)) {
-				throw new RuntimeException("Refresh token is not in database or user is not present"); // TODO: throw custom exception
+		if (jwtUtils.isTokenValid(refreshToken)) {
+			String username = jwtUtils.extractUsername(refreshToken);
+			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+			// TODO: whether to use ?? -> use User user =
+			// userRepository.findByEmailId(email).get(); // TODO: use isPresent()
+			String storedRefreshToken = redisCacheUtil.getCachedValue(username);
+
+			if (!doesTokenMatches(refreshToken, storedRefreshToken)) {
+				throw new RuntimeException("Refresh token not exists."); // TODO: custom
 			}
-			String newAccessToken = jwtUtils.generateJwtAccessToken(username);
-			String newRefreshToken = jwtUtils.generateJwtRefreshToken(username);
-			redisCache.cacheValue(username, newRefreshToken);
-			return new TokenRefreshResponseDTO(newAccessToken, newRefreshToken);
+
+			// TODO: check here the security context on debugging
+
+			final Tokens newTokens = generateTokens(userDetails);
+			redisCacheUtil.cacheValue(username, newTokens.getRefreshToken());
+			return newTokens;
 		} else {
-			throw new RuntimeException("Refresh token is not valid"); // TODO: throw custom exception
+			throw new RuntimeException("Refresh token is not valid"); // TODO: throw custom exception inside the
+																		// isTokenValid
 		}
 	}
 
 	@Override
-	public ResponseMessageDTO changePassword(ChangePasswordRequestDTO changePasswordRequest) {
-		if (changePasswordRequest.getOldPassword().equalsIgnoreCase(changePasswordRequest.getNewPassword()) ) {
-			throw new RuntimeException("New password cannot be similar to old password.");
+	public void changePassword(ChangePasswordRequestDTO changePasswordRequest) {
+		if (changePasswordRequest.getOldPassword().equalsIgnoreCase(changePasswordRequest.getNewPassword())) {
+			throw new RuntimeException("New password cannot be similar to old password."); // TODO: use custom Exception
 		}
 		if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getAgainNewPassword())) {
-			throw new RuntimeException("Re-entered new password do not match."); // TODO: use custom Exception
+			throw new RuntimeException("Re-entered new password does not match."); // TODO: use custom Exception
 		}
-		
-		String email = ((UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-		User user = userRepository.findByEmailId(email).get(); // TODO: use isPresent()
-		
-		if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
+
+		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+				.getUsername();
+		Optional<User> userOpt = userRepository.findByEmailId(email);
+		// TODO: whether to use instead ?? ->
+		// this.userDetailsService.loadUserByUsername(email)
+		if (!userOpt.isPresent()) {
+			throw new UsernameNotFoundException("User not exist."); // TODO: custom
+		}
+
+		if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), userOpt.get().getPassword())) {
 			throw new RuntimeException("Wrong password provided."); // TODO: use custom Exception
 		}
-		user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
-		userRepository.save(user);
-		return new ResponseMessageDTO(HttpStatus.OK, "Password change successful."); // TODO: use custom Exception
+		userOpt.get().setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+		userRepository.save(userOpt.get());
 	}
 
+	private User mapToModel(User user, SignUpRequestDTO signUpRequest) {
+		return user.setFirstName(signUpRequest.getFirstName()).setLastName(signUpRequest.getLastName())
+				.setEmailId(signUpRequest.getEmailId())
+				.setMobileNumber(signUpRequest.getMobileNumber())
+				.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+	}
+
+	private Tokens generateTokens(UserDetails userDetails) {
+		return new Tokens(jwtUtils.generateAccessToken(userDetails), jwtUtils.generateRefreshToken(userDetails));
+	}
+
+	private boolean doesTokenMatches(String refreshToken, String storedRefreshToken) {
+		return refreshToken.equals(storedRefreshToken);
+	}
 }

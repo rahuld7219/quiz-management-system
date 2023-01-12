@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 //@EnableTransactionManagement
 @EnableJpaAuditing(dateTimeProviderRef = "auditingDateTimeProvider")
 public class AppConfig {
+
 	@Bean(name = "auditingDateTimeProvider")
 	public DateTimeProvider dateTimeProvider() {
 		return () -> Optional.of(OffsetDateTime.now());

@@ -1,5 +1,5 @@
 package com.qms.auth.dto.mapper;
 
-public class dummy {
+public class DummyMapper {
 
 }

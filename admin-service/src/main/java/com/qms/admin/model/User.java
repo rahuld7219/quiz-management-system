@@ -12,7 +12,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -25,35 +26,39 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 @Data
+@Accessors(chain = true)
 @NoArgsConstructor
 @Entity
-@Table(name = "quiz")
 @EntityListeners(AuditingEntityListener.class)
-@Accessors(chain = true)
-public class Quiz {
+@Table(name = "user")
+public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long id;
 
-	@Column(name = "title", nullable = false, unique = true) // TODO: unique is not working find out why, do we need to
-																// change to 'create' mode or set explicitly in MySQL
-																// itself, check in each model
-	private String title;
+	@Column(name = "first_name", nullable = false)
+	private String firstName;
 
-	@Column(name = "deleted", columnDefinition = "varchar(1) default 'N'") // TODO: why this not inserting by default
-																			// value N, check in each model
-	private String deleted = "N";
+	@Column(name = "last_name", nullable = false)
+	private String lastName;
 
-	@ManyToOne(fetch = FetchType.LAZY) // TODO: what could be the cascade?
-	@JoinColumn(name = "category_id")
-	private Category category;
+	@Column(name = "email_id", nullable = false, unique = true) // TODO: throw proper standard formatted exception on
+																// any constraint validation for any table
+	private String emailId;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "quiz") // TODO: what could be the cascade?
-	private Set<QuizQuestion> quizQuestions;
+	@Column(name = "password", nullable = false)
+	private String password;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "quiz")
+	@Column(name = "mobile_number", nullable = false, unique = true)
+	private String mobileNumber;
+
+	@ManyToMany(fetch = FetchType.LAZY) // TODO: what could be the cascading rule? check in every entity class
+	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+	private Set<Role> roles;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
 	private List<Score> scores;
 
 	@CreatedDate

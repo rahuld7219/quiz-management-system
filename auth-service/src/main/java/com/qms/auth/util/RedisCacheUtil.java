@@ -14,7 +14,7 @@ public class RedisCacheUtil {
 	private RedisTemplate<String, Object> redisTemplate;
 
 	/**
-	 * Get value for given hashKey from hash at key (hashReference).
+	 * Get value for given key
 	 * 
 	 * @param key
 	 */
@@ -23,7 +23,7 @@ public class RedisCacheUtil {
 	}
 
 	/**
-	 * Set the value of a hash hashKey.
+	 * Set the value of a key
 	 * 
 	 * @param key
 	 * @param value
@@ -31,8 +31,8 @@ public class RedisCacheUtil {
 	public void cacheValue(String key, String value) {
 		redisTemplate.opsForValue().set(key, value);
 	}
-	
+
 	public void removeCachedValue(String key) {
-		
+
 	}
 }
