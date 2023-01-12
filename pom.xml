@@ -6,7 +6,7 @@
 	<modules>
 		<module>auth-service</module>
 		<module>common</module>
-		<module>user-service</module>
+		<module>attendee-service</module>
 		<module>admin-service</module>
 	</modules>
 	<parent>
