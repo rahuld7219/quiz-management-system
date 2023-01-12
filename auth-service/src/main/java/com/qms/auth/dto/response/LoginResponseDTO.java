@@ -2,10 +2,14 @@ package com.qms.auth.dto.response;
 
 import java.util.List;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class LoginResponseDTO {
+@Getter
+@Setter
+public class LoginResponseDTO extends ApiResponse {
+
+	private static final long serialVersionUID = 8378512252815115711L;
 
 	private String accessToken;
 	private String refreshToken;

@@ -56,7 +56,7 @@ public class User {
 	@Column(name = "mobile_number", nullable = false, unique = true)
 	private String mobileNumber;
 
-	@ManyToMany(fetch = FetchType.LAZY) // TODO: what could be the cascading rule? check in every entity class
+	@ManyToMany(fetch = FetchType.EAGER) // TODO: what could be the cascading rule? check in every entity class
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;
 
