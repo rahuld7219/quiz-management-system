@@ -7,10 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.qms.attendee.dto.Dashboard;
 import com.qms.attendee.dto.QuizQuestionDTO;
+import com.qms.attendee.dto.QuizResult;
+import com.qms.attendee.dto.QuizSubmission;
 import com.qms.attendee.service.AttendeeService;
 import com.qms.attendee.service.QuizService;
 
@@ -57,5 +62,21 @@ public class AttendeeController {
 	@GetMapping("/quizQuestions/{quizId}")
 	public ResponseEntity<List<QuizQuestionDTO>> getQuizQuestions(@PathVariable final String quizId) {
 		return ResponseEntity.ok(attendeeService.getQuizQuestions(quizId));
+	}
+
+	@GetMapping("/dashboard")
+	public ResponseEntity<Dashboard> dashboard() {
+		return ResponseEntity.ok(attendeeService.dashboard());
+	}
+
+	@PostMapping("/submitQuiz")
+	public ResponseEntity<String> submitQuiz(@RequestBody final QuizSubmission quizSubmission) {
+		attendeeService.submitQuiz(quizSubmission);
+		return ResponseEntity.ok("Quiz answers submitted successfully.");
+	}
+
+	@GetMapping("/showResult/{quizId}")
+	public ResponseEntity<QuizResult> showResult(@PathVariable final String quizId) {
+		return ResponseEntity.ok(attendeeService.showResult(quizId));
 	}
 }

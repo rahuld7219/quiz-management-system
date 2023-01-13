@@ -2,7 +2,6 @@ package com.qms.attendee.model;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Locale.Category;
 import java.util.Set;
 
 import javax.persistence.Column;
