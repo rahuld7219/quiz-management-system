@@ -28,6 +28,6 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
 			+ "from user u, user_score s, category c, quiz q "
 			+ "where u.id = s.user_id AND q.id = s.quiz_id AND c.id = q.category_id "
 			+ "order by c.name, q.title, s.score desc " + "limit 10", nativeQuery = true)
-	List<Map<String, Object>> getRecordFilteredByCategoryThenQuizThenAttendeeScore();
+	List<Map<String, Object>> getRecordFilteredByCategoryThenQuizThenAttendeeScore(); // TODO: show only top score for a user id in paricular category and particular quiz
 
 }

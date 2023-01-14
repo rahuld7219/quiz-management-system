@@ -41,20 +41,7 @@ make constant file and put all literals there
 
 
 
-
-
-
-
-eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyZEBnbWFpbC5jb20ifQ.TPC62hjKI0ZHIwmd9hmpf4oEoCtlV4AXjKhzMrSC8Xv1s6RY_Ogh9sHdnKDEkjD-EnYl4dlxUE71ZVQLdz-H1g
-
-
-quiz category
-id
-category
-created
-updated
-
-Nule7+AlYbF6CbC13YjCAyB1jw1uR2MDxi9uwAMYyofE7WhaGTUPn5OTzMU1wzPFl7ANEQEcHKe0+/i2rPbkIA==
+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
 
 
 
@@ -109,10 +96,6 @@ why we put final before DTO in controller
 
 
 
-
-QuizRepository.existsByQuestionId
-
-
 {
     "questionDetail": "How many layers are in TCP/IP protocol?",
     "optionA": "1",
@@ -126,6 +109,8 @@ QuizRepository.existsByQuestionId
 
 LIMIT offset, records
 eg: LIMIT 1, 3 => returns 2, 3 and 4th record
+
+ROW_NUMBER over (order by something)
 
 
 general repo and limit value as variable
@@ -141,35 +126,67 @@ In attempted quiz options can not not be selected also
 
 
 
-
-
-
-
 -- Select quiz_id quizId, count(*) attendees from user_score group by quizId order by attendees desc limit 5;
 
+-- admin leaderboard (old)
 -- select c.name categoryName, q.title quizTitle, u.email_id userId, s.score
 -- from user u, user_score s, category c, quiz q
 -- where u.id = s.user_id AND q.id = s.quiz_id AND c.id = q.category_id
 -- order by c.name, q.title, s.score desc
--- limit 3, 2;
+-- limit 5;
+
+
+-- 6
+Select count(distinct s.quiz_id) attemptedQuizCount
+from user_score s
+where s.user_id = 2;
 
 
 -- 7
-select c.name, count(*) quizzes
+select c.name categoryName, count(*) quizzes
 from category c, quiz q
 where c.id = q.category_id And q.deleted = 'N'
+group by c.name;
+
+-- 7 (also with category not having any quiz)
+select c.name categoryName, count(*) quizzes
+from category c left join quiz q
+on c.id = q.category_id And q.deleted = 'N'
 group by c.name;
 
 -- 8
 select c.name, count(DISTINCT q.id) attemptedQuizzes
 from category c, quiz q, user_score s
-where c.id = q.category_id AND q.id = s.quiz_id And q.deleted = 'N' AND s.user_id = 2
+where c.id = q.category_id AND q.id = s.quiz_id AND s.user_id = 2
 group by c.name;
 
--- 6
-Select count(distinct s.quiz_id)
-from user_score s
-where s.user_id = 2;
+
+-- admin leaderboard modified (repo TODO implemented), 		// service TODO: add pagination and also limit by category and limit by quiz per category and also limit by users per category per quiz
+select c.name categoryName, q.title quizTitle, u.email_id userId, maxScore from user u 
+inner join
+(SELECT user_id, quiz_id, max(score) maxScore FROM user_score group by user_id, quiz_id) us
+on us.user_id = u.id
+inner join quiz q
+on us.quiz_id = q.id
+inner join category c
+on q.category_id = c.id
+order by c.name, q.title, maxScore desc
+limit 5;
 
 
-getQuestionByQuizId(quiz_id)
+
+TODO: show first and last name instead of ids anywhere
+
+TODO: remove string id everywhere and either take String uuid or Long id
+
+
+UPDATE
+TODO: Admin LeaderBoard: first show top 10 quiz(most attempted) for each category, then top 10 score for a particular quiz
+TODO: Attendee LeaderBoard: top 10 score for a particular quiz and user's score
+
+
+TODO: for now we store the latest attempted quiz by a user in redis and generate pdf for that latest quiz only, later try to generate pdf for any quiz attempted by the user
+
+TODO: remove string concat in query
+
+TODO: write this.repo... everywhere

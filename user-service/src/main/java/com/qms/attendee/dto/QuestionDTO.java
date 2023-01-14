@@ -7,10 +7,12 @@ import lombok.experimental.Accessors;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
-public class QuizQuestionDTO {
+public class QuestionDTO {
 
 	// TODO: add p.k. id OR uuid field
 
+	private Long questionId;
+	
 	private String questionDetail;
 
 	private String optionA;
@@ -20,5 +22,8 @@ public class QuizQuestionDTO {
 	private String optionC;
 
 	private String optionD;
-}
 
+	private String rightOption;
+
+	private int marks;
+}
