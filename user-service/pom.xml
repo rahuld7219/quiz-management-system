@@ -14,18 +14,18 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<groupId>com.qms</groupId>
-	<artifactId>user-service</artifactId>
+	<artifactId>attendee-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>user-service</name>
-	<description>user service(attendee) for Quiz Management System</description>
+	<name>attendee-service</name>
+	<description>attendee service for Quiz Management System</description>
 	
 	<dependencies>
-		<dependency>
-			<groupId>com.qms</groupId>
-			<artifactId>common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.qms</groupId>-->
+<!--			<artifactId>common</artifactId>-->
+<!--			<version>0.0.1-SNAPSHOT</version>-->
+<!--			<scope>compile</scope>-->
+<!--		</dependency>-->
 	</dependencies>
 	<!-- <properties>
 		<java.version>1.8</java.version>

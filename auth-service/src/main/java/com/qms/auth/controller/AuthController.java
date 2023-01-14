@@ -1,10 +1,12 @@
 package com.qms.auth.controller;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +18,7 @@ import com.qms.auth.dto.request.ChangePasswordRequestDTO;
 import com.qms.auth.dto.request.LoginRequestDTO;
 import com.qms.auth.dto.request.RenewTokenRequestDTO;
 import com.qms.auth.dto.request.SignUpRequestDTO;
+import com.qms.auth.dto.response.ApiResponse;
 import com.qms.auth.dto.response.LoginResponseDTO;
 import com.qms.auth.service.AuthService;
 
@@ -30,13 +33,15 @@ public class AuthController {
 	// TODO: make a standard response for all apis
 
 	@PostMapping("/register")
-	public ResponseEntity<String> register(@Valid @RequestBody final SignUpRequestDTO signUpRequest) { // TODO: DO
-																										// validation
+	public ResponseEntity<ApiResponse> register(@Valid @RequestBody final SignUpRequestDTO signUpRequest) { // TODO: DO
+		// validation
 		Long id = authService.register(signUpRequest);
 //		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/").toUriString());
+//		URI location = new URI("/api/");
 		URI location = URI.create("/api/v1/auth/register/" + id);
 
-		return ResponseEntity.created(location).body("User created Successfully.");
+		return ResponseEntity.created(location)
+				.body(new ApiResponse(LocalDateTime.now(), HttpStatus.CREATED, "User created Successfully."));
 	}
 
 	@PostMapping("/login")

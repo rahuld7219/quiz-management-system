@@ -1,4 +1,4 @@
-package com.qms.admin.dto;
+package com.qms.attendee.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
-public class QuestionDTO {
+public class QuizQuestionDTO {
 
 	// TODO: add p.k. id OR uuid field
 
@@ -20,8 +20,4 @@ public class QuestionDTO {
 	private String optionC;
 
 	private String optionD;
-
-	private String rightOption;
-
-	private int marks;
 }

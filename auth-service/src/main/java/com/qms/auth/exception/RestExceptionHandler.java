@@ -25,7 +25,7 @@ public class RestExceptionHandler {
 			fieldError.setField(error.getField());
 			return fieldError;
 		}).collect(Collectors.toList());
-		final ErrorResponse errorResponse = new ErrorResponse();
+		final ErrorResponse errorResponse = new ErrorResponse(); // TODO: make build()
 		errorResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
 		errorResponse.setException(exception.getClass().getSimpleName());
 		errorResponse.setFieldErrors(fieldErrors);

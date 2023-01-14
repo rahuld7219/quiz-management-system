@@ -34,3 +34,142 @@ possible solution: store refresh and access token both in redis cache for each l
 How to make redis repo?? is is possible?? find different ways of storing data in redis??
 
 make constant file and put all literals there
+
+
+
+
+
+
+
+
+
+
+
+eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyZEBnbWFpbC5jb20ifQ.TPC62hjKI0ZHIwmd9hmpf4oEoCtlV4AXjKhzMrSC8Xv1s6RY_Ogh9sHdnKDEkjD-EnYl4dlxUE71ZVQLdz-H1g
+
+
+quiz category
+id
+category
+created
+updated
+
+Nule7+AlYbF6CbC13YjCAyB1jw1uR2MDxi9uwAMYyofE7WhaGTUPn5OTzMU1wzPFl7ANEQEcHKe0+/i2rPbkIA==
+
+
+
+Questions To Ask:
+1. why access token and refresh token and why we need to store it and if storing refresh token is required then why and why not access token?
+2. while defining database/JPA entity, for many to many relation should we use composite PK or single PK (id), why and why not?
+3. user_score should have quiz id
+
+4. clarify link question API, list or single question
+5. total attendees ? attended any quiz or only registered ones
+6. quiz count ?? deleted ? or all?
+7. attendess count with quiz ?? is it attendess who attneded the quizes
+
+
+we can delete quiz if no one have attempted or quiz have no questions
+
+why we put final before DTO in controller
+
+//TODO: use @Transactional everywhere instead of save() and for other things
+// TODO: format and clear code everywhere
+// TODO: use UUID in every DTO/model (see walletMe for implementation idea)
+// TODO: optimize the hibernate mapping and repository crud operations
+
+
+
+-- DROP TABLE IF EXISTS `quiz_management`.`category`;
+
+-- CREATE TABLE `quiz_management`.`category`
+-- (`id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+-- `name` varchar(45) NOT NULL UNIQUE,
+-- `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP);
+--   
+-- CREATE TABLE `quiz_management`.`quiz_category` (
+--   `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+--   `quiz_id` int NOT NULL,
+--   `category_id` int NOT NULL,
+--   `deleted` varchar(1) NOT NULL DEFAULT 'N',
+--   `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   KEY `FK_CQ_QUIZ_ID_idx` (`quiz_id`),
+--   KEY `FK_CQ_CATEGORY_ID_idx` (`category_id`),
+--   CONSTRAINT `FK_CQ_QUIZ_ID` FOREIGN KEY (`quiz_id`) REFERENCES `quiz`(`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+--   CONSTRAINT `FK_CQ_CATEGORY_ID` FOREIGN KEY (`category_id`) REFERENCES `category`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
+--   )
+
+-- here no need to add KEY as innodb automatically index foreign key if not specified
+-- ALTER TABLE `quiz_management`.`user_score`
+-- ADD COLUMN `quiz_id` INT NOT NULL,
+-- ADD CONSTRAINT `FK_USER_SCORE_QUIZ_ID` FOREIGN KEY (`quiz_id`)
+-- REFERENCES `quiz_management`.`quiz` (`id`);
+
+
+
+
+QuizRepository.existsByQuestionId
+
+
+{
+    "questionDetail": "How many layers are in TCP/IP protocol?",
+    "optionA": "1",
+    "optionB": "3",
+    "optionC": "2",
+    "optionD": "5",
+    "rightOption": "D",
+    "marks": "1"
+}
+
+
+LIMIT offset, records
+eg: LIMIT 1, 3 => returns 2, 3 and 4th record
+
+
+general repo and limit value as variable
+call each repo from its respective service only
+call service from its respective controller only 
+i.e. controller and service should match, and, service and repo should match
+
+
+In attempted quiz options can not not be selected also
+
+
+
+
+
+
+
+
+
+
+-- Select quiz_id quizId, count(*) attendees from user_score group by quizId order by attendees desc limit 5;
+
+-- select c.name categoryName, q.title quizTitle, u.email_id userId, s.score
+-- from user u, user_score s, category c, quiz q
+-- where u.id = s.user_id AND q.id = s.quiz_id AND c.id = q.category_id
+-- order by c.name, q.title, s.score desc
+-- limit 3, 2;
+
+
+-- 7
+select c.name, count(*) quizzes
+from category c, quiz q
+where c.id = q.category_id And q.deleted = 'N'
+group by c.name;
+
+-- 8
+select c.name, count(DISTINCT q.id) attemptedQuizzes
+from category c, quiz q, user_score s
+where c.id = q.category_id AND q.id = s.quiz_id And q.deleted = 'N' AND s.user_id = 2
+group by c.name;
+
+-- 6
+Select count(distinct s.quiz_id)
+from user_score s
+where s.user_id = 2;
+
+
+getQuestionByQuizId(quiz_id)
