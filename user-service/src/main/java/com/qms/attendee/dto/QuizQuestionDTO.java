@@ -9,7 +9,9 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class QuizQuestionDTO {
 
-	// TODO: add p.k. id OR uuid field
+	// TODO: instead of p.k. id use uuid field
+	
+	private Long questionId;
 
 	private String questionDetail;
 

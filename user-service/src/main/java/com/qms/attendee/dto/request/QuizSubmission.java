@@ -1,7 +1,9 @@
-package com.qms.attendee.dto;
+package com.qms.attendee.dto.request;
 
 import java.io.Serializable;
 import java.util.List;
+
+import com.qms.attendee.dto.QuestionAnswer;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

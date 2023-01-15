@@ -1,6 +1,7 @@
 package com.qms.attendee.model;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -17,11 +18,15 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
-@Data
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @Entity
 @Accessors(chain = true)
@@ -68,4 +73,25 @@ public class Question {
 	@LastModifiedDate
 	@Column(name = "updated_on", nullable = false)
 	private OffsetDateTime updatedOn;
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Question other = (Question) obj;
+		return Objects.equals(id, other.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
 }

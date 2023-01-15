@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.qms.admin.dto.Dashboard;
+import com.qms.admin.dto.Leaderboard;
 import com.qms.admin.dto.LinkQuizQuestionDTO;
 
 public interface AdminService {
@@ -18,6 +19,6 @@ public interface AdminService {
 
 	Dashboard dashboard();
 
-	List<Map<String, Object>> leaderboard();
+	Leaderboard leaderboard(final String quizId);
 
 }

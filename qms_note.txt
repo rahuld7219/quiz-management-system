@@ -177,7 +177,10 @@ limit 5;
 
 TODO: show first and last name instead of ids anywhere
 
-TODO: remove string id everywhere and either take String uuid or Long id
+TODO: remove string id everywhere and either take String uuid(may name it like quizCode) or Long id
+TODO: set id wherever required for response
+
+TODO: apply paging in leaderboard, in one using offset and in other using jpa Page
 
 
 UPDATE
@@ -190,3 +193,27 @@ TODO: for now we store the latest attempted quiz by a user in redis and generate
 TODO: remove string concat in query
 
 TODO: write this.repo... everywhere
+
+TODO: convert Map<String, Object> to DTOs
+
+
+{
+    "timestamp": "2023-01-15T13:40:06.831+00:00",
+    "status": 404,
+    "error": "Not Found",
+    "message": "No message available",
+    "path": "/api/v1/admin/leaderboard"
+}
+
+EXTRAS:
+
+
+In Attendee:
+
+show all quiz
+show Attended quiz
+show quiz by category
+show attended quiz by category
+
+In Admin:
+Do top quiz per catgeory and top scorer per quiz leaderboard at last

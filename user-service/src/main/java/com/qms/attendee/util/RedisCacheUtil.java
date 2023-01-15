@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.qms.attendee.dto.QuizSubmission;
+import com.qms.attendee.dto.request.QuizSubmission;
 
 import lombok.extern.slf4j.Slf4j;
 

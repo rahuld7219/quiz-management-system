@@ -1,4 +1,4 @@
-package com.qms.attendee.dto;
+package com.qms.attendee.dto.response;
 
 import java.util.List;
 import java.util.Map;

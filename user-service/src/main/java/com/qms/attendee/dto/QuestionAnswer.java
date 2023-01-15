@@ -11,6 +11,11 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class QuestionAnswer implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3743554751813245798L;
+	
 	private Long questionId;
 	private String selectedOption;
 }

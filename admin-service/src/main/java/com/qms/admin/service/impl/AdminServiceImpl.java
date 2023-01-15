@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.qms.admin.constant.RoleName;
 import com.qms.admin.dto.Dashboard;
+import com.qms.admin.dto.Leaderboard;
 import com.qms.admin.dto.LinkQuizQuestionDTO;
 import com.qms.admin.model.Question;
 import com.qms.admin.model.Quiz;
@@ -106,10 +107,15 @@ public class AdminServiceImpl implements AdminService {
 				.setTopFiveAttendedQuizzes(this.countTopFiveQuizWithAttendee());
 	}
 
+//	@Override
+//	public List<Map<String, Object>> leaderboard() {
+//		return scoreRepository.getRecordFilteredByCategoryThenQuizThenAttendeeScore();
+//		// TODO: add pagination and also limit by category and limit by quiz per category and also limit by users per category per quiz
+//	}
+
 	@Override
-	public List<Map<String, Object>> leaderboard() {
-		return scoreRepository.getRecordFilteredByCategoryThenQuizThenAttendeeScore();
-		// TODO: add pagination and also limit by category and limit by quiz per category and also limit by users per category per quiz
+	public Leaderboard leaderboard(final String quizId) {
+		return new Leaderboard().setRankList(scoreRepository.getTopScorers(Long.valueOf(quizId)));
 	}
 
 }

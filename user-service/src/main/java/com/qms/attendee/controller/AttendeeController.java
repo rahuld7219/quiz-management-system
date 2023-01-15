@@ -12,10 +12,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qms.attendee.dto.Dashboard;
 import com.qms.attendee.dto.QuizQuestionDTO;
 import com.qms.attendee.dto.QuizResult;
-import com.qms.attendee.dto.QuizSubmission;
+import com.qms.attendee.dto.request.QuizSubmission;
+import com.qms.attendee.dto.response.Dashboard;
+import com.qms.attendee.dto.response.Leaderboard;
 import com.qms.attendee.service.AttendeeService;
 import com.qms.attendee.service.QuizService;
 
@@ -69,6 +70,11 @@ public class AttendeeController {
 		return ResponseEntity.ok(attendeeService.dashboard());
 	}
 
+	@GetMapping("/leaderboard/{quizId}")
+	public ResponseEntity<Leaderboard> leaderboard(@PathVariable final String quizId) {
+		return ResponseEntity.ok(attendeeService.leaderboard(quizId));
+	}
+
 	@PostMapping("/submitQuiz")
 	public ResponseEntity<String> submitQuiz(@RequestBody final QuizSubmission quizSubmission) {
 		attendeeService.submitQuiz(quizSubmission);
@@ -77,6 +83,11 @@ public class AttendeeController {
 
 	@GetMapping("/showResult/{quizId}")
 	public ResponseEntity<QuizResult> showResult(@PathVariable final String quizId) {
+		return ResponseEntity.ok(attendeeService.showResult(quizId));
+	}
+
+	@GetMapping("/downloadResult/{quizId}")
+	public ResponseEntity<QuizResult> downloadResult(@PathVariable final String quizId) {
 		return ResponseEntity.ok(attendeeService.showResult(quizId));
 	}
 }

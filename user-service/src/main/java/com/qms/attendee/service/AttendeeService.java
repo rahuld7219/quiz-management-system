@@ -3,10 +3,11 @@ package com.qms.attendee.service;
 import java.util.List;
 import java.util.Map;
 
-import com.qms.attendee.dto.Dashboard;
 import com.qms.attendee.dto.QuizQuestionDTO;
 import com.qms.attendee.dto.QuizResult;
-import com.qms.attendee.dto.QuizSubmission;
+import com.qms.attendee.dto.request.QuizSubmission;
+import com.qms.attendee.dto.response.Dashboard;
+import com.qms.attendee.dto.response.Leaderboard;
 
 public interface AttendeeService {
 
@@ -22,6 +23,8 @@ public interface AttendeeService {
 
 	void submitQuiz(final QuizSubmission quizSubmission);
 
-	QuizResult showResult(String quizId);
+	QuizResult showResult(final String quizId);
+
+	Leaderboard leaderboard(final String quizId);
 
 }
