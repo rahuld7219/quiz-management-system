@@ -53,7 +53,7 @@ public class User {
 	@Column(name = "password", nullable = false)
 	private String password;
 
-	@Column(name = "mobile_number", nullable = false, unique = true)
+	@Column(name = "mobile_number", nullable = false, unique = true) // TODO: why unique not working??, also check every fields constraint
 	private String mobileNumber;
 
 	@ManyToMany(fetch = FetchType.EAGER) // TODO: what could be the cascading rule? check in every entity class

@@ -196,6 +196,17 @@ TODO: write this.repo... everywhere
 
 TODO: convert Map<String, Object> to DTOs
 
+TODO: handle database constraint violation exceptions
+TODO: check why the entity notations not working like unique =true, default ,etc.
+
+TODO: do and check validation in all DTOs and entity
+
+TODO: remove non-required annotations over every DTOs or entity, does annotations also inherit, if so then remove inherited annotations declaration from child class
+
+TODO: place every literals in constant file, inlcuding endpoints, messages, etc. and make separate constant files for them
+
+TODO: add doc comments everywhere
+
 
 {
     "timestamp": "2023-01-15T13:40:06.831+00:00",

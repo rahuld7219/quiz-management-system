@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChangePasswordRequestDTO { //TODO: implements Serializable
+public class ChangePasswordRequest { //TODO: implements Serializable
 
 	//TODO: do validation
 	private String oldPassword;

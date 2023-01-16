@@ -13,54 +13,51 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qms.auth.dto.Tokens;
-import com.qms.auth.dto.request.ChangePasswordRequestDTO;
-import com.qms.auth.dto.request.LoginRequestDTO;
-import com.qms.auth.dto.request.RenewTokenRequestDTO;
-import com.qms.auth.dto.request.SignUpRequestDTO;
+import com.qms.auth.dto.request.ChangePasswordRequest;
+import com.qms.auth.dto.request.LoginRequest;
+import com.qms.auth.dto.request.RenewTokenRequest;
+import com.qms.auth.dto.request.SignUpRequest;
 import com.qms.auth.dto.response.ApiResponse;
-import com.qms.auth.dto.response.LoginResponseDTO;
+import com.qms.auth.dto.response.SignUpResponse;
 import com.qms.auth.service.AuthService;
 
 //@CrossOrigin(origins = "*", maxAge = 3600) ???
 @RestController
-@RequestMapping("/api/v1/auth") // TODO: place constants/literals separately
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
 	@Autowired
 	private AuthService authService;
 
-	// TODO: make a standard response for all apis
-
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse> register(@Valid @RequestBody final SignUpRequestDTO signUpRequest) { // TODO: DO
-		// validation
-		Long id = authService.register(signUpRequest);
+	public ResponseEntity<ApiResponse> register(@Valid @RequestBody final SignUpRequest signUpRequest) {
+
+		SignUpResponse response = authService.register(signUpRequest);
 //		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/").toUriString());
 //		URI location = new URI("/api/");
-		URI location = URI.create("/api/v1/auth/register/" + id);
+		URI location = URI.create("/api/v1/auth/register/" + response.getData().getId());
 
-		return ResponseEntity.created(location)
-				.body(new ApiResponse(LocalDateTime.now(), HttpStatus.CREATED, "User created Successfully."));
+		return ResponseEntity.created(location).body(response);
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody final LoginRequestDTO loginRequest) { // TODO: DO
-																											// validation
+	public ResponseEntity<ApiResponse> login(@Valid @RequestBody final LoginRequest loginRequest) {
+
 		return ResponseEntity.ok(authService.login(loginRequest));
 
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<Tokens> renewTokens(@Valid @RequestBody final RenewTokenRequestDTO tokenRefreshRequest) {
+	public ResponseEntity<ApiResponse> renewTokens(@Valid @RequestBody final RenewTokenRequest tokenRefreshRequest) {
 		return ResponseEntity.ok(authService.renewTokens(tokenRefreshRequest));
 	}
 
 	@PostMapping("/changePassword")
-	public ResponseEntity<String> changePassword(
-			@Valid @RequestBody final ChangePasswordRequestDTO changePasswordRequest) {
+	public ResponseEntity<ApiResponse> changePassword(
+			@Valid @RequestBody final ChangePasswordRequest changePasswordRequest) {
 		authService.changePassword(changePasswordRequest);
-		return ResponseEntity.ok("Password changed successfully.");
+		return ResponseEntity.ok(new ApiResponse().setHttpStatus(HttpStatus.OK).setResponseTime(LocalDateTime.now())
+				.setMessage("Password change successful."));
 	}
 
 //	@GetMapping("/logout")

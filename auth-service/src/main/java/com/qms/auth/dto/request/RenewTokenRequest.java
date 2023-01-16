@@ -5,6 +5,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RenewTokenRequestDTO {
+public class RenewTokenRequest {
 	private String refreshToken;
 }

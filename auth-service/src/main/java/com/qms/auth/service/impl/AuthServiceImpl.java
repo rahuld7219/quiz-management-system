@@ -1,10 +1,12 @@
 package com.qms.auth.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,11 +20,13 @@ import org.springframework.stereotype.Service;
 
 import com.qms.auth.constant.RoleName;
 import com.qms.auth.dto.Tokens;
-import com.qms.auth.dto.request.ChangePasswordRequestDTO;
-import com.qms.auth.dto.request.LoginRequestDTO;
-import com.qms.auth.dto.request.RenewTokenRequestDTO;
-import com.qms.auth.dto.request.SignUpRequestDTO;
-import com.qms.auth.dto.response.LoginResponseDTO;
+import com.qms.auth.dto.request.ChangePasswordRequest;
+import com.qms.auth.dto.request.LoginRequest;
+import com.qms.auth.dto.request.RenewTokenRequest;
+import com.qms.auth.dto.request.SignUpRequest;
+import com.qms.auth.dto.response.LoginResponse;
+import com.qms.auth.dto.response.RenewTokenResponse;
+import com.qms.auth.dto.response.SignUpResponse;
 import com.qms.auth.model.Role;
 import com.qms.auth.model.User;
 import com.qms.auth.repository.RoleRepository;
@@ -56,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
 	private RedisCacheUtil redisCacheUtil;
 
 	@Override
-	public Long register(final SignUpRequestDTO signUpRequest) {
+	public SignUpResponse register(final SignUpRequest signUpRequest) {
 		if (userRepository.existsByEmailId(signUpRequest.getEmailId())) {
 			throw new RuntimeException("Error: Username is already taken!"); // BAD request, throw custom exception
 		}
@@ -70,11 +74,17 @@ public class AuthServiceImpl implements AuthService {
 		User user = new User();
 		user.addRole(userRole);
 
-		return userRepository.save(mapToModel(user, signUpRequest)).getId();
+		userRepository.save(mapToModel(user, signUpRequest));
+
+		// TODO: send Zoned Date time and find a way to json format that
+		SignUpResponse response = new SignUpResponse();
+		response.setData(response.new Data(user.getId(), user.getEmailId())).setHttpStatus(HttpStatus.CREATED)
+				.setResponseTime(LocalDateTime.now()).setMessage("User created Successfully.");
+		return response;
 	}
 
 	@Override
-	public LoginResponseDTO login(final LoginRequestDTO loginRequest) {
+	public LoginResponse login(final LoginRequest loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getEmailId(), loginRequest.getPassword()));
 
@@ -87,12 +97,15 @@ public class AuthServiceImpl implements AuthService {
 		List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());
 
-		return new LoginResponseDTO(tokens.getAccessToken(), tokens.getRefreshToken(), userDetails.getUsername(),
-				roles);
+		LoginResponse response = new LoginResponse();
+		response.setData(
+				response.new Data(tokens.getAccessToken(), tokens.getRefreshToken(), userDetails.getUsername(), roles))
+				.setHttpStatus(HttpStatus.OK).setResponseTime(LocalDateTime.now()).setMessage("Login successful.");
+		return response;
 	}
 
 	@Override
-	public Tokens renewTokens(final RenewTokenRequestDTO tokenRefreshRequest) {
+	public RenewTokenResponse renewTokens(final RenewTokenRequest tokenRefreshRequest) {
 		String refreshToken = tokenRefreshRequest.getRefreshToken();
 		if (jwtUtils.isTokenValid(refreshToken)) {
 			String username = jwtUtils.extractUsername(refreshToken);
@@ -102,14 +115,18 @@ public class AuthServiceImpl implements AuthService {
 			String storedRefreshToken = redisCacheUtil.getCachedValue(username);
 
 			if (!doesTokenMatches(refreshToken, storedRefreshToken)) {
-				throw new RuntimeException("Refresh token not exists."); // TODO: custom
+				throw new RuntimeException("Refresh token not exist."); // TODO: custom
 			}
 
 			// TODO: check here the security context on debugging
 
 			final Tokens newTokens = generateTokens(userDetails);
 			redisCacheUtil.cacheValue(username, newTokens.getRefreshToken());
-			return newTokens;
+			RenewTokenResponse response = new RenewTokenResponse();
+			response.setData(response.new Data(newTokens.getAccessToken(), newTokens.getRefreshToken()))
+					.setHttpStatus(HttpStatus.OK).setResponseTime(LocalDateTime.now())
+					.setMessage("Token renew Successful.");
+			return response;
 		} else {
 			throw new RuntimeException("Refresh token is not valid"); // TODO: throw custom exception inside the
 																		// isTokenValid
@@ -117,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	public void changePassword(ChangePasswordRequestDTO changePasswordRequest) {
+	public void changePassword(ChangePasswordRequest changePasswordRequest) {
 		if (changePasswordRequest.getOldPassword().equalsIgnoreCase(changePasswordRequest.getNewPassword())) {
 			throw new RuntimeException("New password cannot be similar to old password."); // TODO: use custom Exception
 		}
@@ -126,7 +143,8 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-				.getUsername();
+				.getUsername(); // TODO: put this in utility
+
 		Optional<User> userOpt = userRepository.findByEmailId(email);
 		// TODO: whether to use instead ?? ->
 		// this.userDetailsService.loadUserByUsername(email)
@@ -141,10 +159,9 @@ public class AuthServiceImpl implements AuthService {
 		userRepository.save(userOpt.get());
 	}
 
-	private User mapToModel(User user, SignUpRequestDTO signUpRequest) {
+	private User mapToModel(User user, SignUpRequest signUpRequest) {
 		return user.setFirstName(signUpRequest.getFirstName()).setLastName(signUpRequest.getLastName())
-				.setEmailId(signUpRequest.getEmailId())
-				.setMobileNumber(signUpRequest.getMobileNumber())
+				.setEmailId(signUpRequest.getEmailId()).setMobileNumber(signUpRequest.getMobileNumber())
 				.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 	}
 

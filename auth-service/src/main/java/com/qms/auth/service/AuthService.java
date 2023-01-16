@@ -1,22 +1,23 @@
 package com.qms.auth.service;
 
-import com.qms.auth.dto.Tokens;
-import com.qms.auth.dto.request.ChangePasswordRequestDTO;
-import com.qms.auth.dto.request.LoginRequestDTO;
-import com.qms.auth.dto.request.RenewTokenRequestDTO;
-import com.qms.auth.dto.request.SignUpRequestDTO;
-import com.qms.auth.dto.response.LoginResponseDTO;
+import com.qms.auth.dto.request.ChangePasswordRequest;
+import com.qms.auth.dto.request.LoginRequest;
+import com.qms.auth.dto.request.RenewTokenRequest;
+import com.qms.auth.dto.request.SignUpRequest;
+import com.qms.auth.dto.response.LoginResponse;
+import com.qms.auth.dto.response.RenewTokenResponse;
+import com.qms.auth.dto.response.SignUpResponse;
 
 // TODO: make separate service for role and user
 public interface AuthService {
 
-	Long register(final SignUpRequestDTO signUpRequestDto);
+	SignUpResponse register(final SignUpRequest signUpRequest);
 
-	LoginResponseDTO login(final LoginRequestDTO loginRequestDto);
+	LoginResponse login(final LoginRequest loginRequestDto);
 
-	Tokens renewTokens(final RenewTokenRequestDTO tokenRefreshRequestDTO);
+	RenewTokenResponse renewTokens(final RenewTokenRequest tokenRefreshRequestDTO);
 
-	void changePassword(final ChangePasswordRequestDTO changePasswordRequest);
+	void changePassword(final ChangePasswordRequest changePasswordRequest);
 
 //	ResponseMessageDTO logout();
 }

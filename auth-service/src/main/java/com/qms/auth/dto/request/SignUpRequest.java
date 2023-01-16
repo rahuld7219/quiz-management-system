@@ -3,7 +3,7 @@ package com.qms.auth.dto.request;
 import lombok.Data;
 
 @Data
-public class SignUpRequestDTO {
+public class SignUpRequest {
 
 	// TODO: validation
 	private String firstName;
