@@ -121,11 +121,10 @@ public class SecurityConfig {
 																					// to access an endpoint
 				.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session will not be
 																									// stored
-				.and().authorizeRequests()
-				.antMatchers("/api/v1/auth/changePassword").hasAnyAuthority("ADMIN", "ATTENDEE")
+				.and().authorizeRequests().antMatchers("/api/v1/auth/changePassword")
+				.hasAnyAuthority("ADMIN", "ATTENDEE")
 //				.antMatchers("/api/v1/auth/**").permitAll()
-				.antMatchers("/api/v1/auth/login").permitAll()
-				.antMatchers("/api/v1/auth/register").permitAll()
+				.antMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
 				.antMatchers("/api/v1/dummyAdmin/**").hasAnyAuthority("ADMIN").anyRequest().authenticated();
 
 		http.authenticationProvider(authenticationProvider());
