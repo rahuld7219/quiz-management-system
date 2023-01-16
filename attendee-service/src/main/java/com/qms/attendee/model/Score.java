@@ -37,7 +37,7 @@ public class Score {
 	 * 
 	 */
 	@Column(name = "score", nullable = false, updatable = false)
-	private int scoreValue;
+	private Long scoreValue;
 
 	@CreatedDate
 	@Column(name = "created_on", nullable = false, updatable = false)

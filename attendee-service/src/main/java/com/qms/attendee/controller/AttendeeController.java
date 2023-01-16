@@ -87,7 +87,7 @@ public class AttendeeController {
 	}
 
 	@GetMapping("/downloadResult/{quizId}")
-	public ResponseEntity<QuizResult> downloadResult(@PathVariable final String quizId) {
-		return ResponseEntity.ok(attendeeService.showResult(quizId));
+	public ResponseEntity<Object> downloadResult(@PathVariable final String quizId) {
+		return ResponseEntity.ok(attendeeService.downloadResult(quizId));
 	}
 }

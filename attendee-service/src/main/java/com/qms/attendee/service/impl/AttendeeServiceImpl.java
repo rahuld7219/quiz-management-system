@@ -18,9 +18,13 @@ import com.qms.attendee.dto.response.Dashboard;
 import com.qms.attendee.dto.response.Leaderboard;
 import com.qms.attendee.dto.response.RankDetail;
 import com.qms.attendee.model.Question;
+import com.qms.attendee.model.Quiz;
+import com.qms.attendee.model.Score;
+import com.qms.attendee.model.User;
 import com.qms.attendee.repository.QuizQuestionRepository;
 import com.qms.attendee.repository.QuizRepository;
 import com.qms.attendee.repository.ScoreRepository;
+import com.qms.attendee.repository.UserRepository;
 import com.qms.attendee.service.AttendeeService;
 import com.qms.attendee.service.QuizService;
 import com.qms.attendee.util.RedisCacheUtil;
@@ -45,6 +49,9 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	@Autowired
 	private RedisCacheUtil redisCacheUtil;
+
+	@Autowired
+	private UserRepository userRepository;
 
 	@Override
 	public Long countAttendedQuiz() {
@@ -105,17 +112,28 @@ public class AttendeeServiceImpl implements AttendeeService {
 //		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
 //				.getUsername();
 
-		final List<RankDetail> rankDetails = scoreRepository.getTopScorers(Long.valueOf(quizId), "rd@gmail.com"); // TODO: how to compare equals ignore case in mysql for email id
+		final List<RankDetail> rankDetails = scoreRepository.getTopScorers(Long.valueOf(quizId), "rd2@gmail.com"); // TODO:
+																													// how
+																													// to
+																													// compare
+																													// equals
+																													// ignore
+																													// case
+																													// in
+																													// mysql
+																													// for
+																													// email
+																													// id
 		final Leaderboard leaderboard = new Leaderboard();
 		leaderboard.setRankList(rankDetails);
-		
+
 //		for (RankDetail rankDetail : rankDetails) {
 //			if (rankDetail.getEmail().equalsIgnoreCase("rd2@gmail.com")) { // TODO: pass userId extracted from spring security
 //				leaderboard.setYourRank(rankDetail);
 //				break;
 //			}
 //		}
-		
+
 		return leaderboard;
 
 //		List<Map<String, Object>> topScorers = scoreRepository.getTopScorers(Long.valueOf(quizId));
@@ -160,7 +178,11 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	@Override
 	public QuizResult showResult(final String quizId) {
+//		TODO: extract this in a method
+//		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+//				.getUsername();
 
+		// TODO: pass userId extracted from spring security context
 		QuizSubmission quizSubmission = redisCacheUtil.getCachedSubmission("rd2@gmail.com_" + quizId); // TODO: handle
 																										// exception if
 																										// key not found
@@ -173,7 +195,18 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 		final Map<Long, Question> questionsMap = createQuestionsMap(quizQuestionQuestions);
 
-		return computeQuizResult(quizSubmission, questionsMap);
+		QuizResult quizResult = computeQuizResult(quizSubmission, questionsMap);
+		User user = userRepository.findByEmailId("rd2@gmail.com")
+				.orElseThrow(() -> new RuntimeException("User not exist.")); // TODO: pass from security context and use
+																				// custom exception
+
+		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
+				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: use custom exception
+
+		// TODO: how to optimize this saving by preventing fetching of user and quiz? can change mapping by using ids instead of classes or can we write insert query in score repo directly.
+		scoreRepository.save(new Score().setScoreValue(quizResult.getTotalScore()).setQuiz(quiz).setUser(user)); // TODO: what if show result method called multiple times, it will add duplicate entries? handle this case...can we set to run this line only once for each user each quiz id and after only once sumitQuiz() has been called again for that user and quiz id?? Or should we save only top score OR should we don't save if score is same for that quiz
+
+		return quizResult;
 	}
 
 	/**
@@ -233,5 +266,11 @@ public class AttendeeServiceImpl implements AttendeeService {
 //			questionsMap.put(quizQuestionQuestion.getQuestion().getId(), quizQuestionQuestion.getQuestion());
 //		}
 //		return questionsMap;
+	}
+
+	@Override
+	public Object downloadResult(String quizId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

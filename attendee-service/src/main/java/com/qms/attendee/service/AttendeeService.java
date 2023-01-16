@@ -27,4 +27,6 @@ public interface AttendeeService {
 
 	Leaderboard leaderboard(final String quizId);
 
+	Object downloadResult(String quizId);
+
 }
