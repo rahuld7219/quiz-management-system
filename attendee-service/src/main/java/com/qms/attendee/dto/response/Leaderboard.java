@@ -2,6 +2,8 @@ package com.qms.attendee.dto.response;
 
 import java.util.List;
 
+import com.qms.common.dto.RankDetail;
+
 import lombok.Data;
 
 @Data

@@ -19,8 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.qms.auth.constant.MessageConstant;
-import com.qms.auth.constant.RoleName;
+import com.qms.auth.constant.AuthMessageConstant;
 import com.qms.auth.dto.Tokens;
 import com.qms.auth.dto.request.ChangePasswordRequest;
 import com.qms.auth.dto.request.LoginRequest;
@@ -34,13 +33,14 @@ import com.qms.auth.exception.custom.RefreshTokenNotMatchException;
 import com.qms.auth.exception.custom.RoleNotFoundException;
 import com.qms.auth.exception.custom.UserAlreadyExistException;
 import com.qms.auth.exception.custom.WrongPasswordException;
-import com.qms.auth.model.Role;
-import com.qms.auth.model.User;
-import com.qms.auth.repository.RoleRepository;
-import com.qms.auth.repository.UserRepository;
 import com.qms.auth.service.AuthService;
 import com.qms.auth.util.JwtUtils;
-import com.qms.auth.util.RedisCacheUtil;
+import com.qms.auth.util.AuthRedisCacheUtil;
+import com.qms.common.constant.RoleName;
+import com.qms.common.model.Role;
+import com.qms.common.model.User;
+import com.qms.common.repository.RoleRepository;
+import com.qms.common.repository.UserRepository;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -64,20 +64,20 @@ public class AuthServiceImpl implements AuthService {
 	private JwtUtils jwtUtils;
 
 	@Autowired
-	private RedisCacheUtil redisCacheUtil;
+	private AuthRedisCacheUtil redisCacheUtil;
 
 	@Override
 	@Transactional
 	public SignUpResponse register(final SignUpRequest signUpRequest) {
 		if (userRepository.existsByEmailId(signUpRequest.getEmailId())) {
-			throw new UserAlreadyExistException(MessageConstant.USER_ALREADY_EXIST);
+			throw new UserAlreadyExistException(AuthMessageConstant.USER_ALREADY_EXIST);
 		}
 
 		// TODO: how to use design pattern(like factory if have to choose from many
 		// roles, i.e., if signuprequest also have role info)
 
 		Role userRole = roleRepository.findByRoleName(RoleName.ATTENDEE)
-				.orElseThrow(() -> new RoleNotFoundException(MessageConstant.USER_ROLE_NOT_FOUND));
+				.orElseThrow(() -> new RoleNotFoundException(AuthMessageConstant.USER_ROLE_NOT_FOUND));
 
 		User user = new User();
 		user.addRole(userRole);
@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
 		// TODO: send Zoned Date time and find a way to json format that
 		SignUpResponse response = new SignUpResponse();
 		response.setData(response.new Data(user.getId(), user.getEmailId())).setHttpStatus(HttpStatus.CREATED)
-				.setResponseTime(LocalDateTime.now()).setMessage(MessageConstant.USER_CREATED);
+				.setResponseTime(LocalDateTime.now()).setMessage(AuthMessageConstant.USER_CREATED);
 		return response;
 	}
 
@@ -109,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
 		response.setData(
 				response.new Data(tokens.getAccessToken(), tokens.getRefreshToken(), userDetails.getUsername(), roles))
 				.setHttpStatus(HttpStatus.OK).setResponseTime(LocalDateTime.now())
-				.setMessage(MessageConstant.LOGIN_SUCCESS);
+				.setMessage(AuthMessageConstant.LOGIN_SUCCESS);
 		return response;
 	}
 
@@ -126,7 +126,7 @@ public class AuthServiceImpl implements AuthService {
 		final String storedRefreshToken = redisCacheUtil.getCachedValue(username);
 
 		if (!doesTokenMatches(refreshToken, storedRefreshToken)) {
-			throw new RefreshTokenNotMatchException(MessageConstant.REFRESH_TOKEN_NOT_MATCH);
+			throw new RefreshTokenNotMatchException(AuthMessageConstant.REFRESH_TOKEN_NOT_MATCH);
 		}
 
 		// TODO: check here the security context on debugging
@@ -136,7 +136,7 @@ public class AuthServiceImpl implements AuthService {
 		RenewTokenResponse response = new RenewTokenResponse();
 		response.setData(response.new Data(newTokens.getAccessToken(), newTokens.getRefreshToken()))
 				.setHttpStatus(HttpStatus.OK).setResponseTime(LocalDateTime.now())
-				.setMessage(MessageConstant.REFRESH_SUCCESS);
+				.setMessage(AuthMessageConstant.REFRESH_SUCCESS);
 		return response;
 	}
 
@@ -144,22 +144,22 @@ public class AuthServiceImpl implements AuthService {
 	@Transactional
 	public void changePassword(ChangePasswordRequest changePasswordRequest) {
 		if (changePasswordRequest.getOldPassword().equalsIgnoreCase(changePasswordRequest.getNewPassword())) {
-			throw new PasswordChangePolicyException(MessageConstant.NEW_PASSWORD_SIMILAR_TO_OLD);
+			throw new PasswordChangePolicyException(AuthMessageConstant.NEW_PASSWORD_SIMILAR_TO_OLD);
 		}
 		if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getAgainNewPassword())) {
-			throw new PasswordChangePolicyException(MessageConstant.RE_ENTERED_PASSWORD_NOT_MATCH);
+			throw new PasswordChangePolicyException(AuthMessageConstant.RE_ENTERED_PASSWORD_NOT_MATCH);
 		}
 
 		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
 				.getUsername(); // TODO: put this in utility
 
 		User user = userRepository.findByEmailId(email)
-				.orElseThrow(() -> new UsernameNotFoundException(MessageConstant.USER_NOT_FOUND));
+				.orElseThrow(() -> new UsernameNotFoundException(AuthMessageConstant.USER_NOT_FOUND));
 		// TODO: whether to use instead ?? ->
 		// this.userDetailsService.loadUserByUsername(email)
 
 		if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
-			throw new WrongPasswordException(MessageConstant.WRONG_PASSWORD);
+			throw new WrongPasswordException(AuthMessageConstant.WRONG_PASSWORD);
 		}
 		user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
 		userRepository.save(user);

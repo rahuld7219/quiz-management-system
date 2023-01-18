@@ -252,3 +252,4 @@ set postman using auto set tokens and uri variables
 
 validate Path Variables also
 
+TODO: make a common repository to write query

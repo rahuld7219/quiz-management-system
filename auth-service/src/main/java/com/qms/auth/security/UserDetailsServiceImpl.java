@@ -6,8 +6,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.qms.auth.model.User;
-import com.qms.auth.repository.UserRepository;
+import com.qms.common.model.User;
+import com.qms.common.repository.UserRepository;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {

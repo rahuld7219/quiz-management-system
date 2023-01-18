@@ -11,14 +11,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.qms.auth.dto.response.ErrorResponse;
-import com.qms.auth.dto.response.FieldError;
 import com.qms.auth.exception.custom.InvalidJWTException;
 import com.qms.auth.exception.custom.PasswordChangePolicyException;
 import com.qms.auth.exception.custom.RefreshTokenNotMatchException;
 import com.qms.auth.exception.custom.RoleNotFoundException;
 import com.qms.auth.exception.custom.UserAlreadyExistException;
 import com.qms.auth.exception.custom.WrongPasswordException;
+import com.qms.common.dto.response.ErrorResponse;
+import com.qms.common.dto.response.FieldError;
 
 @RestControllerAdvice
 public class RestExceptionHandler {

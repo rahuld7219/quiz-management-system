@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.qms.admin.dto.QuestionDTO;
-import com.qms.admin.model.Question;
 import com.qms.admin.repository.QuestionRepository;
-import com.qms.admin.repository.QuizQuestionRepository;
-import com.qms.admin.repository.QuizRepository;
 import com.qms.admin.service.QuestionService;
+import com.qms.common.dto.QuestionDTO;
+import com.qms.common.model.Question;
+import com.qms.common.repository.QuizQuestionRepository;
+import com.qms.common.repository.QuizRepository;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -24,7 +24,7 @@ public class QuestionServiceImpl implements QuestionService {
 	private QuizRepository quizRepository;
 	
 	@Autowired
-	QuizQuestionRepository quizQuestionRepository;
+	private QuizQuestionRepository quizQuestionRepository;
 
 	@Override
 	public Long addQuestion(final QuestionDTO questionDTO) {

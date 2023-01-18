@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import com.qms.auth.constant.MessageConstant;
+import com.qms.auth.constant.AuthMessageConstant;
 import com.qms.auth.exception.custom.InvalidJWTException;
 
 import io.jsonwebtoken.Claims;
@@ -39,7 +39,7 @@ public class JwtUtils {
 	 */
 	public String generateAccessToken(UserDetails userDetails) {
 		Map<String, Object> extraClaim = new HashMap<>();
-		extraClaim.put(MessageConstant.ROLES, userDetails.getAuthorities());
+		extraClaim.put(AuthMessageConstant.ROLES, userDetails.getAuthorities());
 		return generateToken(extraClaim, userDetails.getUsername(), jwtAccessExpiration);
 	}
 
@@ -74,7 +74,7 @@ public class JwtUtils {
 			return true;
 		} catch (Exception e) {
 			log.error("Invalid JWT: {}", e.getMessage());
-			throw new InvalidJWTException(MessageConstant.INVALID_JWT + e.getMessage());
+			throw new InvalidJWTException(AuthMessageConstant.INVALID_JWT + e.getMessage());
 		}
 
 //		catch (SignatureException e) {

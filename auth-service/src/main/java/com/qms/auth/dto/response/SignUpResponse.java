@@ -3,6 +3,7 @@ package com.qms.auth.dto.response;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.qms.common.dto.response.ApiResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

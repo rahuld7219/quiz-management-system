@@ -13,25 +13,25 @@ import org.springframework.stereotype.Service;
 
 import com.qms.attendee.dto.QuestionAnswer;
 import com.qms.attendee.dto.QuizQuestionDTO;
-import com.qms.attendee.dto.QuizQuestionQuestion;
 import com.qms.attendee.dto.QuizResult;
 import com.qms.attendee.dto.ResultDetail;
 import com.qms.attendee.dto.request.QuizSubmission;
 import com.qms.attendee.dto.response.Dashboard;
 import com.qms.attendee.dto.response.Leaderboard;
-import com.qms.attendee.dto.response.RankDetail;
-import com.qms.attendee.model.Question;
-import com.qms.attendee.model.Quiz;
-import com.qms.attendee.model.Score;
-import com.qms.attendee.model.User;
-import com.qms.attendee.repository.QuizQuestionRepository;
-import com.qms.attendee.repository.QuizRepository;
-import com.qms.attendee.repository.ScoreRepository;
-import com.qms.attendee.repository.UserRepository;
 import com.qms.attendee.service.AttendeeService;
 import com.qms.attendee.service.QuizService;
+import com.qms.attendee.util.AttendeeRedisCacheUtil;
 import com.qms.attendee.util.PDFGenerator;
-import com.qms.attendee.util.RedisCacheUtil;
+import com.qms.common.dto.QuizQuestionQuestion;
+import com.qms.common.dto.RankDetail;
+import com.qms.common.model.Question;
+import com.qms.common.model.Quiz;
+import com.qms.common.model.Score;
+import com.qms.common.model.User;
+import com.qms.common.repository.QuizQuestionRepository;
+import com.qms.common.repository.QuizRepository;
+import com.qms.common.repository.ScoreRepository;
+import com.qms.common.repository.UserRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,7 +52,7 @@ public class AttendeeServiceImpl implements AttendeeService {
 	private QuizService quiService;
 
 	@Autowired
-	private RedisCacheUtil redisCacheUtil;
+	private AttendeeRedisCacheUtil redisCacheUtil;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -186,35 +186,103 @@ public class AttendeeServiceImpl implements AttendeeService {
 //		TODO: extract this in a method
 //		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
 //				.getUsername();
-		
-		User user = userRepository.findByEmailId("rd2@gmail.com") // TODO: pass userId extracted from spring security context
+
+		User user = userRepository.findByEmailId("rd2@gmail.com") // TODO: pass userId extracted from spring security
+																	// context
 				.orElseThrow(() -> new RuntimeException("User not exist.")); // TODO: pass from security context and use
 																				// custom exception
 
 		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
 				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: use custom exception
-		
-		QuizResult quizResult = getQuizResult("rd2@gmail.com", quizId);  // TODO: pass userId extracted from spring security context
 
-		// TODO: how to optimize this saving by preventing fetching of user and quiz? can change mapping by using ids instead of classes or can we write insert query in score repo directly.
-		scoreRepository.save(new Score().setScoreValue(quizResult.getTotalScore()).setQuiz(quiz).setUser(user)); // TODO: what if show result method called multiple times, it will add duplicate entries? handle this case...can we set to run this line only once for each user each quiz id and after only once sumitQuiz() has been called again for that user and quiz id?? Or should we save only top score OR should we don't save if score is same for that quiz
+		QuizResult quizResult = getQuizResult("rd2@gmail.com", quizId); // TODO: pass userId extracted from spring
+																		// security context
+
+		// TODO: how to optimize this saving by preventing fetching of user and quiz?
+		// can change mapping by using ids instead of classes or can we write insert
+		// query in score repo directly.
+		scoreRepository.save(new Score().setScoreValue(quizResult.getTotalScore()).setQuiz(quiz).setUser(user)); // TODO:
+																													// what
+																													// if
+																													// show
+																													// result
+																													// method
+																													// called
+																													// multiple
+																													// times,
+																													// it
+																													// will
+																													// add
+																													// duplicate
+																													// entries?
+																													// handle
+																													// this
+																													// case...can
+																													// we
+																													// set
+																													// to
+																													// run
+																													// this
+																													// line
+																													// only
+																													// once
+																													// for
+																													// each
+																													// user
+																													// each
+																													// quiz
+																													// id
+																													// and
+																													// after
+																													// only
+																													// once
+																													// sumitQuiz()
+																													// has
+																													// been
+																													// called
+																													// again
+																													// for
+																													// that
+																													// user
+																													// and
+																													// quiz
+																													// id??
+																													// Or
+																													// should
+																													// we
+																													// save
+																													// only
+																													// top
+																													// score
+																													// OR
+																													// should
+																													// we
+																													// don't
+																													// save
+																													// if
+																													// score
+																													// is
+																													// same
+																													// for
+																													// that
+																													// quiz
 
 		return quizResult;
 	}
 
 	private QuizResult getQuizResult(String email, String quizId) {
-		
-				QuizSubmission quizSubmission = redisCacheUtil.getCachedSubmission(email + "_" + quizId); // TODO: handle
-																												// exception if
-																												// key not found
 
-				List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository // TODO: handle what if quiz id not
-																							// exist ?
-						.getQuestionByQuizIdAndDeleted(Long.valueOf(quizId), "N"); // TODO: use enum
+		QuizSubmission quizSubmission = redisCacheUtil.getCachedSubmission(email + "_" + quizId); // TODO: handle
+																									// exception if
+																									// key not found
 
-				final Map<Long, Question> questionsMap = createQuestionsMap(quizQuestionQuestions);
+		List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository // TODO: handle what if quiz id not
+																					// exist ?
+				.getQuestionByQuizIdAndDeleted(Long.valueOf(quizId), "N"); // TODO: use enum
 
-			return computeQuizResult(quizSubmission, questionsMap);
+		final Map<Long, Question> questionsMap = createQuestionsMap(quizQuestionQuestions);
+
+		return computeQuizResult(quizSubmission, questionsMap);
 	}
 
 	/**
@@ -244,17 +312,15 @@ public class AttendeeServiceImpl implements AttendeeService {
 				wrongAnswersCount++; // TODO: can implement negative marking feature here
 			}
 			details.add(new ResultDetail().setQuestionDetail(question.getQuestionDetail())
-					.setOptionA(question.getOptionA())
-					.setOptionB(question.getOptionB())
-					.setOptionC(question.getOptionC())
-					.setOptionD(question.getOptionD())
+					.setOptionA(question.getOptionA()).setOptionB(question.getOptionB())
+					.setOptionC(question.getOptionC()).setOptionD(question.getOptionD())
 					.setSubmittedAnswer(questionAnswer.getSelectedOption().toUpperCase()) // TODO: also show option's
 																							// value
 					.setCorrectAnswer(question.getRightOption())); // TODO: also show option's value
 		}
 
-		return new QuizResult().setExamDate(LocalDate.now()).setCorrectAnswersCount(correctAnswersCount).setWrongAnswersCount(wrongAnswersCount)
-				.setTotalScore(totalScore).setDetails(details);
+		return new QuizResult().setExamDate(LocalDate.now()).setCorrectAnswersCount(correctAnswersCount)
+				.setWrongAnswersCount(wrongAnswersCount).setTotalScore(totalScore).setDetails(details);
 	}
 
 	/**
@@ -288,16 +354,19 @@ public class AttendeeServiceImpl implements AttendeeService {
 //				.getUsername();
 		String email = "rd2@gmail.com"; // TODO: pass userId extracted from spring security context
 
-		User user = userRepository.findByEmailId(email) 
-				.orElseThrow(() -> new RuntimeException("User not exist.")); // TODO: custom exception
+		User user = userRepository.findByEmailId(email).orElseThrow(() -> new RuntimeException("User not exist.")); // TODO:
+																													// custom
+																													// exception
 
 		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
 				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: use custom exception
-		
-		QuizResult quizResult = getQuizResult(email, quizId); // TODO: pass userId extracted from spring security context
-		
-		new PDFGenerator(quizResult, quiz.getTitle(), user.getFirstName() + " " + user.getLastName(), email, response).generatePdfReport(); 
-		
+
+		QuizResult quizResult = getQuizResult(email, quizId); // TODO: pass userId extracted from spring security
+																// context
+
+		new PDFGenerator(quizResult, quiz.getTitle(), user.getFirstName() + " " + user.getLastName(), email, response)
+				.generatePdfReport();
+
 		return null;
 	}
 }

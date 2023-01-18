@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qms.admin.dto.QuestionDTO;
 import com.qms.admin.service.QuestionService;
+import com.qms.common.dto.QuestionDTO;
 
 @RestController
 @RequestMapping("/api/v1/admin/question")

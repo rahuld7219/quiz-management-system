@@ -2,7 +2,7 @@ package com.qms.admin.service;
 
 import java.util.List;
 
-import com.qms.admin.dto.QuestionDTO;
+import com.qms.common.dto.QuestionDTO;
 
 public interface QuestionService {
 //	Get questions

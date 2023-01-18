@@ -7,22 +7,22 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.qms.admin.constant.RoleName;
 import com.qms.admin.dto.Dashboard;
 import com.qms.admin.dto.Leaderboard;
 import com.qms.admin.dto.request.LinkQuizQuestion;
-import com.qms.admin.model.Question;
-import com.qms.admin.model.Quiz;
-import com.qms.admin.model.QuizQuestion;
-import com.qms.admin.model.Role;
 import com.qms.admin.repository.QuestionRepository;
-import com.qms.admin.repository.QuizQuestionRepository;
-import com.qms.admin.repository.QuizRepository;
-import com.qms.admin.repository.RoleRepository;
-import com.qms.admin.repository.ScoreRepository;
-import com.qms.admin.repository.UserRepository;
 import com.qms.admin.service.AdminService;
 import com.qms.admin.service.QuizService;
+import com.qms.common.constant.RoleName;
+import com.qms.common.model.Question;
+import com.qms.common.model.Quiz;
+import com.qms.common.model.QuizQuestion;
+import com.qms.common.model.Role;
+import com.qms.common.repository.QuizQuestionRepository;
+import com.qms.common.repository.QuizRepository;
+import com.qms.common.repository.RoleRepository;
+import com.qms.common.repository.ScoreRepository;
+import com.qms.common.repository.UserRepository;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -77,7 +77,8 @@ public class AdminServiceImpl implements AdminService {
 		quizQuestion.setQuestion(question);
 		quizQuestion.setQuiz(quiz);
 
-		quizQuestionRepository.save(quizQuestion); // TODO: save list of questions and return count and ids of saved question
+		quizQuestionRepository.save(quizQuestion); // TODO: save list of questions and return count and ids of saved
+													// question
 	}
 
 	@Override

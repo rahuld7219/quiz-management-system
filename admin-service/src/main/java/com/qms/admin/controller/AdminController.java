@@ -15,16 +15,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qms.admin.constant.MessageConstant;
-import com.qms.admin.constant.URIConstant;
+import com.qms.admin.constant.AdminMessageConstant;
+import com.qms.admin.constant.AdminURIConstant;
 import com.qms.admin.dto.Dashboard;
 import com.qms.admin.dto.Leaderboard;
 import com.qms.admin.dto.request.LinkQuizQuestion;
-import com.qms.admin.dto.response.ApiResponse;
 import com.qms.admin.service.AdminService;
+import com.qms.common.dto.response.ApiResponse;
 
 @RestController
-@RequestMapping(URIConstant.BASE_ADMIN_URL)
+@RequestMapping(AdminURIConstant.BASE_ADMIN_URL)
 public class AdminController {
 
 	@Autowired
@@ -34,11 +34,11 @@ public class AdminController {
 	 * 
 	 * @return
 	 */
-	@PostMapping(URIConstant.LINK_QUIZ_QUESTION)
+	@PostMapping(AdminURIConstant.LINK_QUIZ_QUESTION)
 	public ResponseEntity<ApiResponse> linkQuestionToQuiz(
 			@Valid @RequestBody final LinkQuizQuestion linkQuizQuestion) { // TODO: link multiple question to quiz
 		adminService.linkQuestionToQuiz(linkQuizQuestion);
-		return ResponseEntity.ok(new ApiResponse().setHttpStatus(HttpStatus.CREATED).setMessage(MessageConstant.QUESTION_ADDED));
+		return ResponseEntity.ok(new ApiResponse().setHttpStatus(HttpStatus.CREATED).setMessage(AdminMessageConstant.QUESTION_ADDED));
 	}
 
 	@GetMapping("/countAttendees")

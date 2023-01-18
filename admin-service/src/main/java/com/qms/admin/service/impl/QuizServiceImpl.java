@@ -8,14 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.qms.admin.dto.QuizDTO;
-import com.qms.admin.model.Category;
-import com.qms.admin.model.Quiz;
 import com.qms.admin.repository.CategoryRepository;
 import com.qms.admin.repository.QuestionRepository;
-import com.qms.admin.repository.QuizQuestionRepository;
-import com.qms.admin.repository.QuizRepository;
-import com.qms.admin.repository.ScoreRepository;
 import com.qms.admin.service.QuizService;
+import com.qms.common.model.Category;
+import com.qms.common.model.Quiz;
+import com.qms.common.repository.QuizQuestionRepository;
+import com.qms.common.repository.QuizRepository;
+import com.qms.common.repository.ScoreRepository;
 
 @Service
 public class QuizServiceImpl implements QuizService {

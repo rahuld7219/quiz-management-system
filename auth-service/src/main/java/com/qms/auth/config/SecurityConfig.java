@@ -62,7 +62,6 @@ import lombok.RequiredArgsConstructor;
 
 /* NEW WAY */
 @Configuration
-@EnableAutoConfiguration
 @RequiredArgsConstructor // for DI for final fields, it creates constructor for final fields and Spring
 							// automatically so constructor injection, i.e. find and provide the required
 							// objects for the constructor
@@ -127,7 +126,7 @@ public class SecurityConfig {
 				.hasAnyAuthority("ADMIN", "ATTENDEE")
 //				.antMatchers("/api/v1/auth/**").permitAll()
 				.antMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
-				.antMatchers("/api/v1/dummyAdmin/**").hasAnyAuthority("ADMIN").anyRequest().authenticated();
+				.antMatchers("/api/v1/dummyAdmin/**").hasAnyAuthority("ADMIN").anyRequest().permitAll();//authenticated();
 
 		http.authenticationProvider(authenticationProvider());
 
