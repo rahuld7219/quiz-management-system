@@ -1,4 +1,4 @@
-package com.qms.auth.dto.response;
+package com.qms.admin.dto.response;
 
 import java.io.Serializable;
 

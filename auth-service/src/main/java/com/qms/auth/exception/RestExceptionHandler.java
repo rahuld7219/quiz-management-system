@@ -13,8 +13,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.qms.auth.dto.response.ErrorResponse;
 import com.qms.auth.dto.response.FieldError;
+import com.qms.auth.exception.custom.InvalidJWTException;
+import com.qms.auth.exception.custom.PasswordChangePolicyException;
+import com.qms.auth.exception.custom.RefreshTokenNotMatchException;
 import com.qms.auth.exception.custom.RoleNotFoundException;
 import com.qms.auth.exception.custom.UserAlreadyExistException;
+import com.qms.auth.exception.custom.WrongPasswordException;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
@@ -52,11 +56,11 @@ public class RestExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleUserAlreadyExist(final UserAlreadyExistException exception) {
 		exception.printStackTrace();
 		final ErrorResponse errorResponse = new ErrorResponse();
-		errorResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+		errorResponse.setHttpStatus(HttpStatus.CONFLICT);
 		errorResponse.setException(exception.getClass().getSimpleName());
 		errorResponse.setMessage(exception.getMessage());
 		errorResponse.setResponseTime(LocalDateTime.now());
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(RoleNotFoundException.class)
@@ -68,5 +72,50 @@ public class RestExceptionHandler {
 		errorResponse.setMessage(exception.getMessage());
 		errorResponse.setResponseTime(LocalDateTime.now());
 		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@ExceptionHandler(InvalidJWTException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidJWTException(final InvalidJWTException exception) {
+		exception.printStackTrace();
+		final ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
+		errorResponse.setException(exception.getClass().getSimpleName());
+		errorResponse.setMessage(exception.getMessage());
+		errorResponse.setResponseTime(LocalDateTime.now());
+		return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+	}
+
+	@ExceptionHandler(RefreshTokenNotMatchException.class)
+	public ResponseEntity<ErrorResponse> handleRefreshTokenNotMatch(final RefreshTokenNotMatchException exception) {
+		exception.printStackTrace();
+		final ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
+		errorResponse.setException(exception.getClass().getSimpleName());
+		errorResponse.setMessage(exception.getMessage());
+		errorResponse.setResponseTime(LocalDateTime.now());
+		return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+	}
+
+	@ExceptionHandler(PasswordChangePolicyException.class)
+	public ResponseEntity<ErrorResponse> handlePasswordChangePolicyException(
+			final PasswordChangePolicyException exception) {
+		exception.printStackTrace();
+		final ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+		errorResponse.setException(exception.getClass().getSimpleName());
+		errorResponse.setMessage(exception.getMessage());
+		errorResponse.setResponseTime(LocalDateTime.now());
+		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(WrongPasswordException.class)
+	public ResponseEntity<ErrorResponse> handleWrongPasswordException(final WrongPasswordException exception) {
+		exception.printStackTrace();
+		final ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
+		errorResponse.setException(exception.getClass().getSimpleName());
+		errorResponse.setMessage(exception.getMessage());
+		errorResponse.setResponseTime(LocalDateTime.now());
+		return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
 	}
 }

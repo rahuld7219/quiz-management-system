@@ -228,3 +228,23 @@ show attended quiz by category
 
 In Admin:
 Do top quiz per catgeory and top scorer per quiz leaderboard at last
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TODOS:
+implements Serializable to each DTO
+
+set postman using auto set tokens and uri variables
+
+validate Path Variables also

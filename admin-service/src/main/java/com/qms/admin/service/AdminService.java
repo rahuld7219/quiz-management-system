@@ -5,11 +5,11 @@ import java.util.Map;
 
 import com.qms.admin.dto.Dashboard;
 import com.qms.admin.dto.Leaderboard;
-import com.qms.admin.dto.LinkQuizQuestionDTO;
+import com.qms.admin.dto.request.LinkQuizQuestion;
 
 public interface AdminService {
 
-	void linkQuestionToQuiz(final LinkQuizQuestionDTO linkQuizQuestionDTO);
+	void linkQuestionToQuiz(final LinkQuizQuestion linkQuizQuestion);
 
 	Long countAttendess();
 

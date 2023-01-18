@@ -1,5 +1,6 @@
 package com.qms.auth.config;
 
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -61,6 +62,7 @@ import lombok.RequiredArgsConstructor;
 
 /* NEW WAY */
 @Configuration
+@EnableAutoConfiguration
 @RequiredArgsConstructor // for DI for final fields, it creates constructor for final fields and Spring
 							// automatically so constructor injection, i.e. find and provide the required
 							// objects for the constructor
