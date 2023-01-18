@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.qms.auth.constant.MessageConstant;
 import com.qms.auth.constant.RoleName;
 import com.qms.auth.dto.Tokens;
 import com.qms.auth.dto.request.ChangePasswordRequest;
@@ -27,6 +28,8 @@ import com.qms.auth.dto.request.SignUpRequest;
 import com.qms.auth.dto.response.LoginResponse;
 import com.qms.auth.dto.response.RenewTokenResponse;
 import com.qms.auth.dto.response.SignUpResponse;
+import com.qms.auth.exception.custom.RoleNotFoundException;
+import com.qms.auth.exception.custom.UserAlreadyExistException;
 import com.qms.auth.model.Role;
 import com.qms.auth.model.User;
 import com.qms.auth.repository.RoleRepository;
@@ -62,14 +65,14 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public SignUpResponse register(final SignUpRequest signUpRequest) {
 		if (userRepository.existsByEmailId(signUpRequest.getEmailId())) {
-			throw new RuntimeException("Error: Username is already taken!"); // BAD request, throw custom exception
+			throw new UserAlreadyExistException(MessageConstant.USER_ALREADY_EXIST);
 		}
 
 		// TODO: how to use design pattern(like factory if have to choose from many
 		// roles, i.e., if signuprequest also have role info)
 
 		Role userRole = roleRepository.findByRoleName(RoleName.ATTENDEE)
-				.orElseThrow(() -> new RuntimeException("Error: Role is not found.")); // TODO: create custom
+				.orElseThrow(() -> new RoleNotFoundException(MessageConstant.USER_ROLE_NOT_FOUND));
 
 		User user = new User();
 		user.addRole(userRole);
@@ -79,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
 		// TODO: send Zoned Date time and find a way to json format that
 		SignUpResponse response = new SignUpResponse();
 		response.setData(response.new Data(user.getId(), user.getEmailId())).setHttpStatus(HttpStatus.CREATED)
-				.setResponseTime(LocalDateTime.now()).setMessage("User created Successfully.");
+				.setResponseTime(LocalDateTime.now()).setMessage(MessageConstant.USER_CREATED);
 		return response;
 	}
 
@@ -100,7 +103,8 @@ public class AuthServiceImpl implements AuthService {
 		LoginResponse response = new LoginResponse();
 		response.setData(
 				response.new Data(tokens.getAccessToken(), tokens.getRefreshToken(), userDetails.getUsername(), roles))
-				.setHttpStatus(HttpStatus.OK).setResponseTime(LocalDateTime.now()).setMessage("Login successful.");
+				.setHttpStatus(HttpStatus.OK).setResponseTime(LocalDateTime.now())
+				.setMessage(MessageConstant.LOGGED_IN);
 		return response;
 	}
 

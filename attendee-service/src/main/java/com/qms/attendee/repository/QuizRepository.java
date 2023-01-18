@@ -31,4 +31,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 			+ "group by c.name",
 			nativeQuery = true)
 	List<Map<String, Object>> countAttendedQuizByCategory();
+
+	String getTitleById(Long quizId);
 }

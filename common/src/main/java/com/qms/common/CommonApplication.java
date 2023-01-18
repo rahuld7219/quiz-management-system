@@ -1,14 +1,13 @@
-package com.qms.admin;
+package com.qms.common;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-//@ComponentScan(basePackages = "com.qms")
-public class AdminServiceApplication {
+public class CommonApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AdminServiceApplication.class, args);
+		SpringApplication.run(CommonApplication.class, args);
+		System.out.println("Hello QMS common!!!");
 	}
-
 }

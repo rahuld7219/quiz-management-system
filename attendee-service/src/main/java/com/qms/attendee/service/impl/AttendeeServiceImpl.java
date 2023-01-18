@@ -1,9 +1,12 @@
 package com.qms.attendee.service.impl;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,11 +21,16 @@ import com.qms.attendee.dto.response.Dashboard;
 import com.qms.attendee.dto.response.Leaderboard;
 import com.qms.attendee.dto.response.RankDetail;
 import com.qms.attendee.model.Question;
+import com.qms.attendee.model.Quiz;
+import com.qms.attendee.model.Score;
+import com.qms.attendee.model.User;
 import com.qms.attendee.repository.QuizQuestionRepository;
 import com.qms.attendee.repository.QuizRepository;
 import com.qms.attendee.repository.ScoreRepository;
+import com.qms.attendee.repository.UserRepository;
 import com.qms.attendee.service.AttendeeService;
 import com.qms.attendee.service.QuizService;
+import com.qms.attendee.util.PDFGenerator;
 import com.qms.attendee.util.RedisCacheUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +53,9 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	@Autowired
 	private RedisCacheUtil redisCacheUtil;
+
+	@Autowired
+	private UserRepository userRepository;
 
 	@Override
 	public Long countAttendedQuiz() {
@@ -105,17 +116,28 @@ public class AttendeeServiceImpl implements AttendeeService {
 //		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
 //				.getUsername();
 
-		final List<RankDetail> rankDetails = scoreRepository.getTopScorers(Long.valueOf(quizId), "rd@gmail.com"); // TODO: how to compare equals ignore case in mysql for email id
+		final List<RankDetail> rankDetails = scoreRepository.getTopScorers(Long.valueOf(quizId), "rd2@gmail.com"); // TODO:
+																													// how
+																													// to
+																													// compare
+																													// equals
+																													// ignore
+																													// case
+																													// in
+																													// mysql
+																													// for
+																													// email
+																													// id
 		final Leaderboard leaderboard = new Leaderboard();
 		leaderboard.setRankList(rankDetails);
-		
+
 //		for (RankDetail rankDetail : rankDetails) {
 //			if (rankDetail.getEmail().equalsIgnoreCase("rd2@gmail.com")) { // TODO: pass userId extracted from spring security
 //				leaderboard.setYourRank(rankDetail);
 //				break;
 //			}
 //		}
-		
+
 		return leaderboard;
 
 //		List<Map<String, Object>> topScorers = scoreRepository.getTopScorers(Long.valueOf(quizId));
@@ -158,22 +180,41 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	}
 
+	// TODO: Optimize this and its dependent methods
 	@Override
 	public QuizResult showResult(final String quizId) {
+//		TODO: extract this in a method
+//		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+//				.getUsername();
+		
+		User user = userRepository.findByEmailId("rd2@gmail.com") // TODO: pass userId extracted from spring security context
+				.orElseThrow(() -> new RuntimeException("User not exist.")); // TODO: pass from security context and use
+																				// custom exception
 
-		QuizSubmission quizSubmission = redisCacheUtil.getCachedSubmission("rd2@gmail.com_" + quizId); // TODO: handle
-																										// exception if
-																										// key not found
+		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
+				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: use custom exception
+		
+		QuizResult quizResult = getQuizResult("rd2@gmail.com", quizId);  // TODO: pass userId extracted from spring security context
 
-		log.info("====quiz submisiion=== {} ", quizSubmission);
+		// TODO: how to optimize this saving by preventing fetching of user and quiz? can change mapping by using ids instead of classes or can we write insert query in score repo directly.
+		scoreRepository.save(new Score().setScoreValue(quizResult.getTotalScore()).setQuiz(quiz).setUser(user)); // TODO: what if show result method called multiple times, it will add duplicate entries? handle this case...can we set to run this line only once for each user each quiz id and after only once sumitQuiz() has been called again for that user and quiz id?? Or should we save only top score OR should we don't save if score is same for that quiz
 
-		List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository // TODO: handle what if quiz id not
-																					// exist ?
-				.getQuestionByQuizIdAndDeleted(Long.valueOf(quizId), "N"); // TODO: use enum
+		return quizResult;
+	}
 
-		final Map<Long, Question> questionsMap = createQuestionsMap(quizQuestionQuestions);
+	private QuizResult getQuizResult(String email, String quizId) {
+		
+				QuizSubmission quizSubmission = redisCacheUtil.getCachedSubmission(email + "_" + quizId); // TODO: handle
+																												// exception if
+																												// key not found
 
-		return computeQuizResult(quizSubmission, questionsMap);
+				List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository // TODO: handle what if quiz id not
+																							// exist ?
+						.getQuestionByQuizIdAndDeleted(Long.valueOf(quizId), "N"); // TODO: use enum
+
+				final Map<Long, Question> questionsMap = createQuestionsMap(quizQuestionQuestions);
+
+			return computeQuizResult(quizSubmission, questionsMap);
 	}
 
 	/**
@@ -203,12 +244,16 @@ public class AttendeeServiceImpl implements AttendeeService {
 				wrongAnswersCount++; // TODO: can implement negative marking feature here
 			}
 			details.add(new ResultDetail().setQuestionDetail(question.getQuestionDetail())
+					.setOptionA(question.getOptionA())
+					.setOptionB(question.getOptionB())
+					.setOptionC(question.getOptionC())
+					.setOptionD(question.getOptionD())
 					.setSubmittedAnswer(questionAnswer.getSelectedOption().toUpperCase()) // TODO: also show option's
 																							// value
 					.setCorrectAnswer(question.getRightOption())); // TODO: also show option's value
 		}
 
-		return new QuizResult().setCorrectAnswersCount(correctAnswersCount).setWrongAnswersCount(wrongAnswersCount)
+		return new QuizResult().setExamDate(LocalDate.now()).setCorrectAnswersCount(correctAnswersCount).setWrongAnswersCount(wrongAnswersCount)
 				.setTotalScore(totalScore).setDetails(details);
 	}
 
@@ -233,5 +278,26 @@ public class AttendeeServiceImpl implements AttendeeService {
 //			questionsMap.put(quizQuestionQuestion.getQuestion().getId(), quizQuestionQuestion.getQuestion());
 //		}
 //		return questionsMap;
+	}
+
+	// TODO: Optimize this and its dependent methods
+	@Override
+	public Object exportPDF(final String quizId, final HttpServletResponse response) {
+//		TODO: extract this in a method
+//		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+//				.getUsername();
+		String email = "rd2@gmail.com"; // TODO: pass userId extracted from spring security context
+
+		User user = userRepository.findByEmailId(email) 
+				.orElseThrow(() -> new RuntimeException("User not exist.")); // TODO: custom exception
+
+		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
+				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: use custom exception
+		
+		QuizResult quizResult = getQuizResult(email, quizId); // TODO: pass userId extracted from spring security context
+		
+		new PDFGenerator(quizResult, quiz.getTitle(), user.getFirstName() + " " + user.getLastName(), email, response).generatePdfReport(); 
+		
+		return null;
 	}
 }
