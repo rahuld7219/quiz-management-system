@@ -3,6 +3,8 @@ package com.qms.attendee.controller;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -86,8 +88,8 @@ public class AttendeeController {
 		return ResponseEntity.ok(attendeeService.showResult(quizId));
 	}
 
-	@GetMapping("/downloadResult/{quizId}")
-	public ResponseEntity<Object> downloadResult(@PathVariable final String quizId) {
-		return ResponseEntity.ok(attendeeService.downloadResult(quizId));
+	@GetMapping("/exportPDF/{quizId}")
+	public ResponseEntity<Object> exportPDF(@PathVariable final String quizId, final HttpServletResponse response) {
+		return ResponseEntity.ok(attendeeService.exportPDF(quizId, response));
 	}
 }

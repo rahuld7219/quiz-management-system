@@ -3,6 +3,8 @@ package com.qms.attendee.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.qms.attendee.dto.QuizQuestionDTO;
 import com.qms.attendee.dto.QuizResult;
 import com.qms.attendee.dto.request.QuizSubmission;
@@ -27,6 +29,6 @@ public interface AttendeeService {
 
 	Leaderboard leaderboard(final String quizId);
 
-	Object downloadResult(String quizId);
+	Object exportPDF(final String quizId, final HttpServletResponse response);
 
 }

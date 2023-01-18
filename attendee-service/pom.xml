@@ -50,14 +50,14 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.qms</groupId>
-			<artifactId>common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.qms</groupId>
-			<artifactId>auth-service</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.qms</groupId>-->
+<!--			<artifactId>common</artifactId>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>com.qms</groupId>-->
+<!--			<artifactId>auth-service</artifactId>-->
+<!--		</dependency>-->
 	</dependencies>
 
 	<build>
