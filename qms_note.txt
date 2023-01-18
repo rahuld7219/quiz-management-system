@@ -234,3 +234,21 @@ Do top quiz per catgeory and top scorer per quiz leaderboard at last
 
 TODO: add page number, useful to see document class
 TODO: use some cache instead of hitting database for same thing again and again, if data is not going to change in database frequently
+
+
+
+
+
+
+
+
+
+
+
+TODOS:
+implements Serializable to each DTO
+
+set postman using auto set tokens and uri variables
+
+validate Path Variables also
+
