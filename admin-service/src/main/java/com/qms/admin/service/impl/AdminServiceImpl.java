@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.qms.admin.dto.Dashboard;
 import com.qms.admin.dto.Leaderboard;
-import com.qms.admin.dto.request.LinkQuizQuestion;
+import com.qms.admin.dto.request.LinkQuizQuestionRequest;
+import com.qms.admin.dto.response.LinkQuizQuestionResponse;
 import com.qms.admin.repository.QuestionRepository;
 import com.qms.admin.service.AdminService;
 import com.qms.admin.service.QuizService;
@@ -49,7 +50,7 @@ public class AdminServiceImpl implements AdminService {
 	private QuizService quizService;
 
 	@Override
-	public void linkQuestionToQuiz(final LinkQuizQuestion linkQuizQuestionDTO) {
+	public LinkQuizQuestionResponse linkQuestionToQuiz(final LinkQuizQuestionRequest linkQuizQuestionDTO) {
 		// TODO: find by Id and and deleted is "N"
 		Question question = questionRepository
 				.findByIdAndDeleted(Long.valueOf(linkQuizQuestionDTO.getQuestionId()), "N") // TODO: use

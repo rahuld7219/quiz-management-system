@@ -30,7 +30,7 @@ public class QuizQuestion {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false) // TODO: what could be the cascade?
 	@JoinColumn(name = "quiz_id")

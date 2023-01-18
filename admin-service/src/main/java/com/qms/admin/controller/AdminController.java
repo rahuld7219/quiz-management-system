@@ -19,7 +19,7 @@ import com.qms.admin.constant.AdminMessageConstant;
 import com.qms.admin.constant.AdminURIConstant;
 import com.qms.admin.dto.Dashboard;
 import com.qms.admin.dto.Leaderboard;
-import com.qms.admin.dto.request.LinkQuizQuestion;
+import com.qms.admin.dto.request.LinkQuizQuestionRequest;
 import com.qms.admin.service.AdminService;
 import com.qms.common.dto.response.ApiResponse;
 
@@ -35,23 +35,28 @@ public class AdminController {
 	 * @return
 	 */
 	@PostMapping(AdminURIConstant.LINK_QUIZ_QUESTION)
-	public ResponseEntity<ApiResponse> linkQuestionToQuiz(
-			@Valid @RequestBody final LinkQuizQuestion linkQuizQuestion) { // TODO: link multiple question to quiz
+	public ResponseEntity<ApiResponse> linkQuestionToQuiz(@Valid @RequestBody final LinkQuizQuestionRequest linkQuizQuestion) { // TODO:
+																															// link
+																															// multiple
+																															// question
+																															// to
+																															// quiz
 		adminService.linkQuestionToQuiz(linkQuizQuestion);
-		return ResponseEntity.ok(new ApiResponse().setHttpStatus(HttpStatus.CREATED).setMessage(AdminMessageConstant.QUESTION_ADDED));
+		return ResponseEntity.ok(
+				new ApiResponse().setHttpStatus(HttpStatus.CREATED).setMessage(AdminMessageConstant.QUESTION_ADDED));
 	}
 
-	@GetMapping("/countAttendees")
+	@GetMapping(AdminURIConstant.COUNT_ATTENDEE)
 	public ResponseEntity<Long> countAttendees() {
 		return ResponseEntity.ok(adminService.countAttendess());
 	}
 
-	@GetMapping("/countAttendeesAttemptedQuiz")
+	@GetMapping(AdminURIConstant.COUNT_ATTENDEE_ATTEMPTED_QUIZ)
 	public ResponseEntity<Long> countAttendeesAttemptedQuiz() {
 		return ResponseEntity.ok(adminService.countAttendeesAttemptedQuiz());
 	}
 
-	@GetMapping("/topFiveQuiz")
+	@GetMapping(AdminURIConstant.TOP_5_QUIZ)
 	public ResponseEntity<List<Map<String, Object>>> countTopFiveQuizWithAttendee() {
 		return ResponseEntity.ok(adminService.countTopFiveQuizWithAttendee());
 	}
