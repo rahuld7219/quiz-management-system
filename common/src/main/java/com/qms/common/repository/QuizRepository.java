@@ -16,7 +16,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
 	Optional<Quiz> findByCategoryId(Long id);
 
-	Long countByDeleted(String deleted);
+	Long countByDeleted(Deleted deleted);
 
 	Optional<Quiz> findByIdAndDeleted(Long id, Deleted deleted);
 
@@ -40,4 +40,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 	List<Map<String, Object>> countAttendedQuizByCategory();
 
 	String getTitleById(Long quizId);
+
+	boolean existsByCategoryId(Long id);
 }

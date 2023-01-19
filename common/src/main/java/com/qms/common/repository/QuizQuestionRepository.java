@@ -27,4 +27,6 @@ public interface QuizQuestionRepository extends JpaRepository<QuizQuestion, Long
 	Optional<List<QuizQuestion>> findAllByQuizIdAndDeletedAndQuestionIdIn(Long id, Deleted deleted,
 			List<Long> existingQuestionIds);
 
+	boolean existsByQuizIdAndDeleted(Long quizId, Deleted deleted);
+
 }

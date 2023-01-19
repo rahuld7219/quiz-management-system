@@ -1,10 +1,5 @@
 package com.qms.admin.service;
 
-import java.util.List;
-import java.util.Map;
-
-import com.qms.admin.dto.Dashboard;
-import com.qms.admin.dto.Leaderboard;
 import com.qms.admin.dto.request.LinkQuizQuestionRequest;
 import com.qms.admin.dto.response.CountAttendeesAttemptedQuizResponse;
 import com.qms.admin.dto.response.CountAttendeesResponse;
@@ -25,6 +20,6 @@ public interface AdminService {
 
 	DashboardResponse dashboard();
 
-	LeaderboardResponse leaderboard(final String quizId);
+	LeaderboardResponse leaderboard(final Long quizId);
 
 }

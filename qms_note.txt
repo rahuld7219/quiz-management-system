@@ -253,3 +253,11 @@ set postman using auto set tokens and uri variables
 validate Path Variables also
 
 TODO: make a common repository to write query
+
+TODO: try and catch database exception instead of manually checking everywhere like constraint violation on delete, update ,etc.
+
+TODO: seprate into thre DTO, Entity and Request (see the code where someone did it you saw it earlier), convert request to DTO in controller and mapToDTO<->mapToModel in service
+
+TODO: rename question detail to question string
+
+TODO: change category response with category DTO

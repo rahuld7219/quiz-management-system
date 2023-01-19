@@ -8,8 +8,6 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 public class QuizQuestionDTO {
-
-	// TODO: instead of p.k. id use uuid field
 	
 	private Long questionId;
 

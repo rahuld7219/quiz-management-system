@@ -1,27 +1,19 @@
 package com.qms.admin.service;
 
-import java.util.List;
-
-import com.qms.common.dto.QuestionDTO;
+import com.qms.admin.dto.request.QuestionRequest;
+import com.qms.admin.dto.response.ListQuestionResponse;
+import com.qms.admin.dto.response.QuestionResponse;
 
 public interface QuestionService {
-//	Get questions
-//	Add questions
-//	Update Questions
-//	Delete Questions
 
-	// List Questions
+	QuestionResponse addQuestion(final QuestionRequest questionRequest);
 
-	// Link question to quiz
+	QuestionResponse updateQuestion(final Long questionId, final QuestionRequest questionRequest);
 
-	Long addQuestion(final QuestionDTO questionDTO);
+	void deleteQuestion(final Long questionId);
 
-	void updateQuestion(final String questionId, final QuestionDTO questionDTO);
+	QuestionResponse getQuestion(final Long questionId);
 
-	void deleteQuestion(final String questionId);
-
-	QuestionDTO getQuestion(final String questionId);
-
-	List<QuestionDTO> getQuestionList();
+	ListQuestionResponse getQuestionList();
 
 }

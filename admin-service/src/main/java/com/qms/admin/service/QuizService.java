@@ -1,25 +1,21 @@
 package com.qms.admin.service;
 
-import java.util.List;
-
-import com.qms.admin.dto.QuizDTO;
+import com.qms.admin.dto.request.QuizRequest;
+import com.qms.admin.dto.response.ListQuizResponse;
+import com.qms.admin.dto.response.QuizCountResponse;
+import com.qms.admin.dto.response.QuizResponse;
 
 public interface QuizService {
-//	Get Quiz
-//	Add Quiz
-//	Update Quiz
-//	Delete Quiz
-//	List Quiz
 
-	Long addQuiz(final QuizDTO quizDTO);
+	QuizResponse addQuiz(final QuizRequest quizRequest);
 
-	void updateQuiz(final String quizId, final QuizDTO quizDTO);
+	QuizResponse updateQuiz(final Long quizId, final QuizRequest quizRequest);
 
-	void deleteQuiz(final String quizId);
+	void deleteQuiz(final Long quizId);
 
-	QuizDTO getQuiz(final String quizId);
+	QuizResponse getQuiz(final Long quizId);
 
-	List<QuizDTO> getQuizList();
+	ListQuizResponse getQuizList();
 
-	Long getQuizCount();
+	QuizCountResponse getQuizCount();
 }

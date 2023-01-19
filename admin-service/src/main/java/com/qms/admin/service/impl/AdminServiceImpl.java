@@ -182,18 +182,19 @@ public class AdminServiceImpl implements AdminService {
 	}
 
 	private Dashboard createDashboard() {
-		return new Dashboard().setNumberOfQuizzes(this.quizService.getQuizCount())
+		return new Dashboard().setNumberOfQuizzes(this.quizService.getQuizCount().getData().getQuizCount())
 				.setTotalAttendees(this.countAttendees().getData().getAttendeesCount()).setTopFiveAttendedQuizzes(
 						this.countTopFiveQuizWithAttendee().getData().getTopFiveQuizWithAttendeeCount());
 	}
 
 	@Override
-	public LeaderboardResponse leaderboard(final String quizId) {
+	public LeaderboardResponse leaderboard(final Long quizId) {
 		LeaderboardResponse response = new LeaderboardResponse();
-		response.setData(response.new Data(new Leaderboard().setRankList(scoreRepository.getTopScorers(Long.valueOf(quizId)))).setHttpStatus(HttpStatus.OK)
-				.setMessage(AdminMessageConstant.LEADERBOARD_SUCCESS).setResponseTime(LocalDateTime.now());
+		response.setData(response.new Data(new Leaderboard().setRankList(scoreRepository.getTopScorers(quizId))))
+				.setHttpStatus(HttpStatus.OK).setMessage(AdminMessageConstant.LEADERBOARD_SUCCESS)
+				.setResponseTime(LocalDateTime.now());
 		return response;
-		
+
 	}
 
 	/* Dashboard Old */

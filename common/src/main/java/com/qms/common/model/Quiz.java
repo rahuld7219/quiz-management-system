@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,6 +21,8 @@ import javax.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.qms.common.constant.Deleted;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,9 +46,9 @@ public class Quiz {
 																// itself, check in each model
 	private String title;
 
-	@Column(name = "deleted", columnDefinition = "varchar(1) default 'N'") // TODO: why this not inserting by default
-																			// value N, check in each model
-	private String deleted = "N";
+	@Column(name = "deleted", columnDefinition = "varchar(1) default 'N'")
+	@Enumerated(EnumType.STRING)
+	private Deleted deleted = Deleted.N; // why default not inserting by default??
 
 	@ManyToOne(fetch = FetchType.LAZY) // TODO: what could be the cascade?
 	@JoinColumn(name = "category_id")

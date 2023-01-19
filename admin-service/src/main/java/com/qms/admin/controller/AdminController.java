@@ -54,13 +54,14 @@ public class AdminController {
 		return ResponseEntity.ok(adminService.dashboard());
 	}
 
+	@GetMapping(AdminURIConstant.LEADERBOARD + "/{quizId}")
+	public ResponseEntity<ApiResponse> leaderboard(@PathVariable final Long quizId) {
+		return ResponseEntity.ok(adminService.leaderboard(quizId));
+	}
+
 //	@GetMapping("/leaderboard")
 //	public ResponseEntity<List<Map<String, Object>>> leaderboard() {
 //		return ResponseEntity.ok(adminService.leaderboard());
 //	}
 
-	@GetMapping(AdminURIConstant.LEADERBOARD + AdminURIConstant.LEADERBOARD_PATH_VARIABLE)
-	public ResponseEntity<ApiResponse> leaderboard(@PathVariable final String quizId) {
-		return ResponseEntity.ok(adminService.leaderboard(quizId));
-	}
 }

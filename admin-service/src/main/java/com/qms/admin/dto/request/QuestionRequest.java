@@ -1,6 +1,7 @@
-package com.qms.common.dto;
+package com.qms.admin.dto.request;
 
-import java.io.Serializable;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,16 +10,21 @@ import lombok.experimental.Accessors;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
-public class QuestionDTO implements Serializable {
+public class QuestionRequest {
 
-	private static final long serialVersionUID = 5399440466321941776L;
-
-	private Long questionId;
+	@NotBlank
 	private String questionDetail;
+	@NotBlank
 	private String optionA;
+	@NotBlank
 	private String optionB;
+	@NotBlank
 	private String optionC;
+	@NotBlank
 	private String optionD;
+	@NotBlank
 	private String rightOption;
+	@NotNull
 	private Integer marks;
+
 }

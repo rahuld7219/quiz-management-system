@@ -12,8 +12,10 @@ public class AdminURIConstant {
 	public static final String TOP_5_QUIZ = "/topFiveQuiz";
 	public static final String DASHBOARD = "/dashboard";
 	public static final String LEADERBOARD = "/leaderboard";
-	public static final String LEADERBOARD_PATH_VARIABLE = "/{quizId}";
 
 	public static final String CATEGORY_URL = "/category";
-	public static final String CATEGORY_PATH_VARIABLE = "/{categoryId}";
+	
+	public static final String QUESTION_URL = "/question";
+	
+	public static final String QUIZ_URL = "/quiz";
 }
