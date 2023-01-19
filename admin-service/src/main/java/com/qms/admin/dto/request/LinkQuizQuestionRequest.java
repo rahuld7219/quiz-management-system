@@ -3,8 +3,8 @@ package com.qms.admin.dto.request;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import lombok.Data;
@@ -19,7 +19,7 @@ public class LinkQuizQuestionRequest implements Serializable {
 	@NotEmpty
 	@Size(max = 10)
 	private List<Long> questionsIds;
-	
-	@NotBlank
-	private String quizId;
+
+	@NotNull
+	private Long quizId;
 }

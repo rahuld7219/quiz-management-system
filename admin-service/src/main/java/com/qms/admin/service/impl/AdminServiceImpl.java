@@ -62,13 +62,14 @@ public class AdminServiceImpl implements AdminService {
 	private QuizService quizService;
 
 	@Override
+//	@Transactional
 	public LinkQuizQuestionResponse linkQuestionToQuiz(final LinkQuizQuestionRequest linkQuizQuestionRequest) {
 
 		// TODO: use question service
 		Optional<List<Question>> existingQuestions = questionRepository
 				.findAllByIdInAndDeleted(linkQuizQuestionRequest.getQuestionsIds(), Deleted.N);
 
-		if (existingQuestions.isPresent()) {
+		if (existingQuestions.isPresent() && !existingQuestions.get().isEmpty()) {
 
 			return linkQuestionsAndCreateResponse(existingQuestions.get(), linkQuizQuestionRequest);
 		}
@@ -86,7 +87,7 @@ public class AdminServiceImpl implements AdminService {
 	private LinkQuizQuestionResponse linkQuestionsAndCreateResponse(List<Question> existingQuestions,
 			final LinkQuizQuestionRequest linkQuizQuestionRequest) {
 
-		Quiz quiz = quizRepository.findByIdAndDeleted(Long.valueOf(linkQuizQuestionRequest.getQuizId()), Deleted.N)
+		Quiz quiz = quizRepository.findByIdAndDeleted(linkQuizQuestionRequest.getQuizId(), Deleted.N)
 				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));
 
 		List<Long> existingQuestionIds = existingQuestions.stream().map(Question::getId).collect(Collectors.toList());
@@ -101,7 +102,7 @@ public class AdminServiceImpl implements AdminService {
 				.findAllByQuizIdAndDeletedAndQuestionIdIn(quiz.getId(), Deleted.N, existingQuestionIds);
 
 		List<Long> alreadyLinkedQuestionIds = new ArrayList<>();
-		if (alreadyLinkedQuizQuestion.isPresent()) {
+		if (alreadyLinkedQuizQuestion.isPresent() && !alreadyLinkedQuizQuestion.get().isEmpty()) {
 			List<Question> alreadyLinkedQuestions = alreadyLinkedQuizQuestion.get().stream()
 					.map(QuizQuestion::getQuestion).collect(Collectors.toList());
 			alreadyLinkedQuestionIds = alreadyLinkedQuestions.stream().map(Question::getId)
@@ -111,6 +112,16 @@ public class AdminServiceImpl implements AdminService {
 
 		List<QuizQuestion> quizQuestionToAdd = new ArrayList<>();
 
+		Optional<List<QuizQuestion>> alreadyLinkedQuestionButSoftDeleted = quizQuestionRepository
+				.findAllByQuizIdAndDeletedAndQuestionIdIn(quiz.getId(), Deleted.Y, existingQuestionIds);
+
+		if (alreadyLinkedQuestionButSoftDeleted.isPresent() && !alreadyLinkedQuestionButSoftDeleted.get().isEmpty()) {
+			alreadyLinkedQuestionButSoftDeleted.get().forEach(quizQuestion -> quizQuestion.setDeleted(Deleted.N));
+			questionsToLink.removeAll(alreadyLinkedQuestionButSoftDeleted.get().stream().map(QuizQuestion::getQuestion)
+					.collect(Collectors.toList()));
+			quizQuestionToAdd.addAll(alreadyLinkedQuestionButSoftDeleted.get());
+		}
+
 		for (Question question : questionsToLink) {
 
 			QuizQuestion quizQuestion = new QuizQuestion();
@@ -118,14 +129,6 @@ public class AdminServiceImpl implements AdminService {
 			quizQuestion.setQuiz(quiz);
 
 			quizQuestionToAdd.add(quizQuestion);
-		}
-
-		Optional<List<QuizQuestion>> alreadyLinkedQuestionButSoftDeleted = quizQuestionRepository
-				.findAllByQuizIdAndDeletedAndQuestionIdIn(quiz.getId(), Deleted.Y, existingQuestionIds);
-
-		if (alreadyLinkedQuestionButSoftDeleted.isPresent()) {
-			alreadyLinkedQuestionButSoftDeleted.get().forEach(quizQuestion -> quizQuestion.setDeleted(Deleted.N));
-			quizQuestionToAdd.addAll(alreadyLinkedQuestionButSoftDeleted.get());
 		}
 
 		List<Long> linkedQuestionIds = new ArrayList<>();

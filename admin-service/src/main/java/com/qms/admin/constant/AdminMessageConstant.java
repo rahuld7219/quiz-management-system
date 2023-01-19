@@ -6,7 +6,7 @@ public class AdminMessageConstant {
 	}
 
 	public static final String QUESTION_ADDED = "Question added successfully to the quiz";
-	public static final String QUIZ_QUESTIONS_LINKED = "Existing questions linked to the quiz.";
+	public static final String QUIZ_QUESTIONS_LINKED = "Given existing non-linked questions linked to the quiz.";
 	public static final String ATTENDEES_COUNTED = "Attendees count successful.";
 	public static final String ATTENDEES_ATTEMPTED_QUIZ_COUNTED = "Attendees attempted quizzes count successful.";
 	public static final String TOP_5_ATTENDEES_ATTEMPTED_QUIZ_COUNTED = "Attendees attempted top 5 quizzes count successful.";
