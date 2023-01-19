@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import com.qms.common.constant.Deleted;
 import com.qms.common.model.Quiz;
 
 @Repository
@@ -17,7 +18,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
 	Long countByDeleted(String deleted);
 
-	Optional<Quiz> findByIdAndDeleted(Long id, String deleted);
+	Optional<Quiz> findByIdAndDeleted(Long id, Deleted deleted);
 
 //	boolean existsByQuestionId(Long questionId); //TODO: find a better way
 

@@ -6,20 +6,25 @@ import java.util.Map;
 import com.qms.admin.dto.Dashboard;
 import com.qms.admin.dto.Leaderboard;
 import com.qms.admin.dto.request.LinkQuizQuestionRequest;
+import com.qms.admin.dto.response.CountAttendeesAttemptedQuizResponse;
+import com.qms.admin.dto.response.CountAttendeesResponse;
+import com.qms.admin.dto.response.CountTopFiveQuizWithAttendeeResponse;
+import com.qms.admin.dto.response.DashboardResponse;
+import com.qms.admin.dto.response.LeaderboardResponse;
 import com.qms.admin.dto.response.LinkQuizQuestionResponse;
 
 public interface AdminService {
 
 	LinkQuizQuestionResponse linkQuestionToQuiz(final LinkQuizQuestionRequest linkQuizQuestion);
 
-	Long countAttendess();
+	CountAttendeesResponse countAttendees();
 
-	Long countAttendeesAttemptedQuiz();
+	CountAttendeesAttemptedQuizResponse countAttendeesAttemptedQuiz();
 
-	List<Map<String, Object>> countTopFiveQuizWithAttendee();
+	CountTopFiveQuizWithAttendeeResponse countTopFiveQuizWithAttendee();
 
-	Dashboard dashboard();
+	DashboardResponse dashboard();
 
-	Leaderboard leaderboard(final String quizId);
+	LeaderboardResponse leaderboard(final String quizId);
 
 }

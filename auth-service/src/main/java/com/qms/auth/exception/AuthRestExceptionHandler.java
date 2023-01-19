@@ -21,25 +21,25 @@ import com.qms.common.dto.response.ErrorResponse;
 import com.qms.common.dto.response.FieldError;
 
 @RestControllerAdvice
-public class RestExceptionHandler {
+public class AuthRestExceptionHandler {
 
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(final MethodArgumentNotValidException exception) {
-		final BindingResult bindingResult = exception.getBindingResult();
-		final List<FieldError> fieldErrors = bindingResult.getFieldErrors().stream().map(error -> {
-			final FieldError fieldError = new FieldError();
-			fieldError.setErrorCode(error.getCode());
-			fieldError.setField(error.getField());
-			return fieldError;
-		}).collect(Collectors.toList());
-		final ErrorResponse errorResponse = new ErrorResponse();
-		errorResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
-		errorResponse.setException(exception.getClass().getSimpleName());
-		errorResponse.setFieldErrors(fieldErrors);
-		errorResponse.setMessage(exception.getMessage());
-		errorResponse.setResponseTime(LocalDateTime.now());
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-	}
+//	@ExceptionHandler(MethodArgumentNotValidException.class)
+//	public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(final MethodArgumentNotValidException exception) {
+//		final BindingResult bindingResult = exception.getBindingResult();
+//		final List<FieldError> fieldErrors = bindingResult.getFieldErrors().stream().map(error -> {
+//			final FieldError fieldError = new FieldError();
+//			fieldError.setErrorCode(error.getCode());
+//			fieldError.setField(error.getField());
+//			return fieldError;
+//		}).collect(Collectors.toList());
+//		final ErrorResponse errorResponse = new ErrorResponse();
+//		errorResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+//		errorResponse.setException(exception.getClass().getSimpleName());
+//		errorResponse.setFieldErrors(fieldErrors);
+//		errorResponse.setMessage(exception.getMessage());
+//		errorResponse.setResponseTime(LocalDateTime.now());
+//		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+//	}
 
 	@ExceptionHandler(Throwable.class)
 	public ResponseEntity<ErrorResponse> handleThrowable(final Throwable exception) {

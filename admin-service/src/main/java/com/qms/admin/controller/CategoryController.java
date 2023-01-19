@@ -1,9 +1,11 @@
 package com.qms.admin.controller;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,35 +16,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qms.admin.dto.CategoryDTO;
+import com.qms.admin.constant.AdminMessageConstant;
+import com.qms.admin.constant.AdminURIConstant;
+import com.qms.admin.dto.request.CategoryRequest;
+import com.qms.admin.dto.response.CategoryResponse;
 import com.qms.admin.service.CategoryService;
+import com.qms.common.dto.response.ApiResponse;
 
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping(AdminURIConstant.BASE_ADMIN_URL)
 public class CategoryController {
 
 	@Autowired
 	private CategoryService categoryService;
 
-	@PostMapping("/category")
-	public ResponseEntity<String> addCategory(@RequestBody final CategoryDTO categoryDTO) {
-		Long id = categoryService.addCategory(categoryDTO);
-//		URI location = new URI("/category/"+ id);
-		URI location = URI.create("/api/v1/admin/category/" + id);
-		return ResponseEntity.created(location).body("Category created successfully.");
+	@PostMapping(AdminURIConstant.CATEGORY_URL)
+	public ResponseEntity<ApiResponse> addCategory(@RequestBody final CategoryRequest categoryRequest) {
+
+		CategoryResponse response = categoryService.addCategory(categoryRequest);
+		URI location = URI.create(
+				AdminURIConstant.BASE_ADMIN_URL + AdminURIConstant.CATEGORY_URL + "/" + response.getData().getId());
+
+		return ResponseEntity.created(location).body(response);
 	}
 
-	@PutMapping("/category/{categoryId}") // TODO: can use uuid in here?
-	public ResponseEntity<String> updateCategory(@PathVariable final String categoryId,
-			@RequestBody final CategoryDTO categoryDTO) {
-		categoryService.updateCategory(categoryId, categoryDTO);
-		return ResponseEntity.ok("Category updated successfully.");
+	@PutMapping(AdminURIConstant.CATEGORY_URL + AdminURIConstant.CATEGORY_PATH_VARIABLE)
+	public ResponseEntity<ApiResponse> updateCategory(@PathVariable final String categoryId,
+			@RequestBody final CategoryRequest categoryDTO) {
+
+		return ResponseEntity.ok(categoryService.updateCategory(categoryId, categoryDTO));
 	}
 
 	@DeleteMapping("/category/{categoryId}")
-	public ResponseEntity<String> deleteCategory(@PathVariable final String categoryId) {
+	public ResponseEntity<ApiResponse> deleteCategory(@PathVariable final String categoryId) {
 		categoryService.deleteCategory(categoryId);
-		return ResponseEntity.ok("Category deleted Successfully.");
+		return ResponseEntity.ok(new ApiResponse().setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.CATGEORY_DELETED).setResponseTime(LocalDateTime.now()));
 	}
 
 	@GetMapping(value = { "/category/{categoryId}", "/category" })

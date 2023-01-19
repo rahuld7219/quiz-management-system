@@ -1,9 +1,14 @@
 package com.qms.common.dto;
 
-public interface RankDetail {
+import java.io.Serializable;
+
+public interface RankDetail extends Serializable {
 	Long getRank();
+
 	String getName();
+
 	String getEmail();
+
 	Long getTotalScore();
 }
 

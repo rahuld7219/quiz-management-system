@@ -5,6 +5,8 @@ import java.time.OffsetDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,6 +18,8 @@ import javax.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.qms.common.constant.Deleted;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -41,7 +45,8 @@ public class QuizQuestion {
 	private Question question;
 
 	@Column(name = "deleted", columnDefinition = "varchar(1) default 'N'")
-	private String deleted = "N"; // TODO: use enum, TODO: why default "N" not working
+	@Enumerated(EnumType.STRING)
+	private Deleted deleted = Deleted.N; // TODO: why default "N" not working
 
 	@CreatedDate
 	@Column(name = "created_on", nullable = false, updatable = false)

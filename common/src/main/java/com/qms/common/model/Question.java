@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,6 +19,8 @@ import javax.persistence.Table;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.qms.common.constant.Deleted;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -61,7 +65,8 @@ public class Question {
 	private int marks;
 
 	@Column(name = "deleted", columnDefinition = "varchar(1) default 'N'")
-	private String deleted = "N"; // TODO: use ENUM, why default not inserting??
+	@Enumerated(EnumType.STRING)
+	private Deleted deleted = Deleted.N; // why default not inserting??
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "question") // TODO: what could be the cascade?
 	private Set<QuizQuestion> quizQuestions;

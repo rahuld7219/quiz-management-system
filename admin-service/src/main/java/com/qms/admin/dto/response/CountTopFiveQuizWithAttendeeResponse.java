@@ -2,6 +2,7 @@ package com.qms.admin.dto.response;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import com.qms.common.dto.response.ApiResponse;
 
@@ -13,9 +14,9 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class LinkQuizQuestionResponse extends ApiResponse {
+public class CountTopFiveQuizWithAttendeeResponse extends ApiResponse {
 
-	private static final long serialVersionUID = -4960838982395370767L;
+	private static final long serialVersionUID = -5915485059904544763L;
 
 	private Data data;
 
@@ -26,8 +27,6 @@ public class LinkQuizQuestionResponse extends ApiResponse {
 
 		private static final long serialVersionUID = -2186121898805574872L;
 
-		private List<Long> linkedQuestionIds;
-		private List<Long> alreadyLinkedQuestionIds;
-		private List<Long> notExistingQuestionIds;
+		private List<Map<String, Object>> topFiveQuizWithAttendeeCount;
 	}
 }
