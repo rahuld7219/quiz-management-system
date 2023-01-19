@@ -1,4 +1,4 @@
-package com.qms.admin.exception.custom;
+package com.qms.common.exception.custom;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

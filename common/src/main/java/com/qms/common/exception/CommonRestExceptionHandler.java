@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.qms.common.dto.response.ErrorResponse;
 import com.qms.common.dto.response.FieldError;
+import com.qms.common.exception.custom.QuizNotExistException;
 
 @RestControllerAdvice
 public class CommonRestExceptionHandler {
@@ -34,4 +35,16 @@ public class CommonRestExceptionHandler {
 		errorResponse.setResponseTime(LocalDateTime.now());
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
+	
+	@ExceptionHandler(QuizNotExistException.class)
+	public ResponseEntity<ErrorResponse> handleQuizNotExistException(final QuizNotExistException exception) {
+		exception.printStackTrace();
+		final ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setHttpStatus(HttpStatus.NOT_FOUND);
+		errorResponse.setException(exception.getClass().getSimpleName());
+		errorResponse.setMessage(exception.getMessage());
+		errorResponse.setResponseTime(LocalDateTime.now());
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	}
+
 }

@@ -1,34 +1,34 @@
 package com.qms.attendee.service;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 
-import com.qms.attendee.dto.QuizQuestionDTO;
-import com.qms.attendee.dto.QuizResult;
 import com.qms.attendee.dto.request.QuizSubmission;
-import com.qms.attendee.dto.response.Dashboard;
-import com.qms.attendee.dto.response.Leaderboard;
+import com.qms.attendee.dto.response.CountAttendedQuizByCategoryResponse;
+import com.qms.attendee.dto.response.CountAttendedQuizResponse;
+import com.qms.attendee.dto.response.CountQuizByCategoryResponse;
+import com.qms.attendee.dto.response.DashboardResponse;
+import com.qms.attendee.dto.response.GetQuizQuestionsReponse;
+import com.qms.attendee.dto.response.LeaderboardResponse;
+import com.qms.attendee.dto.response.ShowResultResponse;
 
 public interface AttendeeService {
 
-	Long countAttendedQuiz();
+	CountAttendedQuizResponse countAttendedQuiz();
 
-	List<Map<String, Object>> countQuizByCategory();
+	CountQuizByCategoryResponse countQuizByCategory();
 
-	List<Map<String, Object>> countAttendedQuizByCategory();
+	CountAttendedQuizByCategoryResponse countAttendedQuizByCategory();
 
-	List<QuizQuestionDTO> getQuizQuestions(final String quizId);
+	GetQuizQuestionsReponse getQuizQuestions(final Long quizId);
 
-	Dashboard dashboard();
+	DashboardResponse dashboard();
+
+	LeaderboardResponse leaderboard(final Long quizId);
 
 	void submitQuiz(final QuizSubmission quizSubmission);
 
-	QuizResult showResult(final String quizId);
+	ShowResultResponse showResult(final Long quizId);
 
-	Leaderboard leaderboard(final String quizId);
-
-	Object exportPDF(final String quizId, final HttpServletResponse response);
+	Object exportPDF(final Long quizId, final HttpServletResponse response);
 
 }

@@ -1,6 +1,7 @@
 package com.qms.attendee.service.impl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,21 +10,36 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.qms.attendee.constant.AttendeeMessageConstant;
+import com.qms.attendee.dto.Dashboard;
+import com.qms.attendee.dto.Leaderboard;
 import com.qms.attendee.dto.QuestionAnswer;
 import com.qms.attendee.dto.QuizQuestionDTO;
 import com.qms.attendee.dto.QuizResult;
 import com.qms.attendee.dto.ResultDetail;
 import com.qms.attendee.dto.request.QuizSubmission;
-import com.qms.attendee.dto.response.Dashboard;
-import com.qms.attendee.dto.response.Leaderboard;
+import com.qms.attendee.dto.response.CountAttendedQuizByCategoryResponse;
+import com.qms.attendee.dto.response.CountAttendedQuizResponse;
+import com.qms.attendee.dto.response.CountQuizByCategoryResponse;
+import com.qms.attendee.dto.response.DashboardResponse;
+import com.qms.attendee.dto.response.GetQuizQuestionsReponse;
+import com.qms.attendee.dto.response.LeaderboardResponse;
+import com.qms.attendee.dto.response.ShowResultResponse;
 import com.qms.attendee.service.AttendeeService;
 import com.qms.attendee.service.QuizService;
 import com.qms.attendee.util.AttendeeRedisCacheUtil;
 import com.qms.attendee.util.PDFGenerator;
+import com.qms.common.constant.CommonMessageConstant;
+import com.qms.common.constant.Deleted;
 import com.qms.common.dto.QuizQuestionQuestion;
 import com.qms.common.dto.RankDetail;
+import com.qms.common.exception.custom.QuizNotExistException;
 import com.qms.common.model.Question;
 import com.qms.common.model.Quiz;
 import com.qms.common.model.Score;
@@ -58,34 +74,49 @@ public class AttendeeServiceImpl implements AttendeeService {
 	private UserRepository userRepository;
 
 	@Override
-	public Long countAttendedQuiz() {
-//		TODO: extract this in a method
-//		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-//				.getUsername();
-//		Long userId = userRepository.getIdByEmail(email);
+	public CountAttendedQuizResponse countAttendedQuiz() {
 
-		return scoreRepository.countDistinctQuizByUserId(2L); // TODO: pass userId extracted from spring security
-																// context
+		final String email = extractUserFromSecurityContext();
+
+		final Long userId = userRepository.getIdByEmailId(email);
+
+		CountAttendedQuizResponse response = new CountAttendedQuizResponse();
+		response.setData(response.new Data(email, scoreRepository.countDistinctQuizByUserId(userId)))
+				.setHttpStatus(HttpStatus.OK).setMessage(AttendeeMessageConstant.ATTENDED_QUIZ_COUNTED)
+				.setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public List<Map<String, Object>> countQuizByCategory() {
-		return quizRepository.countQuizByCategory();
+	public CountQuizByCategoryResponse countQuizByCategory() {
+
+		CountQuizByCategoryResponse response = new CountQuizByCategoryResponse();
+		response.setData(response.new Data(quizRepository.countQuizByCategory())).setHttpStatus(HttpStatus.OK)
+				.setMessage(AttendeeMessageConstant.QUIZ_BY_CATEGORY_COUNTED).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public List<Map<String, Object>> countAttendedQuizByCategory() {
-		return quizRepository.countAttendedQuizByCategory();
+	public CountAttendedQuizByCategoryResponse countAttendedQuizByCategory() {
+		final String email = extractUserFromSecurityContext();
+
+		final Long userId = userRepository.getIdByEmailId(email);
+
+		CountAttendedQuizByCategoryResponse response = new CountAttendedQuizByCategoryResponse();
+		response.setData(response.new Data(quizRepository.countAttendedQuizByCategory(userId)))
+				.setHttpStatus(HttpStatus.OK).setMessage(AttendeeMessageConstant.ATTENDED_QUIZ_BY_CATEGORY_COUNTED)
+				.setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public List<QuizQuestionDTO> getQuizQuestions(final String quizId) {
+	public GetQuizQuestionsReponse getQuizQuestions(final Long quizId) {
 
 		List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository // TODO: handle what if quiz id not
 																					// exist ?
-				.getQuestionByQuizIdAndDeleted(Long.valueOf(quizId), "N"); // TODO: use enum
+				.getQuestionByQuizIdAndDeleted(quizId, Deleted.N);
 
-		return quizQuestionQuestions.stream()
+		List<QuizQuestionDTO> quizQuestions = quizQuestionQuestions.stream()
 				.map(quizQuestionQuestion -> mapToQuizQuestionDTO(quizQuestionQuestion.getQuestion()))
 				.collect(Collectors.toList());
 
@@ -95,6 +126,11 @@ public class AttendeeServiceImpl implements AttendeeService {
 		// Can also implement by query or by first get
 		// question ids for given quiz id from quizQuestion repo then get question
 		// details from question repo
+
+		GetQuizQuestionsReponse response = new GetQuizQuestionsReponse();
+		response.setData(response.new Data(quizQuestions)).setHttpStatus(HttpStatus.OK)
+				.setMessage(AttendeeMessageConstant.QUIZ_QUESTIONS_GOT).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	private QuizQuestionDTO mapToQuizQuestionDTO(Question question) {
@@ -104,46 +140,47 @@ public class AttendeeServiceImpl implements AttendeeService {
 	}
 
 	@Override
-	public Dashboard dashboard() {
-		return new Dashboard().setTotalQuizCount(this.quiService.getQuizCount())
-				.setAttendedQuizCount(this.countAttendedQuiz()).setQuizCountByCategory(this.countQuizByCategory())
-				.setAttendedQuizCountByCategory(this.countAttendedQuizByCategory());
+	public DashboardResponse dashboard() {
+		Dashboard dashboard = new Dashboard().setTotalQuizCount(this.quiService.getQuizCount())
+				.setAttendedQuizCount(this.countAttendedQuiz().getData().getAttendedQuizCount())
+				.setQuizCountByCategory(this.countQuizByCategory().getData().getQuizCountByCategory())
+				.setAttendedQuizCountByCategory(
+						this.countAttendedQuizByCategory().getData().getAttendedQuizCountByCategory());
+
+		DashboardResponse response = new DashboardResponse();
+		response.setData(response.new Data(dashboard)).setHttpStatus(HttpStatus.OK)
+				.setMessage(AttendeeMessageConstant.DASHBOARD_SUCCESS).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public Leaderboard leaderboard(final String quizId) {
-//		TODO: extract this in a method
-//		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-//				.getUsername();
+	public LeaderboardResponse leaderboard(final Long quizId) {
 
-		final List<RankDetail> rankDetails = scoreRepository.getTopScorers(Long.valueOf(quizId), "rd2@gmail.com"); // TODO:
-																													// how
-																													// to
-																													// compare
-																													// equals
-																													// ignore
-																													// case
-																													// in
-																													// mysql
-																													// for
-																													// email
-																													// id
+		final String email = this.extractUserFromSecurityContext();
+
+		// TODO: how to compare equals ignore case in mysql for email id
+		final List<RankDetail> rankDetails = scoreRepository.getTopScorers(quizId, email);
+
 		final Leaderboard leaderboard = new Leaderboard();
 		leaderboard.setRankList(rankDetails);
 
-//		for (RankDetail rankDetail : rankDetails) {
-//			if (rankDetail.getEmail().equalsIgnoreCase("rd2@gmail.com")) { // TODO: pass userId extracted from spring security
-//				leaderboard.setYourRank(rankDetail);
-//				break;
-//			}
-//		}
+		LeaderboardResponse response = new LeaderboardResponse();
+		response.setData(response.new Data(leaderboard)).setHttpStatus(HttpStatus.OK)
+				.setMessage(AttendeeMessageConstant.LEADERBOARD_SUCCESS).setResponseTime(LocalDateTime.now());
+		return response;
 
-		return leaderboard;
-
-//		List<Map<String, Object>> topScorers = scoreRepository.getTopScorers(Long.valueOf(quizId));
-//
-//		return createLeaderboard(topScorers, "rd@gmail.com");
 	}
+
+//	for (RankDetail rankDetail : rankDetails) {
+//	if (rankDetail.getEmail().equalsIgnoreCase("rd2@gmail.com")) { // TODO: pass userId extracted from spring security
+//		leaderboard.setYourRank(rankDetail);
+//		break;
+//	}
+//}
+
+//	List<Map<String, Object>> topScorers = scoreRepository.getTopScorers(Long.valueOf(quizId));
+//
+//	return createLeaderboard(topScorers, "rd@gmail.com");
 
 //	private Leaderboard createLeaderboard(List<Map<String, Object>> topScorers, String email) {
 //
@@ -167,118 +204,51 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	@Override
 	public void submitQuiz(final QuizSubmission quizSubmission) {
-//		TODO: extract this in a method
-//		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-//				.getUsername();
 
-		redisCacheUtil.cacheSubmission("rd2@gmail.com_" + quizSubmission.getQuizId(), quizSubmission); // TODO: pass
-																										// userId
-																										// extracted
-																										// from spring
-																										// security
-																										// context
+		final String email = this.extractUserFromSecurityContext();
+
+		redisCacheUtil.cacheSubmission(email + "_" + quizSubmission.getQuizId(), quizSubmission);
 
 	}
 
 	// TODO: Optimize this and its dependent methods
 	@Override
-	public QuizResult showResult(final String quizId) {
-//		TODO: extract this in a method
-//		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-//				.getUsername();
+	public ShowResultResponse showResult(final Long quizId) {
 
-		User user = userRepository.findByEmailId("rd2@gmail.com") // TODO: pass userId extracted from spring security
-																	// context
-				.orElseThrow(() -> new RuntimeException("User not exist.")); // TODO: pass from security context and use
-																				// custom exception
+		final String email = this.extractUserFromSecurityContext();
 
-		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
-				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: use custom exception
+		User user = userRepository.findByEmailId(email)
+				.orElseThrow(() -> new UsernameNotFoundException(CommonMessageConstant.USER_NOT_FOUND + email));
 
-		QuizResult quizResult = getQuizResult("rd2@gmail.com", quizId); // TODO: pass userId extracted from spring
-																		// security context
+		Quiz quiz = quizRepository.findById(quizId)
+				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));
+
+		QuizResult quizResult = getQuizResult(email, quizId);
 
 		// TODO: how to optimize this saving by preventing fetching of user and quiz?
 		// can change mapping by using ids instead of classes or can we write insert
 		// query in score repo directly.
-		scoreRepository.save(new Score().setScoreValue(quizResult.getTotalScore()).setQuiz(quiz).setUser(user)); // TODO:
-																													// what
-																													// if
-																													// show
-																													// result
-																													// method
-																													// called
-																													// multiple
-																													// times,
-																													// it
-																													// will
-																													// add
-																													// duplicate
-																													// entries?
-																													// handle
-																													// this
-																													// case...can
-																													// we
-																													// set
-																													// to
-																													// run
-																													// this
-																													// line
-																													// only
-																													// once
-																													// for
-																													// each
-																													// user
-																													// each
-																													// quiz
-																													// id
-																													// and
-																													// after
-																													// only
-																													// once
-																													// sumitQuiz()
-																													// has
-																													// been
-																													// called
-																													// again
-																													// for
-																													// that
-																													// user
-																													// and
-																													// quiz
-																													// id??
-																													// Or
-																													// should
-																													// we
-																													// save
-																													// only
-																													// top
-																													// score
-																													// OR
-																													// should
-																													// we
-																													// don't
-																													// save
-																													// if
-																													// score
-																													// is
-																													// same
-																													// for
-																													// that
-																													// quiz
+		// TODO: what if show result method called multiple times, it will add duplicate
+		// entries? handle this case...can we set to run this line only once for each
+		// user each quiz id and after only once sumitQuiz() has been called again for
+		// that user and quiz id?? Or should we save only top score OR should we don't
+		// save if score is same for that quiz
+		scoreRepository.save(new Score().setScoreValue(quizResult.getTotalScore()).setQuiz(quiz).setUser(user));
 
-		return quizResult;
+		ShowResultResponse response = new ShowResultResponse();
+		response.setData(response.new Data(quizResult)).setHttpStatus(HttpStatus.OK)
+				.setMessage(AttendeeMessageConstant.SHOW_RESULT_SUCCESS).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
-	private QuizResult getQuizResult(String email, String quizId) {
+	private QuizResult getQuizResult(String email, Long quizId) {
 
-		QuizSubmission quizSubmission = redisCacheUtil.getCachedSubmission(email + "_" + quizId); // TODO: handle
-																									// exception if
-																									// key not found
+		// TODO: handle exception if key not found
+		QuizSubmission quizSubmission = redisCacheUtil.getCachedSubmission(email + "_" + quizId);
 
-		List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository // TODO: handle what if quiz id not
-																					// exist ?
-				.getQuestionByQuizIdAndDeleted(Long.valueOf(quizId), "N"); // TODO: use enum
+		// TODO: handle what if quiz id not exist ?
+		List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository.getQuestionByQuizIdAndDeleted(quizId,
+				Deleted.N);
 
 		final Map<Long, Question> questionsMap = createQuestionsMap(quizQuestionQuestions);
 
@@ -291,12 +261,8 @@ public class AttendeeServiceImpl implements AttendeeService {
 	 * @param questionsMap
 	 * @return
 	 */
-	private QuizResult computeQuizResult(QuizSubmission quizSubmission, final Map<Long, Question> questionsMap) { // TODO:
-																													// think
-																													// of
-																													// optimizing
-																													// it
-																													// more
+	// TODO: think of optimizing it more
+	private QuizResult computeQuizResult(QuizSubmission quizSubmission, final Map<Long, Question> questionsMap) {
 
 		Long correctAnswersCount = 0L;
 		Long wrongAnswersCount = 0L;
@@ -314,9 +280,9 @@ public class AttendeeServiceImpl implements AttendeeService {
 			details.add(new ResultDetail().setQuestionDetail(question.getQuestionDetail())
 					.setOptionA(question.getOptionA()).setOptionB(question.getOptionB())
 					.setOptionC(question.getOptionC()).setOptionD(question.getOptionD())
-					.setSubmittedAnswer(questionAnswer.getSelectedOption().toUpperCase()) // TODO: also show option's
-																							// value
-					.setCorrectAnswer(question.getRightOption())); // TODO: also show option's value
+					.setSubmittedAnswer(questionAnswer.getSelectedOption().toUpperCase())
+					.setCorrectAnswer(question.getRightOption()));
+			// TODO: can also show option's value
 		}
 
 		return new QuizResult().setExamDate(LocalDate.now()).setCorrectAnswersCount(correctAnswersCount)
@@ -329,12 +295,8 @@ public class AttendeeServiceImpl implements AttendeeService {
 	 * @param quizQuestionQuestions
 	 * @return
 	 */
-	private Map<Long, Question> createQuestionsMap(List<QuizQuestionQuestion> quizQuestionQuestions) { // TODO: make it
-																										// generic to
-																										// create map
-																										// with id, use
-																										// generic
-																										// concepts
+	// TODO: make it generic to create map with id, use generic concepts
+	private Map<Long, Question> createQuestionsMap(List<QuizQuestionQuestion> quizQuestionQuestions) {
 		return quizQuestionQuestions.stream().collect(Collectors.toMap(
 				quizQuestionQuestion -> quizQuestionQuestion.getQuestion().getId(), QuizQuestionQuestion::getQuestion));
 
@@ -348,25 +310,25 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	// TODO: Optimize this and its dependent methods
 	@Override
-	public Object exportPDF(final String quizId, final HttpServletResponse response) {
-//		TODO: extract this in a method
-//		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-//				.getUsername();
-		String email = "rd2@gmail.com"; // TODO: pass userId extracted from spring security context
+	public Object exportPDF(final Long quizId, final HttpServletResponse response) {
 
-		User user = userRepository.findByEmailId(email).orElseThrow(() -> new RuntimeException("User not exist.")); // TODO:
-																													// custom
-																													// exception
+		final String email = this.extractUserFromSecurityContext();
 
-		Quiz quiz = quizRepository.findById(Long.valueOf(quizId))
-				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: use custom exception
+		User user = userRepository.findByEmailId(email)
+				.orElseThrow(() -> new UsernameNotFoundException(CommonMessageConstant.USER_NOT_FOUND + email));
 
-		QuizResult quizResult = getQuizResult(email, quizId); // TODO: pass userId extracted from spring security
-																// context
+		Quiz quiz = quizRepository.findById(quizId)
+				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));
+
+		QuizResult quizResult = getQuizResult(email, quizId);
 
 		new PDFGenerator(quizResult, quiz.getTitle(), user.getFirstName() + " " + user.getLastName(), email, response)
 				.generatePdfReport();
 
 		return null;
+	}
+
+	private String extractUserFromSecurityContext() {
+		return ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
 	}
 }

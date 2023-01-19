@@ -17,10 +17,11 @@ import com.qms.admin.dto.response.QuizCountResponse;
 import com.qms.admin.dto.response.QuizResponse;
 import com.qms.admin.exception.custom.CategoryNotExistException;
 import com.qms.admin.exception.custom.QuizConstraintViolationException;
-import com.qms.admin.exception.custom.QuizNotExistException;
 import com.qms.admin.repository.CategoryRepository;
 import com.qms.admin.service.QuizService;
+import com.qms.common.constant.CommonMessageConstant;
 import com.qms.common.constant.Deleted;
+import com.qms.common.exception.custom.QuizNotExistException;
 import com.qms.common.model.Category;
 import com.qms.common.model.Quiz;
 import com.qms.common.repository.QuizQuestionRepository;
@@ -59,7 +60,7 @@ public class QuizServiceImpl implements QuizService {
 		// update quiz
 
 		Quiz quiz = quizRepository.findByIdAndDeleted(quizId, Deleted.N)
-				.orElseThrow(() -> new QuizNotExistException(AdminMessageConstant.QUIZ_NOT_EXIST));
+				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));
 
 		quizRepository.save(mapToModel(quiz, quizRequest));
 
@@ -77,7 +78,7 @@ public class QuizServiceImpl implements QuizService {
 		// else soft delete iff quiz not have been attempted
 
 		Quiz quiz = quizRepository.findByIdAndDeleted(quizId, Deleted.N)
-				.orElseThrow(() -> new QuizNotExistException(AdminMessageConstant.QUIZ_NOT_EXIST));
+				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));
 
 		if (scoreRepository.existsByQuizId(quizId)) {
 			throw new QuizConstraintViolationException(AdminMessageConstant.QUIZ_SCORE_ASSOCIATION_VIOLATION);
@@ -95,7 +96,7 @@ public class QuizServiceImpl implements QuizService {
 	@Override
 	public QuizResponse getQuiz(final Long quizId) {
 		Quiz quiz = quizRepository.findByIdAndDeleted(quizId, Deleted.N)
-				.orElseThrow(() -> new QuizNotExistException(AdminMessageConstant.QUIZ_NOT_EXIST));
+				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));
 
 		QuizResponse response = new QuizResponse();
 		response.setData(response.new Data(mapToDTO(quiz))).setHttpStatus(HttpStatus.OK)

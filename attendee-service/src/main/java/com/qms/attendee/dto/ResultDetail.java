@@ -1,5 +1,7 @@
 package com.qms.attendee.dto;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
@@ -7,7 +9,9 @@ import lombok.experimental.Accessors;
 
 @Data
 @Accessors(chain = true)
-public class ResultDetail {
+public class ResultDetail implements Serializable {
+
+	private static final long serialVersionUID = 5723443883915308724L;
 
 	private String questionDetail;
 	@JsonIgnore

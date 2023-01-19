@@ -20,12 +20,13 @@ import com.qms.admin.dto.response.CountTopFiveQuizWithAttendeeResponse;
 import com.qms.admin.dto.response.DashboardResponse;
 import com.qms.admin.dto.response.LeaderboardResponse;
 import com.qms.admin.dto.response.LinkQuizQuestionResponse;
-import com.qms.admin.exception.custom.QuizNotExistException;
 import com.qms.admin.repository.QuestionRepository;
 import com.qms.admin.service.AdminService;
 import com.qms.admin.service.QuizService;
+import com.qms.common.constant.CommonMessageConstant;
 import com.qms.common.constant.Deleted;
 import com.qms.common.constant.RoleName;
+import com.qms.common.exception.custom.QuizNotExistException;
 import com.qms.common.model.Question;
 import com.qms.common.model.Quiz;
 import com.qms.common.model.QuizQuestion;
@@ -86,7 +87,7 @@ public class AdminServiceImpl implements AdminService {
 			final LinkQuizQuestionRequest linkQuizQuestionRequest) {
 
 		Quiz quiz = quizRepository.findByIdAndDeleted(Long.valueOf(linkQuizQuestionRequest.getQuizId()), Deleted.N)
-				.orElseThrow(() -> new QuizNotExistException(AdminMessageConstant.QUIZ_NOT_EXIST));
+				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));
 
 		List<Long> existingQuestionIds = existingQuestions.stream().map(Question::getId).collect(Collectors.toList());
 

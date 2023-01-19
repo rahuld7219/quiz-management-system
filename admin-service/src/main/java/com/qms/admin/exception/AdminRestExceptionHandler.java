@@ -11,22 +11,22 @@ import com.qms.admin.exception.custom.CategoryConstraintViolationException;
 import com.qms.admin.exception.custom.CategoryNotExistException;
 import com.qms.admin.exception.custom.QuestionConstraintViolationException;
 import com.qms.admin.exception.custom.QuizConstraintViolationException;
-import com.qms.admin.exception.custom.QuizNotExistException;
 import com.qms.common.dto.response.ErrorResponse;
+import com.qms.common.exception.custom.QuizNotExistException;
 
 @RestControllerAdvice
 public class AdminRestExceptionHandler {
 
-	@ExceptionHandler(QuizNotExistException.class)
-	public ResponseEntity<ErrorResponse> handleQuizNotExistException(final QuizNotExistException exception) {
-		exception.printStackTrace();
-		final ErrorResponse errorResponse = new ErrorResponse();
-		errorResponse.setHttpStatus(HttpStatus.NOT_FOUND);
-		errorResponse.setException(exception.getClass().getSimpleName());
-		errorResponse.setMessage(exception.getMessage());
-		errorResponse.setResponseTime(LocalDateTime.now());
-		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-	}
+//	@ExceptionHandler(QuizNotExistException.class)
+//	public ResponseEntity<ErrorResponse> handleQuizNotExistException(final QuizNotExistException exception) {
+//		exception.printStackTrace();
+//		final ErrorResponse errorResponse = new ErrorResponse();
+//		errorResponse.setHttpStatus(HttpStatus.NOT_FOUND);
+//		errorResponse.setException(exception.getClass().getSimpleName());
+//		errorResponse.setMessage(exception.getMessage());
+//		errorResponse.setResponseTime(LocalDateTime.now());
+//		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+//	}
 
 	@ExceptionHandler(CategoryNotExistException.class)
 	public ResponseEntity<ErrorResponse> handleCategoryNotExistException(final CategoryNotExistException exception) {

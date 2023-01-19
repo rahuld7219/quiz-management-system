@@ -35,9 +35,9 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 														// deleted
 
 	@Query(value = "select c.name, count(DISTINCT q.id) attemptedQuizzes " + "from category c, quiz q, user_score s "
-			+ "where c.id = q.category_id AND q.id = s.quiz_id AND s.user_id = 2 "
+			+ "where c.id = q.category_id AND q.id = s.quiz_id AND s.user_id = ?1 "
 			+ "group by c.name", nativeQuery = true)
-	List<Map<String, Object>> countAttendedQuizByCategory();
+	List<Map<String, Object>> countAttendedQuizByCategory(Long userId);
 
 	String getTitleById(Long quizId);
 

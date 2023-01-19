@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.qms.attendee.service.QuizService;
+import com.qms.common.constant.Deleted;
 import com.qms.common.repository.QuizRepository;
 
 @Service
@@ -14,6 +15,6 @@ public class QuizServiceImpl implements QuizService {
 
 	@Override
 	public Long getQuizCount() {
-		return quizRepository.countByDeleted("N");
+		return quizRepository.countByDeleted(Deleted.N);
 	}
 }

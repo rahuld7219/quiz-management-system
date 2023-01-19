@@ -1,5 +1,6 @@
-package com.qms.attendee.dto.response;
+package com.qms.attendee.dto;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,9 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class Dashboard {
+public class Dashboard implements Serializable {
+
+	private static final long serialVersionUID = 1582266795055224625L;
 
 	private Long totalQuizCount;
 	private Long attendedQuizCount;
