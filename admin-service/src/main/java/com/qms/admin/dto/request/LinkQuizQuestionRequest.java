@@ -17,7 +17,7 @@ public class LinkQuizQuestionRequest implements Serializable {
 	private static final long serialVersionUID = -1453833192874014372L;
 
 	@NotEmpty
-	@Size(max = 10)
+	@Size(min = 1, max = 10)
 	private List<Long> questionsIds;
 
 	@NotNull
