@@ -2,6 +2,8 @@ package com.qms.auth.dto.response;
 
 import java.io.Serializable;
 
+import com.qms.common.dto.response.ApiResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

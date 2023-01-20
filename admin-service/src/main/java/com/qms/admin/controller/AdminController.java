@@ -1,8 +1,5 @@
 package com.qms.admin.controller;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.qms.admin.dto.Dashboard;
-import com.qms.admin.dto.Leaderboard;
-import com.qms.admin.dto.LinkQuizQuestionDTO;
+import com.qms.admin.constant.AdminURIConstant;
+import com.qms.admin.dto.request.LinkQuizQuestionRequest;
 import com.qms.admin.service.AdminService;
+import com.qms.common.dto.response.ApiResponse;
 
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping(AdminURIConstant.BASE_ADMIN_URL)
 public class AdminController {
 
 	@Autowired
@@ -30,31 +27,36 @@ public class AdminController {
 	 * 
 	 * @return
 	 */
-	@PostMapping("/linkQuizQuestion")
-	public ResponseEntity<String> linkQuestionToQuiz(
-			@Valid @RequestBody final LinkQuizQuestionDTO linkQuizQuestionDTO) { // TODO: link multiple question to quiz
-		adminService.linkQuestionToQuiz(linkQuizQuestionDTO);
-		return ResponseEntity.ok("Question added successfully to the quiz");
+	@PostMapping(AdminURIConstant.LINK_QUIZ_QUESTION)
+	public ResponseEntity<ApiResponse> linkQuestionToQuiz(
+			@Valid @RequestBody final LinkQuizQuestionRequest linkQuizQuestion) {
+		ApiResponse response = adminService.linkQuestionToQuiz(linkQuizQuestion);
+		return new ResponseEntity<>(response, response.getHttpStatus());
 	}
 
-	@GetMapping("/countAttendees")
-	public ResponseEntity<Long> countAttendees() {
-		return ResponseEntity.ok(adminService.countAttendess());
+	@GetMapping(AdminURIConstant.COUNT_ATTENDEE)
+	public ResponseEntity<ApiResponse> countAttendees() {
+		return ResponseEntity.ok(adminService.countAttendees());
 	}
 
-	@GetMapping("/countAttendeesAttemptedQuiz")
-	public ResponseEntity<Long> countAttendeesAttemptedQuiz() {
+	@GetMapping(AdminURIConstant.COUNT_ATTENDEE_ATTEMPTED_QUIZ)
+	public ResponseEntity<ApiResponse> countAttendeesAttemptedQuiz() {
 		return ResponseEntity.ok(adminService.countAttendeesAttemptedQuiz());
 	}
 
-	@GetMapping("/topFiveQuiz")
-	public ResponseEntity<List<Map<String, Object>>> countTopFiveQuizWithAttendee() {
+	@GetMapping(AdminURIConstant.TOP_5_QUIZ)
+	public ResponseEntity<ApiResponse> countTopFiveQuizWithAttendee() {
 		return ResponseEntity.ok(adminService.countTopFiveQuizWithAttendee());
 	}
 
-	@GetMapping("/dashboard")
-	public ResponseEntity<Dashboard> dashboard() {
+	@GetMapping(AdminURIConstant.DASHBOARD)
+	public ResponseEntity<ApiResponse> dashboard() {
 		return ResponseEntity.ok(adminService.dashboard());
+	}
+
+	@GetMapping(AdminURIConstant.LEADERBOARD + "/{quizId}")
+	public ResponseEntity<ApiResponse> leaderboard(@PathVariable final Long quizId) {
+		return ResponseEntity.ok(adminService.leaderboard(quizId));
 	}
 
 //	@GetMapping("/leaderboard")
@@ -62,8 +64,4 @@ public class AdminController {
 //		return ResponseEntity.ok(adminService.leaderboard());
 //	}
 
-	@GetMapping("/leaderboard/{quizId}")
-	public ResponseEntity<Leaderboard> leaderboard(@PathVariable final String quizId) {
-		return ResponseEntity.ok(adminService.leaderboard(quizId));
-	}
 }

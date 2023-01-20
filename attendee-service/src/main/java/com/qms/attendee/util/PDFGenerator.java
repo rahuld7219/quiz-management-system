@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -29,6 +30,8 @@ public class PDFGenerator {
 	private static Font COURIER_SMALL = new Font(Font.FontFamily.COURIER, 14, Font.BOLD);
 	private static Font COURIER_VERY_SMALL = new Font(Font.FontFamily.COURIER, 12, Font.NORMAL);
 	private static Font COURIER_FOOTER = new Font(Font.FontFamily.COURIER, 12, Font.BOLD);
+	private static Font COURIER_FOOTER_RED = new Font(Font.FontFamily.COURIER, 12, Font.BOLD, BaseColor.RED);
+	private static Font COURIER_FOOTER_GREEN = new Font(Font.FontFamily.COURIER, 12, Font.BOLD, BaseColor.GREEN);
 
 //	@Value("${pdfDir}")
 	private static final String pdfDir = "/home/ranosys/Desktop/"; // TODO: extract to constant file
@@ -131,75 +134,18 @@ public class PDFGenerator {
 //		font.setColor(CMYKColor.WHITE);
 
 		// TODO: extract all literals to constant file
-		final List<String> summaryContent = new ArrayList();
+
+		final List<String> summaryContent = new ArrayList<>();
 		summaryContent.add("Name: " + this.attendeeName.toUpperCase());
 		summaryContent.add("Right Answers: " + this.quizResult.getCorrectAnswersCount());
 		summaryContent.add("Email: " + this.attendeeEmail.toUpperCase());
 		summaryContent.add("Wrong Answers: " + this.quizResult.getWrongAnswersCount());
+		// TODO: extract to date util
 		summaryContent
-				.add("Exam Date: " + this.quizResult.getExamDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))); // TODO:
-																														// extract
-																														// to
-																														// date
-																														// util
-																														// and
-																														// extract
-																														// string
-																														// to
-																														// constant
-																														// file
-		summaryContent.add("Score: " + this.quizResult.getTotalScore());
+				.add("Exam Date: " + this.quizResult.getExamDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
+		summaryContent.add("Your score: " + this.quizResult.getTotalScore());
 
 		addDataToSummaryTable(table, summaryContent);
-
-//		PdfPCell cell1 = new PdfPCell(new Phrase("Name: Rahul", COURIER_MEDIUM)); // TODO: make dynamic
-//		cell1.setHorizontalAlignment(Element.ALIGN_LEFT);
-//		cell1.setPaddingTop(5);
-//		cell1.setPaddingRight(5);
-//		cell1.setPaddingBottom(5);
-//		cell1.setPaddingLeft(5);
-//
-//		PdfPCell cell2 = new PdfPCell(new Phrase("Right Answers: 5", COURIER_MEDIUM)); // TODO: make dynamic
-//		cell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
-//		cell2.setPaddingTop(5);
-//		cell2.setPaddingRight(5);
-//		cell2.setPaddingBottom(5);
-//		cell2.setPaddingLeft(5);
-//
-//		PdfPCell cell3 = new PdfPCell(new Phrase("Email: rd@gmail.com", COURIER_MEDIUM)); // TODO: make dynamic
-//		cell3.setHorizontalAlignment(Element.ALIGN_LEFT);
-//		cell3.setPaddingTop(5);
-//		cell3.setPaddingRight(5);
-//		cell3.setPaddingBottom(5);
-//		cell3.setPaddingLeft(5);
-//
-//		PdfPCell cell4 = new PdfPCell(new Phrase("Wrong Answers: 3", COURIER_MEDIUM)); // TODO: make dynamic
-//		cell4.setHorizontalAlignment(Element.ALIGN_RIGHT);
-//		cell4.setPaddingTop(5);
-//		cell4.setPaddingRight(5);
-//		cell4.setPaddingBottom(5);
-//		cell4.setPaddingLeft(5);
-//
-//		PdfPCell cell5 = new PdfPCell(new Phrase("Exam date: 16 Jan 2023", COURIER_MEDIUM)); // TODO: make dynamic
-//		cell5.setHorizontalAlignment(Element.ALIGN_LEFT);
-//		cell5.setPaddingTop(5);
-//		cell5.setPaddingRight(5);
-//		cell5.setPaddingBottom(5);
-//		cell5.setPaddingLeft(5);
-//
-//		PdfPCell cell6 = new PdfPCell(new Phrase("Score: 70", COURIER_MEDIUM)); // TODO: make dynamic
-//		cell6.setHorizontalAlignment(Element.ALIGN_RIGHT);
-//		cell6.setPaddingTop(5);
-//		cell6.setPaddingRight(5);
-//		cell6.setPaddingBottom(5);
-//		cell6.setPaddingLeft(5);
-//
-//		table.addCell(cell1);
-//		table.addCell(cell2);
-//		table.addCell(cell3);
-//		table.addCell(cell4);
-//		table.addCell(cell5);
-//		table.addCell(cell6);
 
 		document.add(table);
 	}
@@ -251,28 +197,7 @@ public class PDFGenerator {
 			addQuestionReport(p, resultDetail, questionNumber);
 			leaveEmptyLine(p, 1);
 		}
-//
-//		Paragraph p1 = new Paragraph(
-//				"Q.1 For class inheritance which keyword do we use in Java? Q.1 For class inheritance which keyword do we use in Java? Q.1 For class inheritance which keyword do we use in Java?",
-//				COURIER_SMALL);
-//		p1.setAlignment(Element.ALIGN_LEFT);
-//
-//		Paragraph p2 = new Paragraph("(A) extend", COURIER_VERY_SMALL);
-//		Paragraph p3 = new Paragraph("(B) extends", COURIER_VERY_SMALL);
-//		Paragraph p4 = new Paragraph("(C) implements", COURIER_VERY_SMALL);
-//		Paragraph p5 = new Paragraph("(D) implement", COURIER_VERY_SMALL);
-//		Paragraph p6 = new Paragraph("Submitted Answer: (A)", COURIER_FOOTER);
-//		Paragraph p7 = new Paragraph("Correct Answer: (B)", COURIER_FOOTER);
-//
-//		p.add(p1);
-//		leaveEmptyLine(p, 1);
-//		p.add(p2);
-//		p.add(p3);
-//		p.add(p4);
-//		p.add(p5);
-////		leaveEmptyLine(p, 1);
-//		p.add(p6);
-//		p.add(p7);
+
 		p.setKeepTogether(true);
 		document.add(p);
 
@@ -288,18 +213,23 @@ public class PDFGenerator {
 		Paragraph p4 = new Paragraph("(C) " + resultDetail.getOptionC(), COURIER_VERY_SMALL);
 		Paragraph p5 = new Paragraph("(D) " + resultDetail.getOptionD(), COURIER_VERY_SMALL);
 
-		Paragraph p6 = new Paragraph("Submitted Answer: (" + resultDetail.getSubmittedAnswer().toUpperCase() + ")",
-				COURIER_FOOTER);
+		Paragraph p6;
+		if (resultDetail.getSubmittedAnswer().equalsIgnoreCase(resultDetail.getCorrectAnswer())) {
+			p6 = new Paragraph("Submitted Answer: (" + resultDetail.getSubmittedAnswer().toUpperCase() + ")",
+					COURIER_FOOTER_GREEN);
+		} else {
+			p6 = new Paragraph("Submitted Answer: (" + resultDetail.getSubmittedAnswer().toUpperCase() + ")",
+					COURIER_FOOTER_RED);
+		}
+
 		Paragraph p7 = new Paragraph("Correct Answer: (" + resultDetail.getCorrectAnswer().toUpperCase() + ")",
 				COURIER_FOOTER);
 
 		p.add(p1);
-//		leaveEmptyLine(p, 1);
 		p.add(p2);
 		p.add(p3);
 		p.add(p4);
 		p.add(p5);
-//		leaveEmptyLine(p, 1);
 		p.add(p6);
 		p.add(p7);
 
@@ -334,28 +264,6 @@ public class PDFGenerator {
 //		table.setHeaderRows(1);
 //		getDbData(table);
 //		document.add(table);
-//	}
-
-//	private void getDbData(PdfPTable table) {
-//
-//		List<Employee> list = new ArrayList<>();
-//		list.add(new Employee(1, "Rahul", 100.0, "Java"));
-//		list.add(new Employee(1, "Rahul", 100.0, "Java"));
-//		list.add(new Employee(1, "Rahul", 100.0, "Java"));
-//		for (Employee employee : list) {
-//
-//			table.setWidthPercentage(100);
-//			table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
-//			table.getDefaultCell().setVerticalAlignment(Element.ALIGN_MIDDLE);
-//
-//			table.addCell(employee.getEmpId().toString());
-//			table.addCell(employee.getEmpName());
-//			table.addCell(employee.getEmpDept());
-//			table.addCell(currencySymbol + employee.getEmpSal().toString());
-//
-//			System.out.println(employee.getEmpName());
-//		}
-//
 //	}
 
 	private void addFooter(Document document) throws DocumentException {

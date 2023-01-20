@@ -1,18 +1,26 @@
 package com.qms.admin.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.qms.admin.dto.QuestionDTO;
-import com.qms.admin.model.Question;
+import com.qms.admin.constant.AdminMessageConstant;
+import com.qms.admin.dto.request.QuestionRequest;
+import com.qms.admin.dto.response.ListQuestionResponse;
+import com.qms.admin.dto.response.QuestionResponse;
+import com.qms.admin.exception.custom.QuestionConstraintViolationException;
+import com.qms.admin.exception.custom.QuestionNotExistException;
 import com.qms.admin.repository.QuestionRepository;
-import com.qms.admin.repository.QuizQuestionRepository;
-import com.qms.admin.repository.QuizRepository;
 import com.qms.admin.service.QuestionService;
+import com.qms.common.constant.Deleted;
+import com.qms.common.dto.QuestionDTO;
+import com.qms.common.model.Question;
+import com.qms.common.repository.QuizQuestionRepository;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -21,70 +29,86 @@ public class QuestionServiceImpl implements QuestionService {
 	private QuestionRepository questionRepository;
 
 	@Autowired
-	private QuizRepository quizRepository;
-	
-	@Autowired
-	QuizQuestionRepository quizQuestionRepository;
+	private QuizQuestionRepository quizQuestionRepository;
 
 	@Override
-	public Long addQuestion(final QuestionDTO questionDTO) {
-		return questionRepository.save(mapToModel(new Question(), questionDTO)).getId();
+	public QuestionResponse addQuestion(final QuestionRequest questionRequest) {
+
+		Question question = questionRepository.save(mapToModel(new Question(), questionRequest));
+
+		QuestionResponse response = new QuestionResponse();
+		response.setData(response.new Data(mapToDTO(question))).setHttpStatus(HttpStatus.CREATED)
+				.setMessage(AdminMessageConstant.QUESTION_CREATED).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public void updateQuestion(final String questionId, final QuestionDTO questionDTO) {
-		// check whether question exist
-		// update question
+	public QuestionResponse updateQuestion(final Long questionId, final QuestionRequest questionRequest) {
 
-		Question question = questionRepository.findById(Long.valueOf(questionId))
-				.orElseThrow(() -> new RuntimeException("Question not exist.")); // TODO: create custom exception
+		Question question = questionRepository.findById(questionId)
+				.orElseThrow(() -> new QuestionNotExistException(AdminMessageConstant.QUESTION_NOT_EXIST));
 
-		questionRepository.save(mapToModel(question, questionDTO));
+		questionRepository.save(mapToModel(question, questionRequest));
+
+		QuestionResponse response = new QuestionResponse();
+		response.setData(response.new Data(mapToDTO(question))).setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.QUESTION_UPDATED).setResponseTime(LocalDateTime.now());
+		return response;
 
 	}
 
 	@Override
-	public void deleteQuestion(final String questionId) {
-		// find Quiz by question Id -> if exist then cannot delete the Question
-		// else soft delete the Question
-		if (quizQuestionRepository.existsByQuestionId(Long.valueOf(questionId))) { //TODO: also check id deleted is "N" //TODO: use quizService, check everywhere
-			throw new RuntimeException("Cannot delete the question, it has quiz association."); // TODO: throw custom
-																								// exception
+	public void deleteQuestion(final Long questionId) {
+
+		Question question = questionRepository.findByIdAndDeleted(questionId, Deleted.N)
+				.orElseThrow(() -> new QuestionNotExistException(AdminMessageConstant.QUESTION_NOT_EXIST));
+
+		// TODO: try and catch databse exception instead of checking here, check CASCADE
+		// definition
+		if (quizQuestionRepository.existsByQuestionIdAndDeleted(questionId, Deleted.N)) {
+			throw new QuestionConstraintViolationException(AdminMessageConstant.QUESTION_QUIZ_ASSOCIATION_VIOLATION);
 		}
 
-		Question question = questionRepository.findById(Long.valueOf(questionId))
-				.orElseThrow(() -> new RuntimeException("Question not exist.")); // TODO: throw custom exception
-
-		question.setDeleted("Y"); // TODO: use enum
+		question.setDeleted(Deleted.Y);
 		questionRepository.save(question);
 
 	}
 
 	@Override
-	public QuestionDTO getQuestion(final String questionId) {
-		Question question = questionRepository.findById(Long.valueOf(questionId))
-				.orElseThrow(() -> new RuntimeException("Question not exist.")); // TODO: throw custom exception
+	public QuestionResponse getQuestion(final Long questionId) {
+		Question question = questionRepository.findByIdAndDeleted(questionId, Deleted.N)
+				.orElseThrow(() -> new QuestionNotExistException(AdminMessageConstant.QUESTION_NOT_EXIST));
 
-		return mapToDTO(question);
+		QuestionResponse response = new QuestionResponse();
+		response.setData(response.new Data(mapToDTO(question))).setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.QUESTION_GOT).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public List<QuestionDTO> getQuestionList() {
-		return questionRepository.findAll().stream().map(this::mapToDTO)
+	public ListQuestionResponse getQuestionList() {
+
+		List<QuestionDTO> questions = questionRepository.findAllByDeleted(Deleted.N).stream().map(this::mapToDTO)
 				.collect(Collectors.toCollection(ArrayList::new));
+
+		ListQuestionResponse response = new ListQuestionResponse();
+		response.setData(response.new Data(questions)).setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.QUESTION_GOT).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
-	private Question mapToModel(final Question question, final QuestionDTO questionDTO) {
-		return question.setQuestionDetail(questionDTO.getQuestionDetail()).setOptionA(questionDTO.getOptionA())
-				.setOptionB(questionDTO.getOptionB()).setOptionC(questionDTO.getOptionC())
-				.setOptionD(questionDTO.getOptionD()).setRightOption(questionDTO.getRightOption())
-				.setMarks(questionDTO.getMarks());
+	private Question mapToModel(final Question question, final QuestionRequest questionRequest) {
+		return question.setQuestionDetail(questionRequest.getQuestionDetail()).setOptionA(questionRequest.getOptionA())
+				.setOptionB(questionRequest.getOptionB()).setOptionC(questionRequest.getOptionC())
+				.setOptionD(questionRequest.getOptionD()).setRightOption(questionRequest.getRightOption())
+				.setMarks(questionRequest.getMarks());
 	}
 
 	private QuestionDTO mapToDTO(final Question question) {
-		return new QuestionDTO().setQuestionDetail(question.getQuestionDetail()).setOptionA(question.getOptionA())
-				.setOptionB(question.getOptionB()).setOptionC(question.getOptionC()).setOptionD(question.getOptionD())
-				.setRightOption(question.getRightOption()).setMarks(question.getMarks());
+		return new QuestionDTO().setQuestionId(question.getId()).setQuestionDetail(question.getQuestionDetail())
+				.setOptionA(question.getOptionA()).setOptionB(question.getOptionB()).setOptionC(question.getOptionC())
+				.setOptionD(question.getOptionD()).setRightOption(question.getRightOption())
+				.setMarks(question.getMarks());
 	}
 
 }

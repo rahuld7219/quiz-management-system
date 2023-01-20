@@ -1,19 +1,25 @@
 package com.qms.admin.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.qms.admin.constant.AdminMessageConstant;
 import com.qms.admin.dto.CategoryDTO;
-import com.qms.admin.model.Category;
-import com.qms.admin.model.Quiz;
+import com.qms.admin.dto.request.CategoryRequest;
+import com.qms.admin.dto.response.CategoryResponse;
+import com.qms.admin.dto.response.ListCategoryResponse;
+import com.qms.admin.exception.custom.CategoryConstraintViolationException;
+import com.qms.admin.exception.custom.CategoryNotExistException;
 import com.qms.admin.repository.CategoryRepository;
-import com.qms.admin.repository.QuizRepository;
 import com.qms.admin.service.CategoryService;
+import com.qms.common.model.Category;
+import com.qms.common.repository.QuizRepository;
 
 @Service
 public class CategoryServiceimpl implements CategoryService {
@@ -25,52 +31,71 @@ public class CategoryServiceimpl implements CategoryService {
 	private QuizRepository quizRepository;
 
 	@Override
-	public Long addCategory(final CategoryDTO categoryDTO) {
-		return categoryRepository.save(mapToModel(new Category(), categoryDTO)).getId();
+	public CategoryResponse addCategory(final CategoryRequest categoryRequest) {
+		Category category = categoryRepository.save(mapToModel(new Category(), categoryRequest));
+
+		CategoryResponse response = new CategoryResponse();
+		response.setData(response.new Data(category.getId(), category.getName())).setHttpStatus(HttpStatus.CREATED)
+				.setMessage(AdminMessageConstant.CATGEORY_CREATED).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public void updateCategory(final String categoryId, final CategoryDTO categoryDTO) {
-		Category category = categoryRepository.findById(Long.valueOf(categoryId))
-				.orElseThrow(() -> new RuntimeException("Category not exist.")); // TODO: make custom exception and add
-																					// message constant
-		categoryRepository.save(mapToModel(category, categoryDTO));
+	public CategoryResponse updateCategory(final Long categoryId, final CategoryRequest categoryRequest) {
+
+		Category category = categoryRepository.findById(categoryId)
+				.orElseThrow(() -> new CategoryNotExistException(AdminMessageConstant.CATEGORY_NOT_EXIST));
+
+		categoryRepository.save(mapToModel(category, categoryRequest));
+
+		CategoryResponse response = new CategoryResponse();
+		response.setData(response.new Data(category.getId(), category.getName())).setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.CATGEORY_UPDATED).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public void deleteCategory(final String categoryId) {
-		Category category = categoryRepository.findById(Long.valueOf(categoryId))
-				.orElseThrow(() -> new RuntimeException("Category not exist.")); // TODO: make custom exception and add
+	public void deleteCategory(final Long categoryId) {
+		Category category = categoryRepository.findById(categoryId)
+				.orElseThrow(() -> new CategoryNotExistException(AdminMessageConstant.CATEGORY_NOT_EXIST));
 
-		Optional<Quiz> quizOpt = quizRepository.findByCategoryId(category.getId());
-		if (quizOpt.isPresent()) {
-			throw new RuntimeException("Category cannot be deleted, it has associated quiz."); // TODO: make custom
-																								// exception
+		// TODO: try and catch databse exception instead of checking here, check CASCADE
+		// definition
+		if (quizRepository.existsByCategoryId(category.getId())) {
+			throw new CategoryConstraintViolationException(AdminMessageConstant.CATEGORY_QUIZ_ASSOCIATION_VIOLATION);
 		}
 		categoryRepository.delete(category);
 	}
 
 	@Override
-	public CategoryDTO getCategory(final String categoryId) {
-		Category category = categoryRepository.findById(Long.valueOf(categoryId))
-				.orElseThrow(() -> new RuntimeException("Category not exist.")); // TODO: make custom exception and add
-																					// message
-		return mapToDTO(category);
+	public CategoryResponse getCategory(final Long categoryId) {
+		Category category = categoryRepository.findById(categoryId)
+				.orElseThrow(() -> new CategoryNotExistException(AdminMessageConstant.CATEGORY_NOT_EXIST));
+
+		CategoryResponse response = new CategoryResponse();
+		response.setData(response.new Data(category.getId(), category.getName())).setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.CATGEORY_GOT).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public List<CategoryDTO> listCategories() {
+	public ListCategoryResponse getCategoryList() {
 
-		return categoryRepository.findAll().stream().map(this::mapToDTO)
+		List<CategoryDTO> categories = categoryRepository.findAll().stream().map(this::mapToDTO)
 				.collect(Collectors.toCollection(ArrayList::new));
+
+		ListCategoryResponse response = new ListCategoryResponse();
+		response.setData(response.new Data(categories)).setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.CATGEORY_GOT).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
-	private Category mapToModel(final Category category, final CategoryDTO categoryDTO) {
+	private Category mapToModel(final Category category, final CategoryRequest categoryDTO) {
 		return category.setName(categoryDTO.getName());
 	}
 
 	private CategoryDTO mapToDTO(final Category category) {
-		return new CategoryDTO().setName(category.getName());
+		return new CategoryDTO().setId(category.getId()).setCategoryName(category.getName());
 	}
 
 }

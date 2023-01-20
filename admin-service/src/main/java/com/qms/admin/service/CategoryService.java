@@ -1,18 +1,18 @@
 package com.qms.admin.service;
 
-import java.util.List;
-
-import com.qms.admin.dto.CategoryDTO;
+import com.qms.admin.dto.request.CategoryRequest;
+import com.qms.admin.dto.response.CategoryResponse;
+import com.qms.admin.dto.response.ListCategoryResponse;
 
 public interface CategoryService {
 
-	Long addCategory(final CategoryDTO categoryDTO);
+	CategoryResponse addCategory(final CategoryRequest categoryRequest);
 
-	void updateCategory(final String categoryId, final CategoryDTO categoryDTO);
+	CategoryResponse updateCategory(final Long categoryId, final CategoryRequest categoryRequest);
 
-	void deleteCategory(final String categoryId);
+	void deleteCategory(final Long categoryId);
 
-	CategoryDTO getCategory(final String categoryId);
+	CategoryResponse getCategory(final Long categoryId);
 
-	List<CategoryDTO> listCategories();
+	ListCategoryResponse getCategoryList();
 }

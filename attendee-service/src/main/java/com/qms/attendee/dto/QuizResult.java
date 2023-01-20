@@ -1,5 +1,6 @@
 package com.qms.attendee.dto;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import lombok.experimental.Accessors;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
-public class QuizResult {
+public class QuizResult implements Serializable {
 
 //	@JsonIgnore
 //	private String name;
@@ -20,7 +21,9 @@ public class QuizResult {
 //	private String email;
 //	@JsonIgnore
 //	private String quizTitle;
-	
+
+	private static final long serialVersionUID = 1580996452753373165L;
+
 	@JsonIgnore
 	private LocalDate examDate;
 	private Long correctAnswersCount;

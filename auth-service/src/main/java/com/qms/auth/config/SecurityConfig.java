@@ -71,6 +71,9 @@ import lombok.RequiredArgsConstructor;
 		prePostEnabled = true)
 public class SecurityConfig {
 
+	private static final String ADMIN = "ADMIN";
+	private static final String ATTENDEE = "ATTENDEE";
+
 	private final UserDetailsService userDetailsService;
 
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -121,11 +124,13 @@ public class SecurityConfig {
 																					// to access an endpoint
 				.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session will not be
 																									// stored
-				.and().authorizeRequests().antMatchers("/api/v1/auth/changePassword")
-				.hasAnyAuthority("ADMIN", "ATTENDEE")
-//				.antMatchers("/api/v1/auth/**").permitAll()
+				.and().authorizeRequests()
 				.antMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
-				.antMatchers("/api/v1/dummyAdmin/**").hasAnyAuthority("ADMIN").anyRequest().authenticated();
+				.antMatchers("/api/v1/auth/changePassword").hasAnyAuthority(ADMIN, ATTENDEE)
+//				.antMatchers("/api/v1/auth/**").permitAll()
+				.antMatchers("/api/v1/admin/**").hasAuthority(ADMIN).antMatchers("/api/v1/attendee/**")
+				.hasAuthority(ATTENDEE).antMatchers("/api/v1/dummyAdmin/**").hasAnyAuthority(ADMIN).anyRequest()
+				.authenticated();
 
 		http.authenticationProvider(authenticationProvider());
 

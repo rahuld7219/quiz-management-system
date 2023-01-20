@@ -234,3 +234,36 @@ Do top quiz per catgeory and top scorer per quiz leaderboard at last
 
 TODO: add page number, useful to see document class
 TODO: use some cache instead of hitting database for same thing again and again, if data is not going to change in database frequently
+
+
+
+
+
+
+
+
+
+
+
+TODOS:
+implements Serializable to each DTO
+
+set postman using auto set tokens and uri variables
+
+validate Path Variables also
+
+TODO: make a common repository to write query
+
+TODO: try and catch database exception instead of manually checking everywhere like constraint violation on delete, update ,etc.
+
+TODO: seprate into thre DTO, Entity and Request (see the code where someone did it you saw it earlier), convert request to DTO in controller and mapToDTO<->mapToModel in service
+
+TODO: rename question detail to question string
+
+TODO: change category response with category DTO
+
+
+TODO: on password change logout the user, means invalidate(set expiry time of past) or remove the accessToken and refresh token
+TODO: do we need to store all scores or only max one or all unique scores
+TODO: what if user submitted duplicate questions
+TODO: add doc comment

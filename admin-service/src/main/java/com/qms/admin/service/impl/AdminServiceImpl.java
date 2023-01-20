@@ -1,28 +1,41 @@
 package com.qms.admin.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.qms.admin.constant.RoleName;
+import com.qms.admin.constant.AdminMessageConstant;
 import com.qms.admin.dto.Dashboard;
 import com.qms.admin.dto.Leaderboard;
-import com.qms.admin.dto.LinkQuizQuestionDTO;
-import com.qms.admin.model.Question;
-import com.qms.admin.model.Quiz;
-import com.qms.admin.model.QuizQuestion;
-import com.qms.admin.model.Role;
+import com.qms.admin.dto.request.LinkQuizQuestionRequest;
+import com.qms.admin.dto.response.CountAttendeesAttemptedQuizResponse;
+import com.qms.admin.dto.response.CountAttendeesResponse;
+import com.qms.admin.dto.response.CountTopFiveQuizWithAttendeeResponse;
+import com.qms.admin.dto.response.DashboardResponse;
+import com.qms.admin.dto.response.LeaderboardResponse;
+import com.qms.admin.dto.response.LinkQuizQuestionResponse;
 import com.qms.admin.repository.QuestionRepository;
-import com.qms.admin.repository.QuizQuestionRepository;
-import com.qms.admin.repository.QuizRepository;
-import com.qms.admin.repository.RoleRepository;
-import com.qms.admin.repository.ScoreRepository;
-import com.qms.admin.repository.UserRepository;
 import com.qms.admin.service.AdminService;
 import com.qms.admin.service.QuizService;
+import com.qms.common.constant.CommonMessageConstant;
+import com.qms.common.constant.Deleted;
+import com.qms.common.constant.RoleName;
+import com.qms.common.exception.custom.QuizNotExistException;
+import com.qms.common.model.Question;
+import com.qms.common.model.Quiz;
+import com.qms.common.model.QuizQuestion;
+import com.qms.common.model.Role;
+import com.qms.common.repository.QuizQuestionRepository;
+import com.qms.common.repository.QuizRepository;
+import com.qms.common.repository.RoleRepository;
+import com.qms.common.repository.ScoreRepository;
+import com.qms.common.repository.UserRepository;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -49,73 +62,149 @@ public class AdminServiceImpl implements AdminService {
 	private QuizService quizService;
 
 	@Override
-	public void linkQuestionToQuiz(final LinkQuizQuestionDTO linkQuizQuestionDTO) {
-		// TODO: find by Id and and deleted is "N"
-		Question question = questionRepository
-				.findByIdAndDeleted(Long.valueOf(linkQuizQuestionDTO.getQuestionId()), "N") // TODO: use
-				// questionService
-				.orElseThrow(() -> new RuntimeException("Question not exist.")); // TODO: create custom exception
+//	@Transactional
+	public LinkQuizQuestionResponse linkQuestionToQuiz(final LinkQuizQuestionRequest linkQuizQuestionRequest) {
 
-		// TODO: find by Id and and deleted is "N"
-		Quiz quiz = quizRepository.findByIdAndDeleted(Long.valueOf(Long.valueOf(linkQuizQuestionDTO.getQuizId())), "N") // TODO:
-				// use
-				// quizService
-				.orElseThrow(() -> new RuntimeException("Quiz not exist.")); // TODO: create custom exception
+		// TODO: use question service
+		Optional<List<Question>> existingQuestions = questionRepository
+				.findAllByIdInAndDeleted(linkQuizQuestionRequest.getQuestionsIds(), Deleted.N);
 
-		if (quizQuestionRepository.existsByQuestionId(quiz.getId())) { // also consider if deleted is 'N' ==>
-																		// quizQuestionRepository.existsByQuestionIdAndDeleted(quizId,
-																		// "N")
-			throw new RuntimeException("Question is already linked to the quiz.");
+		if (existingQuestions.isPresent() && !existingQuestions.get().isEmpty()) {
 
-			// TODO: OR can return simply??
+			return linkQuestionsAndCreateResponse(existingQuestions.get(), linkQuizQuestionRequest);
 		}
 
-		// TODO: if question exist and deleted is "Y" in QuizQuestion then just set the
-		// deleted to "N" and don't add the question again i.e., not execute below lines
+		LinkQuizQuestionResponse response = new LinkQuizQuestionResponse();
+		response.setData(
+				response.new Data(new ArrayList<>(), new ArrayList<>(), linkQuizQuestionRequest.getQuestionsIds()))
+				.setHttpStatus(HttpStatus.OK).setMessage(AdminMessageConstant.QUIZ_QUESTIONS_LINKED)
+				.setResponseTime(LocalDateTime.now());
+		return response;
 
-		QuizQuestion quizQuestion = new QuizQuestion();
-		quizQuestion.setQuestion(question);
-		quizQuestion.setQuiz(quiz);
+	}
 
-		quizQuestionRepository.save(quizQuestion);
+	// TODO: optimize it
+	private LinkQuizQuestionResponse linkQuestionsAndCreateResponse(List<Question> existingQuestions,
+			final LinkQuizQuestionRequest linkQuizQuestionRequest) {
+
+		Quiz quiz = quizRepository.findByIdAndDeleted(linkQuizQuestionRequest.getQuizId(), Deleted.N)
+				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));
+
+		List<Long> existingQuestionIds = existingQuestions.stream().map(Question::getId).collect(Collectors.toList());
+
+		List<Long> notExistingQuestionIds = linkQuizQuestionRequest.getQuestionsIds().stream()
+				.filter(qId -> !existingQuestionIds.contains(qId)).collect(Collectors.toList());
+
+		List<Question> questionsToLink = existingQuestions;
+
+		// TODO: fetch only Questions
+		Optional<List<QuizQuestion>> alreadyLinkedQuizQuestion = quizQuestionRepository
+				.findAllByQuizIdAndDeletedAndQuestionIdIn(quiz.getId(), Deleted.N, existingQuestionIds);
+
+		List<Long> alreadyLinkedQuestionIds = new ArrayList<>();
+		if (alreadyLinkedQuizQuestion.isPresent() && !alreadyLinkedQuizQuestion.get().isEmpty()) {
+			List<Question> alreadyLinkedQuestions = alreadyLinkedQuizQuestion.get().stream()
+					.map(QuizQuestion::getQuestion).collect(Collectors.toList());
+			alreadyLinkedQuestionIds = alreadyLinkedQuestions.stream().map(Question::getId)
+					.collect(Collectors.toList());
+			questionsToLink.removeAll(alreadyLinkedQuestions);
+		}
+
+		List<QuizQuestion> quizQuestionToAdd = new ArrayList<>();
+
+		Optional<List<QuizQuestion>> alreadyLinkedQuestionButSoftDeleted = quizQuestionRepository
+				.findAllByQuizIdAndDeletedAndQuestionIdIn(quiz.getId(), Deleted.Y, existingQuestionIds);
+
+		if (alreadyLinkedQuestionButSoftDeleted.isPresent() && !alreadyLinkedQuestionButSoftDeleted.get().isEmpty()) {
+			alreadyLinkedQuestionButSoftDeleted.get().forEach(quizQuestion -> quizQuestion.setDeleted(Deleted.N));
+			questionsToLink.removeAll(alreadyLinkedQuestionButSoftDeleted.get().stream().map(QuizQuestion::getQuestion)
+					.collect(Collectors.toList()));
+			quizQuestionToAdd.addAll(alreadyLinkedQuestionButSoftDeleted.get());
+		}
+
+		for (Question question : questionsToLink) {
+
+			QuizQuestion quizQuestion = new QuizQuestion();
+			quizQuestion.setQuestion(question);
+			quizQuestion.setQuiz(quiz);
+
+			quizQuestionToAdd.add(quizQuestion);
+		}
+
+		List<Long> linkedQuestionIds = new ArrayList<>();
+		if (!quizQuestionToAdd.isEmpty()) {
+			linkedQuestionIds = quizQuestionRepository.saveAll(quizQuestionToAdd).stream()
+					.map(quizQuestion -> quizQuestion.getQuestion().getId()).collect(Collectors.toList());
+		}
+
+		LinkQuizQuestionResponse response = new LinkQuizQuestionResponse();
+		response.setData(response.new Data(linkedQuestionIds, alreadyLinkedQuestionIds, notExistingQuestionIds))
+				.setHttpStatus(HttpStatus.CREATED).setMessage(AdminMessageConstant.QUIZ_QUESTIONS_LINKED)
+				.setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public Long countAttendess() {
-		return userRepository.countByRolesRoleName(RoleName.ATTENDEE);
+	public CountAttendeesResponse countAttendees() {
+		CountAttendeesResponse response = new CountAttendeesResponse();
+		response.setData(response.new Data(userRepository.countByRolesRoleName(RoleName.ATTENDEE)))
+				.setHttpStatus(HttpStatus.OK).setMessage(AdminMessageConstant.ATTENDEES_COUNTED)
+				.setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public Long countAttendeesAttemptedQuiz() {
-//		return userRepository.countDistinctByScoresUserRolesRoleName(RoleName.ATTENDEE);
+	public CountAttendeesAttemptedQuizResponse countAttendeesAttemptedQuiz() {
 		Optional<Role> role = roleRepository.findByRoleName(RoleName.ATTENDEE);
-		if (!role.isPresent()) {
-			return 0L;
+		Long theCount = 0L;
+		if (role.isPresent()) {
+			theCount = userRepository.countAttendeeAttemptedQuiz(role.get().getId());
 		}
-		return userRepository.countAttendeeAttemptedQuiz(role.get().getId());
+
+		CountAttendeesAttemptedQuizResponse response = new CountAttendeesAttemptedQuizResponse();
+		response.setData(response.new Data(theCount)).setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.ATTENDEES_ATTEMPTED_QUIZ_COUNTED).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public List<Map<String, Object>> countTopFiveQuizWithAttendee() {
-		return scoreRepository.getAttendeeCountGroupByQuiz();
+	public CountTopFiveQuizWithAttendeeResponse countTopFiveQuizWithAttendee() {
+		CountTopFiveQuizWithAttendeeResponse response = new CountTopFiveQuizWithAttendeeResponse();
+		response.setData(response.new Data(scoreRepository.getAttendeeCountGroupByQuiz())).setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.TOP_5_ATTENDEES_ATTEMPTED_QUIZ_COUNTED)
+				.setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
 	@Override
-	public Dashboard dashboard() {
-		return new Dashboard().setNumberOfQuizzes(this.quizService.getQuizCount())
-				.setTotalAttendees(this.countAttendess())
-				.setTopFiveAttendedQuizzes(this.countTopFiveQuizWithAttendee());
+	public DashboardResponse dashboard() {
+
+		DashboardResponse response = new DashboardResponse();
+		response.setData(response.new Data(this.createDashboard())).setHttpStatus(HttpStatus.OK)
+				.setMessage(AdminMessageConstant.DASHBOARD_SUCCESS).setResponseTime(LocalDateTime.now());
+		return response;
 	}
 
+	private Dashboard createDashboard() {
+		return new Dashboard().setNumberOfQuizzes(this.quizService.getQuizCount().getData().getQuizCount())
+				.setTotalAttendees(this.countAttendees().getData().getAttendeesCount()).setTopFiveAttendedQuizzes(
+						this.countTopFiveQuizWithAttendee().getData().getTopFiveQuizWithAttendeeCount());
+	}
+
+	@Override
+	public LeaderboardResponse leaderboard(final Long quizId) {
+		LeaderboardResponse response = new LeaderboardResponse();
+		response.setData(response.new Data(new Leaderboard().setRankList(scoreRepository.getTopScorers(quizId))))
+				.setHttpStatus(HttpStatus.OK).setMessage(AdminMessageConstant.LEADERBOARD_SUCCESS)
+				.setResponseTime(LocalDateTime.now());
+		return response;
+
+	}
+
+	/* Dashboard Old */
 //	@Override
 //	public List<Map<String, Object>> leaderboard() {
 //		return scoreRepository.getRecordFilteredByCategoryThenQuizThenAttendeeScore();
 //		// TODO: add pagination and also limit by category and limit by quiz per category and also limit by users per category per quiz
 //	}
-
-	@Override
-	public Leaderboard leaderboard(final String quizId) {
-		return new Leaderboard().setRankList(scoreRepository.getTopScorers(Long.valueOf(quizId)));
-	}
-
 }

@@ -3,6 +3,10 @@ package com.qms.attendee.dto.request;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import com.qms.attendee.dto.QuestionAnswer;
 
 import lombok.Data;
@@ -16,6 +20,10 @@ public class QuizSubmission implements Serializable {
 
 	private static final long serialVersionUID = -4309995216131985209L;
 
-	private String quizId;
+	@NotNull
+	private Long quizId;
+
+	@NotEmpty
+	@Size(max = 100)
 	private List<QuestionAnswer> answerList;
 }
