@@ -12,8 +12,8 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class QuizRequest {
 
-	@NotBlank
+	@NotBlank(message = "Quiz title cannot be blank.")
 	private String quizTitle;
-	@NotNull
+	@NotNull(message = "Category id cannot be blank.")
 	private Long categoryId;
 }

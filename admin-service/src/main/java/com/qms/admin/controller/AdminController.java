@@ -70,8 +70,7 @@ public class AdminController {
 	}
 
 	/**
-	 * Dashboard contains total of quizzes, total attendees and 
-	 * top 5 quizzes
+	 * Dashboard contains total of quizzes, total attendees and top 5 quizzes
 	 * 
 	 */
 	@GetMapping(AdminURIConstant.DASHBOARD)
@@ -88,10 +87,4 @@ public class AdminController {
 	public ResponseEntity<ApiResponse> leaderboard(@PathVariable final Long quizId) {
 		return ResponseEntity.ok(adminService.leaderboard(quizId));
 	}
-
-//	@GetMapping("/leaderboard")
-//	public ResponseEntity<List<Map<String, Object>>> leaderboard() {
-//		return ResponseEntity.ok(adminService.leaderboard());
-//	}
-
 }

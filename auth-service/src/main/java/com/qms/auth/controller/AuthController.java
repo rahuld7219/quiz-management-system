@@ -23,7 +23,6 @@ import com.qms.auth.dto.response.SignUpResponse;
 import com.qms.auth.service.AuthService;
 import com.qms.common.dto.response.ApiResponse;
 
-//@CrossOrigin(origins = "*", maxAge = 3600) ???
 @RestController
 @RequestMapping(AuthURIConstant.BASE_AUTH_URL)
 public class AuthController {
@@ -35,8 +34,6 @@ public class AuthController {
 	public ResponseEntity<ApiResponse> register(@Valid @RequestBody final SignUpRequest signUpRequest) {
 
 		SignUpResponse response = authService.register(signUpRequest);
-//		URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/").toUriString());
-//		URI location = new URI("/api/");
 		URI location = URI.create(
 				AuthURIConstant.BASE_AUTH_URL + AuthURIConstant.REGISTER_URL + "/" + response.getData().getId());
 
@@ -62,11 +59,5 @@ public class AuthController {
 		return ResponseEntity.ok(new ApiResponse().setHttpStatus(HttpStatus.OK).setResponseTime(LocalDateTime.now())
 				.setMessage(AuthMessageConstant.PASSWORD_CHANGE));
 	}
-
-//	@GetMapping("/logout")
-//	public ResponseEntity<?> logout() {
-//		UserDetailsImpl user = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//		return ResponseEntity.ok(new MessageResponseDTO("Logged out successfully"));
-//	}
 
 }

@@ -17,15 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * TODO: explain purpose of this class
- * 
- * @author rahul
- *
- */
 @Slf4j
 @Component
-public class AuthEntryPoint implements AuthenticationEntryPoint { // TODO: explain
+public class AuthEntryPoint implements AuthenticationEntryPoint {
 
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
@@ -35,7 +29,6 @@ public class AuthEntryPoint implements AuthenticationEntryPoint { // TODO: expla
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-		// TODO: throw custom with standard response authentication failed exception
 		final Map<String, Object> body = new HashMap<>();
 		body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
 		body.put("error", "Unauthorized");

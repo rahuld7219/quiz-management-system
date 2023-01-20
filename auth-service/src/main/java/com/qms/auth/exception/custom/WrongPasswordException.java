@@ -10,6 +10,6 @@ import lombok.Setter;
 public class WrongPasswordException extends RuntimeException {
 
 	private static final long serialVersionUID = 7893295453548074224L;
-	
+
 	private final String message;
 }

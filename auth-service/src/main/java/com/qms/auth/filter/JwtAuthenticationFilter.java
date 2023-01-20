@@ -40,17 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			final String jwt = parseForJwt(request);
 
-			if (jwt == null) { // in case some API not requires jwt, so we don't throw error here, we let it
-								// pass for next thing
+			if (jwt == null) {
 				filterChain.doFilter(request, response);
 				return;
 			}
 
-			// NOTE: Refresh token not come to this point as we send refresh token in body
-			// to renew the token
-
-			// TODO: if storing accessToken then also check if the emailId of the
-			// token have the same access token as stored in redis cache
 			if (jwtUtils.isTokenValid(jwt)) {
 				final String userEmail = this.jwtUtils.extractUsername(jwt);
 				UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
@@ -62,14 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		} catch (Exception exception) {
 			log.error("Cannot set user authentication: {}", exception);
 			log.error("Error logging in: {}", exception.getMessage());
-//			response.setHeader("error", exception.getMessage());
-//			response.setStatus(HttpStatus.FORBIDDEN.value());
-//			// response.sendError(FORBIDDEN.value());
-//			Map<String, String> error = new HashMap<>();
-//			error.put("error_message", exception.getMessage());
-//			response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);
-//			new ObjectMapper().writeValue(response.getOutputStream(), error);
-
 			response.setHeader("error", exception.getMessage());
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType(MimeTypeUtils.APPLICATION_JSON_VALUE);
@@ -77,7 +63,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			errorResponse.setHttpStatus(HttpStatus.UNAUTHORIZED);
 			errorResponse.setException(exception.getClass().getSimpleName());
 			errorResponse.setMessage(exception.getMessage());
-//			errorResponse.setResponseTime(LocalDateTime.now());
 			new ObjectMapper().writeValue(response.getOutputStream(), errorResponse);
 		}
 

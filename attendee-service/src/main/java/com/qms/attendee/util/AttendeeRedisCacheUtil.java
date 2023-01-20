@@ -22,8 +22,6 @@ public class AttendeeRedisCacheUtil {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	// TODO: change name for methods for access tokens
-
 	/**
 	 * Get value for given key
 	 * 
@@ -41,14 +39,6 @@ public class AttendeeRedisCacheUtil {
 	 */
 	public void cacheValue(String key, String value) {
 		redisTemplate.opsForValue().set(key, value);
-	}
-
-	/**
-	 * 
-	 * @param key
-	 */
-	public void removeCachedValue(String key) {
-
 	}
 
 	/**

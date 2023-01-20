@@ -15,11 +15,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
 	Optional<Question> findByIdAndDeleted(Long id, Deleted deleted);
 
-//	@Query()
 	Optional<List<Question>> findAllByIdInAndDeleted(List<Long> questionsIds, Deleted deleted);
 
 	Collection<Question> findAllByDeleted(Deleted deleted);
-
-//	boolean existsByQuizId(Long quizId); TODO: find a better way
 
 }

@@ -63,8 +63,6 @@ public class QuestionServiceImpl implements QuestionService {
 		Question question = questionRepository.findByIdAndDeleted(questionId, Deleted.N)
 				.orElseThrow(() -> new QuestionNotExistException(AdminMessageConstant.QUESTION_NOT_EXIST));
 
-		// TODO: try and catch databse exception instead of checking here, check CASCADE
-		// definition
 		if (quizQuestionRepository.existsByQuestionIdAndDeleted(questionId, Deleted.N)) {
 			throw new QuestionConstraintViolationException(AdminMessageConstant.QUESTION_QUIZ_ASSOCIATION_VIOLATION);
 		}

@@ -13,13 +13,13 @@ public class LoginRequest implements Serializable {
 
 	private static final long serialVersionUID = -3954775695279968684L;
 
-	@NotBlank
+	@NotBlank(message = "Email id cannot be blank.")
 	@Email
 	@Size(max = 20)
 	private String emailId;
 
-	@NotBlank
-	@Size(min = 3, max = 20)
+	@NotBlank(message = "Password cannot be blank.")
+	@Size(min = 3, max = 20, message = "Password length should be between 3 and 20 (inclusive).")
 	private String password;
 
 }

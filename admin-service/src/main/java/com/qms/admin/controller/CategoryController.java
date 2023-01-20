@@ -3,6 +3,8 @@ package com.qms.admin.controller;
 import java.net.URI;
 import java.time.LocalDateTime;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +32,7 @@ public class CategoryController {
 	private CategoryService categoryService;
 
 	@PostMapping()
-	public ResponseEntity<ApiResponse> addCategory(@RequestBody final CategoryRequest categoryRequest) {
+	public ResponseEntity<ApiResponse> addCategory(@Valid @RequestBody final CategoryRequest categoryRequest) {
 
 		CategoryResponse response = categoryService.addCategory(categoryRequest);
 		URI location = URI.create(
@@ -41,7 +43,7 @@ public class CategoryController {
 
 	@PutMapping("/{categoryId}")
 	public ResponseEntity<ApiResponse> updateCategory(@PathVariable final Long categoryId,
-			@RequestBody final CategoryRequest categoryRequest) {
+			@Valid @RequestBody final CategoryRequest categoryRequest) {
 
 		return ResponseEntity.ok(categoryService.updateCategory(categoryId, categoryRequest));
 	}
@@ -62,13 +64,4 @@ public class CategoryController {
 	public ResponseEntity<ApiResponse> getCategoryList() {
 		return ResponseEntity.ok(categoryService.getCategoryList());
 	}
-
-//	@GetMapping(value = { "/category/{categoryId}", "/category" })
-//	public ResponseEntity<?> getCategory(@PathVariable final Optional<Long> categoryId) {
-//		if (categoryId.isPresent()) {
-//			return ResponseEntity.ok().body(categoryService.getCategory(categoryId.get()));
-//		}
-//		return ResponseEntity.ok().body(categoryService.listCategories());
-//	}
-
 }

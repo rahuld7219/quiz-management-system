@@ -33,9 +33,6 @@ public class Score {
 	@Column(name = "id")
 	private Long id;
 
-	/**
-	 * 
-	 */
 	@Column(name = "score", nullable = false, updatable = false)
 	private Long scoreValue;
 

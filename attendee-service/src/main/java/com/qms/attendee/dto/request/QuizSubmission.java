@@ -20,10 +20,10 @@ public class QuizSubmission implements Serializable {
 
 	private static final long serialVersionUID = -4309995216131985209L;
 
-	@NotNull
+	@NotNull(message = "Quiz id cannot be blank.")
 	private Long quizId;
 
-	@NotEmpty
-	@Size(max = 100)
+	@NotEmpty(message = "answerList cannot be empty.")
+	@Size(max = 100, message = "Answer list can contain maximum 100 responses.")
 	private List<QuestionAnswer> answerList;
 }

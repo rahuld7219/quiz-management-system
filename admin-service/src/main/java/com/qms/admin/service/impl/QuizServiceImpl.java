@@ -56,8 +56,6 @@ public class QuizServiceImpl implements QuizService {
 
 	@Override
 	public QuizResponse updateQuiz(final Long quizId, final QuizRequest quizRequest) {
-		// check if quiz exist
-		// update quiz
 
 		Quiz quiz = quizRepository.findByIdAndDeleted(quizId, Deleted.N)
 				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));
@@ -70,12 +68,8 @@ public class QuizServiceImpl implements QuizService {
 		return response;
 	}
 
-	// TODO: analyse it more along with linking quiz questions API
 	@Override
 	public void deleteQuiz(final Long quizId) {
-		// check if quiz exist -> hard delete the quiz if quiz not have any
-		// question
-		// else soft delete iff quiz not have been attempted
 
 		Quiz quiz = quizRepository.findByIdAndDeleted(quizId, Deleted.N)
 				.orElseThrow(() -> new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST));

@@ -66,9 +66,9 @@ public class Question {
 
 	@Column(name = "deleted", columnDefinition = "varchar(1) default 'N'")
 	@Enumerated(EnumType.STRING)
-	private Deleted deleted = Deleted.N; // why default not inserting by default??
+	private Deleted deleted = Deleted.N;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "question") // TODO: what could be the cascade?
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "question")
 	private Set<QuizQuestion> quizQuestions;
 
 	@CreatedDate

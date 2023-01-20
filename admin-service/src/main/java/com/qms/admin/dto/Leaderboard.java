@@ -17,6 +17,5 @@ public class Leaderboard implements Serializable {
 
 	private static final long serialVersionUID = 3636103812379884376L;
 
-//	private RankDetail yourRank;
 	private List<RankDetail> rankList;
 }

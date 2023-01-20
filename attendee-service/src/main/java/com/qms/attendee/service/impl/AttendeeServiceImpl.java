@@ -79,8 +79,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 		final String email = extractUserFromSecurityContext();
 
-//		final Long userId = userRepository.getIdByEmailId(email); //TODO: make method or write query to only get user id
-
 		final Long userId = userRepository.findByEmailId(email).get().getId();
 
 		CountAttendedQuizResponse response = new CountAttendedQuizResponse();
@@ -103,8 +101,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 	public CountAttendedQuizByCategoryResponse countAttendedQuizByCategory() {
 		final String email = extractUserFromSecurityContext();
 
-//		final Long userId = userRepository.getIdByEmailId(email); //TODO: make method or write query to only get user id
-
 		final Long userId = userRepository.findByEmailId(email).get().getId();
 
 		CountAttendedQuizByCategoryResponse response = new CountAttendedQuizByCategoryResponse();
@@ -117,20 +113,12 @@ public class AttendeeServiceImpl implements AttendeeService {
 	@Override
 	public GetQuizQuestionsReponse getQuizQuestions(final Long quizId) {
 
-		List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository // TODO: handle what if quiz id not
-																					// exist ?
-				.getQuestionByQuizIdAndDeleted(quizId, Deleted.N);
+		List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository.getQuestionByQuizIdAndDeleted(quizId,
+				Deleted.N);
 
 		List<QuizQuestionDTO> quizQuestions = quizQuestionQuestions.stream()
 				.map(quizQuestionQuestion -> mapToQuizQuestionDTO(quizQuestionQuestion.getQuestion()))
 				.collect(Collectors.toList());
-
-		// TODO: The query running internally by JPA is not optimal,
-		// but above implementation is just to show a way to get only particular fields
-		// from the result.
-		// Can also implement by query or by first get
-		// question ids for given quiz id from quizQuestion repo then get question
-		// details from question repo
 
 		GetQuizQuestionsReponse response = new GetQuizQuestionsReponse();
 		response.setData(response.new Data(quizQuestions)).setHttpStatus(HttpStatus.OK)
@@ -163,7 +151,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 		final String email = this.extractUserFromSecurityContext();
 
-		// TODO: how to compare equals ignore case in mysql for email id
 		final List<RankDetail> rankDetails = scoreRepository.getTopScorers(quizId, email);
 
 		final Leaderboard leaderboard = new Leaderboard();
@@ -177,40 +164,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	}
 
-//	for (RankDetail rankDetail : rankDetails) {
-//	if (rankDetail.getEmail().equalsIgnoreCase("rd2@gmail.com")) { // TODO: pass userId extracted from spring security
-//		leaderboard.setYourRank(rankDetail);
-//		break;
-//	}
-//}
-
-//	List<Map<String, Object>> topScorers = scoreRepository.getTopScorers(Long.valueOf(quizId));
-//
-//	return createLeaderboard(topScorers, "rd@gmail.com");
-
-//	private Leaderboard createLeaderboard(List<Map<String, Object>> topScorers, String email) {
-//
-//		final Leaderboard leaderboard = new Leaderboard();
-//		final List<RankDetail> rankList = new ArrayList<>();
-//
-//		for (Map<String, Object> scorer : topScorers) {
-//			RankDetail rankDetail = new RankDetail();
-//			rankDetail.setRank(Long.valueOf(scorer.get("rank").toString())).setName((String) scorer.get("name"))
-//					.setEmail((String) scorer.get("email"))
-//					.setTotalScore(Long.valueOf(scorer.get("totalScore").toString()));
-//
-//			rankList.add(rankDetail);
-//			if (rankDetail.getEmail().equalsIgnoreCase(email)) {
-//				leaderboard.setYourRank(rankDetail);
-//			}
-//		}
-//		leaderboard.setRankList(rankList);
-//		return leaderboard;
-//	}
-
-	// TODO: store score in database here (instead of in show result) and also in
-	// redis and when user submit for that quiz again the update in redis and score
-	// in database
 	@Override
 	public void submitQuiz(final QuizSubmission quizSubmission) {
 
@@ -224,7 +177,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	}
 
-	// TODO: Optimize this and its dependent methods
 	@Override
 	public ShowResultResponse showResult(final Long quizId) {
 
@@ -238,14 +190,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 		QuizResult quizResult = getQuizResult(email, quizId);
 
-		// TODO: how to optimize this saving by preventing fetching of user and quiz?
-		// can change mapping by using ids instead of classes or can we write insert
-		// query in score repo directly.
-		// TODO: what if show result method called multiple times, it will add duplicate
-		// entries? handle this case...can we set to run this line only once for each
-		// user each quiz id and after only once sumitQuiz() has been called again for
-		// that user and quiz id?? Or should we save only top score OR should we don't
-		// save if score is same for that quiz
 		scoreRepository.save(new Score().setScoreValue(quizResult.getTotalScore()).setQuiz(quiz).setUser(user));
 
 		ShowResultResponse response = new ShowResultResponse();
@@ -258,7 +202,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 		QuizSubmission quizSubmission = redisCacheUtil.getCachedSubmission(email + "_" + quizId);
 
-		// TODO: handle what if quiz id not exist ?
 		List<QuizQuestionQuestion> quizQuestionQuestions = quizQuestionRepository.getQuestionByQuizIdAndDeleted(quizId,
 				Deleted.N);
 
@@ -267,13 +210,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 		return computeQuizResult(quizSubmission, questionsMap);
 	}
 
-	/**
-	 * 
-	 * @param quizSubmission
-	 * @param questionsMap
-	 * @return
-	 */
-	// TODO: think of optimizing it more
 	private QuizResult computeQuizResult(QuizSubmission quizSubmission, final Map<Long, Question> questionsMap) {
 
 		Long correctAnswersCount = 0L;
@@ -281,7 +217,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 		Long totalScore = 0L;
 		List<ResultDetail> details = new ArrayList<>();
 
-//		TODO: handle duplicate submitted question id and question id submitted which is not in the quiz
 		for (QuestionAnswer questionAnswer : quizSubmission.getAnswerList()) {
 			Question question = questionsMap.get(questionAnswer.getQuestionId());
 
@@ -294,14 +229,13 @@ public class AttendeeServiceImpl implements AttendeeService {
 				correctAnswersCount++;
 				totalScore += question.getMarks();
 			} else {
-				wrongAnswersCount++; // TODO: can implement negative marking feature here
+				wrongAnswersCount++;
 			}
 			details.add(new ResultDetail().setQuestionDetail(question.getQuestionDetail())
 					.setOptionA(question.getOptionA()).setOptionB(question.getOptionB())
 					.setOptionC(question.getOptionC()).setOptionD(question.getOptionD())
 					.setSubmittedAnswer(questionAnswer.getSelectedOption().toUpperCase())
 					.setCorrectAnswer(question.getRightOption()));
-			// TODO: can also show option's value
 		}
 
 		return new QuizResult().setExamDate(LocalDate.now()).setCorrectAnswersCount(correctAnswersCount)
@@ -314,20 +248,11 @@ public class AttendeeServiceImpl implements AttendeeService {
 	 * @param quizQuestionQuestions
 	 * @return
 	 */
-	// TODO: make it generic to create map with id, use generic concepts
 	private Map<Long, Question> createQuestionsMap(List<QuizQuestionQuestion> quizQuestionQuestions) {
 		return quizQuestionQuestions.stream().collect(Collectors.toMap(
 				quizQuestionQuestion -> quizQuestionQuestion.getQuestion().getId(), QuizQuestionQuestion::getQuestion));
-
-//		Map<Long, Question> questionsMap = new HashMap<>();
-//		
-//		for (QuizQuestionQuestion quizQuestionQuestion : quizQuestionQuestions) {
-//			questionsMap.put(quizQuestionQuestion.getQuestion().getId(), quizQuestionQuestion.getQuestion());
-//		}
-//		return questionsMap;
 	}
 
-	// TODO: Optimize this and its dependent methods
 	@Override
 	public Object exportPDF(final Long quizId, final HttpServletResponse response) {
 

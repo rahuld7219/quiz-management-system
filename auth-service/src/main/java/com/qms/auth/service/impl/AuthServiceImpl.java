@@ -34,8 +34,8 @@ import com.qms.auth.exception.custom.RoleNotFoundException;
 import com.qms.auth.exception.custom.UserAlreadyExistException;
 import com.qms.auth.exception.custom.WrongPasswordException;
 import com.qms.auth.service.AuthService;
-import com.qms.auth.util.JwtUtils;
 import com.qms.auth.util.AuthRedisCacheUtil;
+import com.qms.auth.util.JwtUtils;
 import com.qms.common.constant.RoleName;
 import com.qms.common.model.Role;
 import com.qms.common.model.User;
@@ -69,12 +69,9 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	@Transactional
 	public SignUpResponse register(final SignUpRequest signUpRequest) {
-		if (userRepository.existsByEmailId(signUpRequest.getEmailId())) {
+		if (Boolean.TRUE.equals(userRepository.existsByEmailId(signUpRequest.getEmailId()))) {
 			throw new UserAlreadyExistException(AuthMessageConstant.USER_ALREADY_EXIST);
 		}
-
-		// TODO: how to use design pattern(like factory if have to choose from many
-		// roles, i.e., if signuprequest also have role info)
 
 		Role userRole = roleRepository.findByRoleName(RoleName.ATTENDEE)
 				.orElseThrow(() -> new RoleNotFoundException(AuthMessageConstant.USER_ROLE_NOT_FOUND));
@@ -84,7 +81,6 @@ public class AuthServiceImpl implements AuthService {
 
 		userRepository.save(mapToModel(user, signUpRequest));
 
-		// TODO: send Zoned Date time and find a way to json format that
 		SignUpResponse response = new SignUpResponse();
 		response.setData(response.new Data(user.getId(), user.getEmailId())).setHttpStatus(HttpStatus.CREATED)
 				.setResponseTime(LocalDateTime.now()).setMessage(AuthMessageConstant.USER_CREATED);
@@ -121,15 +117,12 @@ public class AuthServiceImpl implements AuthService {
 		jwtUtils.isTokenValid(refreshToken);
 		final String username = jwtUtils.extractUsername(refreshToken);
 		UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-		// TODO: whether to use ?? -> use User user =
-		// userRepository.findByEmailId(email).get(); // TODO: use isPresent()
+
 		final String storedRefreshToken = redisCacheUtil.getCachedValue(username);
 
 		if (!doesTokenMatches(refreshToken, storedRefreshToken)) {
 			throw new RefreshTokenNotMatchException(AuthMessageConstant.REFRESH_TOKEN_NOT_MATCH);
 		}
-
-		// TODO: check here the security context on debugging
 
 		final Tokens newTokens = generateTokens(userDetails);
 		redisCacheUtil.cacheValue(username, newTokens.getRefreshToken());
@@ -151,12 +144,10 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-				.getUsername(); // TODO: put this in utility
+				.getUsername();
 
 		User user = userRepository.findByEmailId(email)
 				.orElseThrow(() -> new UsernameNotFoundException(AuthMessageConstant.USER_NOT_FOUND));
-		// TODO: whether to use instead ?? ->
-		// this.userDetailsService.loadUserByUsername(email)
 
 		if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.getPassword())) {
 			throw new WrongPasswordException(AuthMessageConstant.WRONG_PASSWORD);

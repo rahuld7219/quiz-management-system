@@ -18,8 +18,6 @@ public class AuthRedisCacheUtil {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	// TODO: change name for methods for access tokens
-
 	/**
 	 * Get value for given key
 	 * 
@@ -37,14 +35,6 @@ public class AuthRedisCacheUtil {
 	 */
 	public void cacheValue(String key, String value) {
 		redisTemplate.opsForValue().set(key, value);
-	}
-
-	/**
-	 * 
-	 * @param key
-	 */
-	public void removeCachedValue(String key) {
-
 	}
 
 }

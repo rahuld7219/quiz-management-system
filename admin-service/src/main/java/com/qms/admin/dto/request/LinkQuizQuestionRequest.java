@@ -17,9 +17,9 @@ public class LinkQuizQuestionRequest implements Serializable {
 	private static final long serialVersionUID = -1453833192874014372L;
 
 	@NotEmpty
-	@Size(min = 1, max = 10)
+	@Size(min = 1, max = 10, message = "Number of question ids must be between 1 and 10 (both inclusive).")
 	private List<Long> questionsIds;
 
-	@NotNull
+	@NotNull(message = "Quiz id cannot be blank.")
 	private Long quizId;
 }

@@ -77,19 +77,6 @@ public class JwtUtils {
 			throw new InvalidJWTException(AuthMessageConstant.INVALID_JWT + e.getMessage());
 		}
 
-//		catch (SignatureException e) {
-//			log.error("Invalid JWT signature: {}", e.getMessage());
-//		} 
-//			catch (MalformedJwtException e) {
-//			log.error("Invalid JWT token: {}", e.getMessage());
-//		} catch (ExpiredJwtException e) {
-//			log.error("JWT token is expired: {}", e.getMessage());
-//		} catch (UnsupportedJwtException e) {
-//			log.error("JWT token is unsupported: {}", e.getMessage());
-//		} catch (IllegalArgumentException e) {
-//			log.error("JWT claims string is empty: {}", e.getMessage());
-//		}
-
 	}
 
 	private Key getSignKey() {
@@ -106,11 +93,4 @@ public class JwtUtils {
 		return claimsResolver.apply(claims);
 	}
 
-//	private Date extractExpiration(String token) {
-//		return extractClaim(token, Claims::getExpiration);
-//	}
-
-//	private boolean isTokenExpired(String token) {
-//		return extractExpiration(token).before(new Date());
-//	}
 }

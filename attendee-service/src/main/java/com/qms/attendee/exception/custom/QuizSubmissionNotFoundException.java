@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class QuizSubmissionNotFoundException extends RuntimeException {
+
 	private static final long serialVersionUID = -7157341170270348664L;
 	private final String message;
 }

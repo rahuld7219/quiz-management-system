@@ -29,7 +29,6 @@ public class AdminMessageConstant {
 	public static final String QUIZ_GOT = "Quiz fetch successful.";
 
 	public static final String QUESTION_NOT_EXIST = "Question not exist.";
-//	public static final String QUIZ_NOT_EXIST = "Quiz not exist.";
 	public static final String CATEGORY_NOT_EXIST = "Category not exist.";
 	public static final String CATEGORY_QUIZ_ASSOCIATION_VIOLATION = "Category cannot be deleted, it has associated quiz.";
 	public static final String QUESTION_QUIZ_ASSOCIATION_VIOLATION = "Question cannot be deleted, it has associated quiz.";

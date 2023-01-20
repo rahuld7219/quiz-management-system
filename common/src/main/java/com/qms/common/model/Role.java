@@ -37,11 +37,4 @@ public class Role {
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
 	private List<User> users;
 
-//	@CreatedDate
-//    @Column(name = "created_on", nullable = false, updatable = false)
-//    private OffsetDateTime createdOn;
-//
-//    @LastModifiedDate
-//    @Column(name = "updated_on", nullable = false)
-//    private OffsetDateTime updatedOn;
 }

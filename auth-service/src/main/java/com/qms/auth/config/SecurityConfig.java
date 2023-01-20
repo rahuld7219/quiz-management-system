@@ -21,54 +21,10 @@ import com.qms.auth.security.AuthEntryPoint;
 
 import lombok.RequiredArgsConstructor;
 
-/* OLD WAY */
-
-/**
- * @author
- * @version
- * @since
- */
-//@Configuration @EnableWebSecurity @RequiredArgsConstructor
-//public class SecurityConfig extends WebSecurityConfigurerAdapter {
-//    private final UserDetailsService userDetailsService;
-//    private final BCryptPasswordEncoder bCryptPasswordEncoder;
-//
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
-//    }
-//
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean());
-//        customAuthenticationFilter.setFilterProcessesUrl("/api/login"); // changes the URL for login from /login to /api/login
-//        http.csrf().disable();
-//        http.sessionManagement().sessionCreationPolicy(STATELESS);
-//        http.authorizeRequests().antMatchers("/api/login/**", "/api/token/refresh/**").permitAll();
-//        http.authorizeRequests().antMatchers(GET, "/api/user/**").hasAnyAuthority("ROLE_USER");
-//        http.authorizeRequests().antMatchers(POST, "/api/user/save/**").hasAnyAuthority("ROLE_ADMIN");
-//        http.authorizeRequests().anyRequest().authenticated();
-//        http.addFilter(customAuthenticationFilter);
-//        http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
-//    }
-//
-//    @Bean
-//    @Override
-//    public AuthenticationManager authenticationManagerBean() throws Exception {
-//        return super.authenticationManagerBean();
-//    }
-//}
-
-/* NEW WAY */
 @Configuration
-@RequiredArgsConstructor // for DI for final fields, it creates constructor for final fields and Spring
-							// automatically so constructor injection, i.e. find and provide the required
-							// objects for the constructor
+@RequiredArgsConstructor
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-		// securedEnabled = true, // TODO: ??
-		// jsr250Enabled = true, // TODO: ??
-		prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
 	private static final String ADMIN = "ADMIN";
@@ -85,10 +41,6 @@ public class SecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -99,48 +51,26 @@ public class SecurityConfig {
 		return authProvider;
 	}
 
-	/**
-	 * 
-	 * @param authConfig
-	 * @return
-	 * @throws Exception
-	 */
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
 
-	/**
-	 * 
-	 * @param http
-	 * @return
-	 * @throws Exception
-	 */
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.cors().and().csrf().disable() // TODO: explore csrf and cors
-				.exceptionHandling().authenticationEntryPoint(unauthorizedHandler) // handles Unauthorized request like
-																					// if not having required authority
-																					// to access an endpoint
-				.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session will not be
-																									// stored
-				.and().authorizeRequests()
+		http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
 				.antMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
 				.antMatchers("/api/v1/auth/changePassword").hasAnyAuthority(ADMIN, ATTENDEE)
-//				.antMatchers("/api/v1/auth/**").permitAll()
 				.antMatchers("/api/v1/admin/**").hasAuthority(ADMIN).antMatchers("/api/v1/attendee/**")
 				.hasAuthority(ATTENDEE).antMatchers("/api/v1/dummyAdmin/**").hasAnyAuthority(ADMIN).anyRequest()
 				.authenticated();
 
 		http.authenticationProvider(authenticationProvider());
 
-		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // add
-																									// jwtAuthentication
-																									// filter before
-																									// UsernamePasswordAuthenticationFilter
+		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 
-		// TODO: explain use of '.and' and what the way if not used '.and'
 	}
 }

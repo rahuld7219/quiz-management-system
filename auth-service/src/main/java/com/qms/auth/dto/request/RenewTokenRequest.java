@@ -13,6 +13,6 @@ public class RenewTokenRequest implements Serializable {
 
 	private static final long serialVersionUID = -9143204329252659667L;
 	
-	@NotBlank
+	@NotBlank(message = "Refresh token cannot be blank.")
 	private String refreshToken;
 }

@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 public class Dashboard implements Serializable {
 
 	private static final long serialVersionUID = -3657756535518191900L;
-	
+
 	Long numberOfQuizzes;
 	Long totalAttendees;
 	List<Map<String, Object>> topFiveAttendedQuizzes;

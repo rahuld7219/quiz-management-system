@@ -11,6 +11,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class CategoryRequest {
 
-	@NotBlank
+	@NotBlank(message = "Category name cannot be blank.")
 	private String name;
 }

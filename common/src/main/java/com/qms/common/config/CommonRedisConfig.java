@@ -25,16 +25,8 @@ public class CommonRedisConfig {
 
 		redisTemplate.setConnectionFactory(redisConnectionFactory);
 
-		// we use StringRedisSerializer() for key,
-		// so keys on redis shown as string
 		redisTemplate.setKeySerializer(new StringRedisSerializer());
 
-		// we use JdkSerializationRedisSerializer for value,
-		// so values on redis will be shown in
-		// some hexa unreadable form,
-		// we can use StringRedisSerializer also
-		// if we want values to be shown as string on redis,
-		// there are other options also for serialization
 		redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
 		return redisTemplate;
 	}

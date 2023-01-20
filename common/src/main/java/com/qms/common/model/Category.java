@@ -37,7 +37,7 @@ public class Category {
 	@Column(name = "name", nullable = false, unique = true)
 	private String name;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "category") // TODO: what could be the cascade?
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "category")
 	private Set<Quiz> quizzes;
 
 	@CreatedDate

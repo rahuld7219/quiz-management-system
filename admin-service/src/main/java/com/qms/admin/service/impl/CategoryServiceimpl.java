@@ -59,8 +59,6 @@ public class CategoryServiceimpl implements CategoryService {
 		Category category = categoryRepository.findById(categoryId)
 				.orElseThrow(() -> new CategoryNotExistException(AdminMessageConstant.CATEGORY_NOT_EXIST));
 
-		// TODO: try and catch databse exception instead of checking here, check CASCADE
-		// definition
 		if (quizRepository.existsByCategoryId(category.getId())) {
 			throw new CategoryConstraintViolationException(AdminMessageConstant.CATEGORY_QUIZ_ASSOCIATION_VIOLATION);
 		}

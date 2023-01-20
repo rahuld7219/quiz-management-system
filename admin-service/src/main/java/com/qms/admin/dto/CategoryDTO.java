@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 public class CategoryDTO implements Serializable {
 
 	private static final long serialVersionUID = 6051937579960606024L;
-	
+
 	private Long id;
 	private String categoryName;
 }

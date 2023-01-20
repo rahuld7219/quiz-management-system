@@ -15,9 +15,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class SignUpResponse extends ApiResponse {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5388400158018270310L;
 
 	private Data data;

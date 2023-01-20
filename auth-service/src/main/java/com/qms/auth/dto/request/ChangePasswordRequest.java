@@ -13,12 +13,12 @@ public class ChangePasswordRequest implements Serializable {
 
 	private static final long serialVersionUID = 7524663818115542142L;
 
-	@NotBlank
+	@NotBlank(message = "Please provide old password.")
 	private String oldPassword;
 
-	@NotBlank
+	@NotBlank(message = "Please provide old password.")
 	private String newPassword;
 
-	@NotBlank
+	@NotBlank(message = "Please provide old password.")
 	private String againNewPassword;
 }

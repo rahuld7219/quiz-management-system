@@ -3,6 +3,7 @@ package com.qms.attendee.controller;
 import java.time.LocalDateTime;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,21 +32,11 @@ public class AttendeeController {
 	@Autowired
 	private QuizService quizService;
 
-	/**
-	 * count all quizzes (not deleted)
-	 * 
-	 * @return
-	 */
-	@GetMapping("/countQuiz") // TODO: duplicate
+	@GetMapping("/countQuiz")
 	public ResponseEntity<ApiResponse> getQuizCount() {
 		return ResponseEntity.ok(quizService.getQuizCount());
 	}
 
-	/**
-	 * count attended unique quizzes by current user
-	 * 
-	 * @return
-	 */
 	@GetMapping("/countAttendedQuiz")
 	public ResponseEntity<ApiResponse> countAttendedQuiz() {
 		return ResponseEntity.ok(attendeeService.countAttendedQuiz());
@@ -77,7 +68,7 @@ public class AttendeeController {
 	}
 
 	@PostMapping("/submitQuiz")
-	public ResponseEntity<ApiResponse> submitQuiz(@RequestBody final QuizSubmission quizSubmission) {
+	public ResponseEntity<ApiResponse> submitQuiz(@Valid @RequestBody final QuizSubmission quizSubmission) {
 		attendeeService.submitQuiz(quizSubmission);
 		return ResponseEntity.ok(new ApiResponse().setHttpStatus(HttpStatus.OK)
 				.setMessage(AttendeeMessageConstant.QUIZ_SUBMITTED).setResponseTime(LocalDateTime.now()));

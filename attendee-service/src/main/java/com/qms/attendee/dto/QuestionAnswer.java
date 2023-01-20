@@ -15,15 +15,12 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class QuestionAnswer implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 3743554751813245798L;
-	
-	@NotNull
+
+	@NotNull(message = "Question id cannot be blank.")
 	private Long questionId;
-	
-	@NotBlank
-	@Size(max = 1)
+
+	@NotBlank(message = "Selected option cannot be blank.")
+	@Size(max = 1, message = "Selected option can be of 1 letter (A, B, C, D)")
 	private String selectedOption;
 }

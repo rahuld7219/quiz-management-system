@@ -14,8 +14,8 @@ public class AdminURIConstant {
 	public static final String LEADERBOARD = "/leaderboard";
 
 	public static final String CATEGORY_URL = "/category";
-	
+
 	public static final String QUESTION_URL = "/question";
-	
+
 	public static final String QUIZ_URL = "/quiz";
 }

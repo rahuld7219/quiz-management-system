@@ -25,6 +25,5 @@ public class QuizServiceImpl implements QuizService {
 		response.setData(response.new Data(quizRepository.countByDeleted(Deleted.N))).setHttpStatus(HttpStatus.OK)
 				.setMessage(CommonMessageConstant.QUIZ_COUNTED).setResponseTime(LocalDateTime.now());
 		return response;
-//		return quizRepository.countByDeleted(Deleted.N);
 	}
 }

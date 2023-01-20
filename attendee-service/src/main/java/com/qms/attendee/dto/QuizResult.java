@@ -15,13 +15,6 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class QuizResult implements Serializable {
 
-//	@JsonIgnore
-//	private String name;
-//	@JsonIgnore
-//	private String email;
-//	@JsonIgnore
-//	private String quizTitle;
-
 	private static final long serialVersionUID = 1580996452753373165L;
 
 	@JsonIgnore
@@ -29,5 +22,5 @@ public class QuizResult implements Serializable {
 	private Long correctAnswersCount;
 	private Long wrongAnswersCount;
 	private Long totalScore;
-	private List<ResultDetail> details; // TODO: rename it to ResponseDetail
+	private List<ResultDetail> details;
 }

@@ -62,10 +62,8 @@ public class AdminServiceImpl implements AdminService {
 	private QuizService quizService;
 
 	@Override
-//	@Transactional
 	public LinkQuizQuestionResponse linkQuestionToQuiz(final LinkQuizQuestionRequest linkQuizQuestionRequest) {
 
-		// TODO: use question service
 		Optional<List<Question>> existingQuestions = questionRepository
 				.findAllByIdInAndDeleted(linkQuizQuestionRequest.getQuestionsIds(), Deleted.N);
 
@@ -83,7 +81,6 @@ public class AdminServiceImpl implements AdminService {
 
 	}
 
-	// TODO: optimize it
 	private LinkQuizQuestionResponse linkQuestionsAndCreateResponse(List<Question> existingQuestions,
 			final LinkQuizQuestionRequest linkQuizQuestionRequest) {
 
@@ -97,7 +94,6 @@ public class AdminServiceImpl implements AdminService {
 
 		List<Question> questionsToLink = existingQuestions;
 
-		// TODO: fetch only Questions
 		Optional<List<QuizQuestion>> alreadyLinkedQuizQuestion = quizQuestionRepository
 				.findAllByQuizIdAndDeletedAndQuestionIdIn(quiz.getId(), Deleted.N, existingQuestionIds);
 
@@ -200,11 +196,4 @@ public class AdminServiceImpl implements AdminService {
 		return response;
 
 	}
-
-	/* Dashboard Old */
-//	@Override
-//	public List<Map<String, Object>> leaderboard() {
-//		return scoreRepository.getRecordFilteredByCategoryThenQuizThenAttendeeScore();
-//		// TODO: add pagination and also limit by category and limit by quiz per category and also limit by users per category per quiz
-//	}
 }

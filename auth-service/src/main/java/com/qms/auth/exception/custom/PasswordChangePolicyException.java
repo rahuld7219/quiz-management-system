@@ -10,6 +10,6 @@ import lombok.Setter;
 public class PasswordChangePolicyException extends RuntimeException {
 
 	private static final long serialVersionUID = -802409212477427247L;
-	
+
 	private final String message;
 }

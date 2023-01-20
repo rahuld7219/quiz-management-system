@@ -12,19 +12,19 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class QuestionRequest {
 
-	@NotBlank
+	@NotBlank(message = "Question detail cannot be blank.")
 	private String questionDetail;
-	@NotBlank
+	@NotBlank(message = "OptionA cannot be blank.")
 	private String optionA;
-	@NotBlank
+	@NotBlank(message = "OptionB cannot be blank.")
 	private String optionB;
-	@NotBlank
+	@NotBlank(message = "OptionC cannot be blank.")
 	private String optionC;
-	@NotBlank
+	@NotBlank(message = "OptionD cannot be blank.")
 	private String optionD;
-	@NotBlank
+	@NotBlank(message = "RightOption cannot be blank.")
 	private String rightOption;
-	@NotNull
+	@NotNull(message = "Marks cannot be blank.")
 	private Integer marks;
 
 }

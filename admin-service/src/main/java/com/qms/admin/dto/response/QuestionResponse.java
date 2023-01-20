@@ -26,6 +26,6 @@ public class QuestionResponse extends ApiResponse {
 
 		private static final long serialVersionUID = -2186121898805574872L;
 
-		private QuestionDTO question; 
+		private QuestionDTO question;
 	}
 }

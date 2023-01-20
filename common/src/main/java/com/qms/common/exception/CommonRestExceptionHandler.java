@@ -35,7 +35,7 @@ public class CommonRestExceptionHandler {
 		errorResponse.setResponseTime(LocalDateTime.now());
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
-	
+
 	@ExceptionHandler(QuizNotExistException.class)
 	public ResponseEntity<ErrorResponse> handleQuizNotExistException(final QuizNotExistException exception) {
 		exception.printStackTrace();

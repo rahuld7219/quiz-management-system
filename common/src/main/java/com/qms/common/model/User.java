@@ -45,17 +45,16 @@ public class User {
 	@Column(name = "last_name", nullable = false)
 	private String lastName;
 
-	@Column(name = "email_id", nullable = false, unique = true) // TODO: throw proper standard formatted exception on
-																// any constraint validation for any table
+	@Column(name = "email_id", nullable = false, unique = true)
 	private String emailId;
 
 	@Column(name = "password", nullable = false)
 	private String password;
 
-	@Column(name = "mobile_number", nullable = false, unique = true) // TODO: why unique not working??, also check every fields constraint
+	@Column(name = "mobile_number", nullable = false, unique = true)
 	private String mobileNumber;
 
-	@ManyToMany(fetch = FetchType.EAGER) // TODO: what could be the cascading rule? check in every entity class
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;
 
