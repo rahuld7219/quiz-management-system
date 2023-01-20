@@ -27,7 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query(value = "SELECT COUNT(DISTINCT s.user_id) FROM user_score s, user_role r WHERE s.user_id = r.user_id AND r.role_id = ?1", nativeQuery = true)
 	Long countAttendeeAttemptedQuiz(Long roleId);
 
-	Long getIdByEmailId(String extractUserFromSecurityContext);
+	Long getIdByEmailId(String email);
 
 //	  Boolean existsByUsername(String username);
 }

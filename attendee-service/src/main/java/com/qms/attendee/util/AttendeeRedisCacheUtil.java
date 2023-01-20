@@ -6,7 +6,9 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.qms.attendee.constant.AttendeeMessageConstant;
 import com.qms.attendee.dto.request.QuizSubmission;
+import com.qms.attendee.exception.custom.QuizSubmissionNotFoundException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -70,6 +72,8 @@ public class AttendeeRedisCacheUtil {
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			throw new QuizSubmissionNotFoundException(AttendeeMessageConstant.QUIZ_SUBMISSION_NOT_FOUND);
 		}
 		return null;
 	}

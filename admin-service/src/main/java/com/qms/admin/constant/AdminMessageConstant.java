@@ -27,7 +27,6 @@ public class AdminMessageConstant {
 	public static final String QUIZ_UPDATED = "Quiz update successful.";
 	public static final String QUIZ_DELETED = "Quiz delete Successful.";
 	public static final String QUIZ_GOT = "Quiz fetch successful.";
-	public static final String QUIZ_COUNTED = "Quiz count successful.";
 
 	public static final String QUESTION_NOT_EXIST = "Question not exist.";
 //	public static final String QUIZ_NOT_EXIST = "Quiz not exist.";

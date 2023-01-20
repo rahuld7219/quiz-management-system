@@ -88,7 +88,7 @@ public class QuestionServiceImpl implements QuestionService {
 	@Override
 	public ListQuestionResponse getQuestionList() {
 
-		List<QuestionDTO> questions = questionRepository.findAll().stream().map(this::mapToDTO)
+		List<QuestionDTO> questions = questionRepository.findAllByDeleted(Deleted.N).stream().map(this::mapToDTO)
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		ListQuestionResponse response = new ListQuestionResponse();

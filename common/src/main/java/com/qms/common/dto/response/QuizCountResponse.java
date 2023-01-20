@@ -1,8 +1,6 @@
-package com.qms.admin.dto.response;
+package com.qms.common.dto.response;
 
 import java.io.Serializable;
-
-import com.qms.common.dto.response.ApiResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

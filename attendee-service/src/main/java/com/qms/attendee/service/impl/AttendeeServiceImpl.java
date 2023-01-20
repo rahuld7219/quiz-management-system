@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -78,7 +79,9 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 		final String email = extractUserFromSecurityContext();
 
-		final Long userId = userRepository.getIdByEmailId(email);
+//		final Long userId = userRepository.getIdByEmailId(email); //TODO: make method or write query to only get user id
+
+		final Long userId = userRepository.findByEmailId(email).get().getId();
 
 		CountAttendedQuizResponse response = new CountAttendedQuizResponse();
 		response.setData(response.new Data(email, scoreRepository.countDistinctQuizByUserId(userId)))
@@ -100,7 +103,9 @@ public class AttendeeServiceImpl implements AttendeeService {
 	public CountAttendedQuizByCategoryResponse countAttendedQuizByCategory() {
 		final String email = extractUserFromSecurityContext();
 
-		final Long userId = userRepository.getIdByEmailId(email);
+//		final Long userId = userRepository.getIdByEmailId(email); //TODO: make method or write query to only get user id
+
+		final Long userId = userRepository.findByEmailId(email).get().getId();
 
 		CountAttendedQuizByCategoryResponse response = new CountAttendedQuizByCategoryResponse();
 		response.setData(response.new Data(quizRepository.countAttendedQuizByCategory(userId)))
@@ -141,7 +146,7 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	@Override
 	public DashboardResponse dashboard() {
-		Dashboard dashboard = new Dashboard().setTotalQuizCount(this.quiService.getQuizCount())
+		Dashboard dashboard = new Dashboard().setTotalQuizCount(this.quiService.getQuizCount().getData().getQuizCount())
 				.setAttendedQuizCount(this.countAttendedQuiz().getData().getAttendedQuizCount())
 				.setQuizCountByCategory(this.countQuizByCategory().getData().getQuizCountByCategory())
 				.setAttendedQuizCountByCategory(
@@ -162,7 +167,8 @@ public class AttendeeServiceImpl implements AttendeeService {
 		final List<RankDetail> rankDetails = scoreRepository.getTopScorers(quizId, email);
 
 		final Leaderboard leaderboard = new Leaderboard();
-		leaderboard.setRankList(rankDetails);
+		leaderboard.setYourRank(rankDetails.get(0));
+		leaderboard.setRankList(rankDetails.subList(1, rankDetails.size()));
 
 		LeaderboardResponse response = new LeaderboardResponse();
 		response.setData(response.new Data(leaderboard)).setHttpStatus(HttpStatus.OK)
@@ -202,8 +208,15 @@ public class AttendeeServiceImpl implements AttendeeService {
 //		return leaderboard;
 //	}
 
+	// TODO: store score in database here (instead of in show result) and also in
+	// redis and when user submit for that quiz again the update in redis and score
+	// in database
 	@Override
 	public void submitQuiz(final QuizSubmission quizSubmission) {
+
+		if (!quizRepository.existsById(quizSubmission.getQuizId())) {
+			throw new QuizNotExistException(CommonMessageConstant.QUIZ_NOT_EXIST);
+		}
 
 		final String email = this.extractUserFromSecurityContext();
 
@@ -243,7 +256,6 @@ public class AttendeeServiceImpl implements AttendeeService {
 
 	private QuizResult getQuizResult(String email, Long quizId) {
 
-		// TODO: handle exception if key not found
 		QuizSubmission quizSubmission = redisCacheUtil.getCachedSubmission(email + "_" + quizId);
 
 		// TODO: handle what if quiz id not exist ?
@@ -269,8 +281,15 @@ public class AttendeeServiceImpl implements AttendeeService {
 		Long totalScore = 0L;
 		List<ResultDetail> details = new ArrayList<>();
 
+//		TODO: handle duplicate submitted question id and question id submitted which is not in the quiz
 		for (QuestionAnswer questionAnswer : quizSubmission.getAnswerList()) {
 			Question question = questionsMap.get(questionAnswer.getQuestionId());
+
+			// if question id is not in the quiz, skip it
+			if (Objects.isNull(question)) {
+				continue;
+			}
+
 			if (questionAnswer.getSelectedOption().equalsIgnoreCase(question.getRightOption())) {
 				correctAnswersCount++;
 				totalScore += question.getMarks();

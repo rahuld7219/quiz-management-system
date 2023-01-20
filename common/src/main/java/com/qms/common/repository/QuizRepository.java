@@ -35,7 +35,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 														// also delete a category when its last associated quiz get
 														// deleted
 
-	@Query(value = "select c.name, count(DISTINCT q.id) attemptedQuizzes " + "from category c, quiz q, user_score s "
+	@Query(value = "select c.name categoryName, count(DISTINCT q.id) attemptedQuizzes " + "from category c, quiz q, user_score s "
 			+ "where c.id = q.category_id AND q.id = s.quiz_id AND s.user_id = ?1 "
 			+ "group by c.name", nativeQuery = true)
 	List<Map<String, Object>> countAttendedQuizByCategory(Long userId);

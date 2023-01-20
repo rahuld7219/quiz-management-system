@@ -1,5 +1,6 @@
 package com.qms.admin.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
 //	@Query()
 	Optional<List<Question>> findAllByIdInAndDeleted(List<Long> questionsIds, Deleted deleted);
+
+	Collection<Question> findAllByDeleted(Deleted deleted);
 
 //	boolean existsByQuizId(Long quizId); TODO: find a better way
 

@@ -13,7 +13,6 @@ import com.qms.admin.constant.AdminMessageConstant;
 import com.qms.admin.dto.QuizDTO;
 import com.qms.admin.dto.request.QuizRequest;
 import com.qms.admin.dto.response.ListQuizResponse;
-import com.qms.admin.dto.response.QuizCountResponse;
 import com.qms.admin.dto.response.QuizResponse;
 import com.qms.admin.exception.custom.CategoryNotExistException;
 import com.qms.admin.exception.custom.QuizConstraintViolationException;
@@ -21,6 +20,7 @@ import com.qms.admin.repository.CategoryRepository;
 import com.qms.admin.service.QuizService;
 import com.qms.common.constant.CommonMessageConstant;
 import com.qms.common.constant.Deleted;
+import com.qms.common.dto.response.QuizCountResponse;
 import com.qms.common.exception.custom.QuizNotExistException;
 import com.qms.common.model.Category;
 import com.qms.common.model.Quiz;
@@ -120,7 +120,7 @@ public class QuizServiceImpl implements QuizService {
 
 		QuizCountResponse response = new QuizCountResponse();
 		response.setData(response.new Data(quizRepository.countByDeleted(Deleted.N))).setHttpStatus(HttpStatus.OK)
-				.setMessage(AdminMessageConstant.QUIZ_COUNTED).setResponseTime(LocalDateTime.now());
+				.setMessage(CommonMessageConstant.QUIZ_COUNTED).setResponseTime(LocalDateTime.now());
 		return response;
 	}
 

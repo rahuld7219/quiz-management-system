@@ -2,8 +2,8 @@ package com.qms.admin.service;
 
 import com.qms.admin.dto.request.QuizRequest;
 import com.qms.admin.dto.response.ListQuizResponse;
-import com.qms.admin.dto.response.QuizCountResponse;
 import com.qms.admin.dto.response.QuizResponse;
+import com.qms.common.dto.response.QuizCountResponse;
 
 public interface QuizService {
 

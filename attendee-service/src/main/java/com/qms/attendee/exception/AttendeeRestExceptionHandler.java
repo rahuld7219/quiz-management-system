@@ -11,8 +11,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.qms.attendee.exception.custom.QuizSubmissionNotFoundException;
 import com.qms.common.dto.response.ErrorResponse;
 import com.qms.common.dto.response.FieldError;
+import com.qms.common.exception.custom.QuizNotExistException;
 
 @RestControllerAdvice
 public class AttendeeRestExceptionHandler {
@@ -45,7 +47,30 @@ public class AttendeeRestExceptionHandler {
 		errorResponse.setResponseTime(LocalDateTime.now());
 		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
+
+	@ExceptionHandler(QuizSubmissionNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleQuizSubmissionNotFoundException(
+			final QuizSubmissionNotFoundException exception) {
+		exception.printStackTrace();
+		final ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setHttpStatus(HttpStatus.NOT_FOUND);
+		errorResponse.setException(exception.getClass().getSimpleName());
+		errorResponse.setMessage(exception.getMessage());
+		errorResponse.setResponseTime(LocalDateTime.now());
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	}
+
+	@ExceptionHandler(QuizNotExistException.class)
+	public ResponseEntity<ErrorResponse> handleQuizNotExistException(final QuizNotExistException exception) {
+		exception.printStackTrace();
+		final ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setHttpStatus(HttpStatus.NOT_FOUND);
+		errorResponse.setException(exception.getClass().getSimpleName());
+		errorResponse.setMessage(exception.getMessage());
+		errorResponse.setResponseTime(LocalDateTime.now());
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	}
+
 //	@ExceptionHandler(CategoryNotExistException.class)
 //	public ResponseEntity<ErrorResponse> handleCategoryNotExistException(final CategoryNotExistException exception) {
 //		exception.printStackTrace();

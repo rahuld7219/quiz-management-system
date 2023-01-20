@@ -261,3 +261,9 @@ TODO: seprate into thre DTO, Entity and Request (see the code where someone did 
 TODO: rename question detail to question string
 
 TODO: change category response with category DTO
+
+
+TODO: on password change logout the user, means invalidate(set expiry time of past) or remove the accessToken and refresh token
+TODO: do we need to store all scores or only max one or all unique scores
+TODO: what if user submitted duplicate questions
+TODO: add doc comment

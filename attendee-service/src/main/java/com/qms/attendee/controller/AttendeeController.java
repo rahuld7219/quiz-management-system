@@ -37,7 +37,7 @@ public class AttendeeController {
 	 * @return
 	 */
 	@GetMapping("/countQuiz") // TODO: duplicate
-	public ResponseEntity<Long> getQuizCount() {
+	public ResponseEntity<ApiResponse> getQuizCount() {
 		return ResponseEntity.ok(quizService.getQuizCount());
 	}
 

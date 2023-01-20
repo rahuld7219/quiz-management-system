@@ -18,7 +18,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
 	// TODO: optimize, find way to write using only JPA method OR use JPQL
 	// instead of native, (native vs JPQL ??)
 
-	@Query(value = "Select quiz_id quizId, count(*) attendees " + "from user_score " + "group by quizId "
+	@Query(value = "Select quiz_id quizId, count(DISTINCT user_id) attendees " + "from user_score " + "group by quizId "
 			+ "order by attendees desc " + "limit 5", nativeQuery = true)
 	List<Map<String, Object>> getAttendeeCountGroupByQuiz();
 

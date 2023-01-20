@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -50,6 +51,17 @@ public class AuthRestExceptionHandler {
 		errorResponse.setMessage(exception.getMessage());
 		errorResponse.setResponseTime(LocalDateTime.now());
 		return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<ErrorResponse> handleAccessDeniedException(final AccessDeniedException exception) {
+		exception.printStackTrace();
+		final ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setHttpStatus(HttpStatus.FORBIDDEN);
+		errorResponse.setException(exception.getClass().getSimpleName());
+		errorResponse.setMessage(exception.getMessage());
+		errorResponse.setResponseTime(LocalDateTime.now());
+		return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
 	}
 
 	@ExceptionHandler(UserAlreadyExistException.class)
