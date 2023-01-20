@@ -105,9 +105,10 @@ public class QuestionServiceImpl implements QuestionService {
 	}
 
 	private QuestionDTO mapToDTO(final Question question) {
-		return new QuestionDTO().setQuestionDetail(question.getQuestionDetail()).setOptionA(question.getOptionA())
-				.setOptionB(question.getOptionB()).setOptionC(question.getOptionC()).setOptionD(question.getOptionD())
-				.setRightOption(question.getRightOption()).setMarks(question.getMarks());
+		return new QuestionDTO().setQuestionId(question.getId()).setQuestionDetail(question.getQuestionDetail())
+				.setOptionA(question.getOptionA()).setOptionB(question.getOptionB()).setOptionC(question.getOptionC())
+				.setOptionD(question.getOptionD()).setRightOption(question.getRightOption())
+				.setMarks(question.getMarks());
 	}
 
 }

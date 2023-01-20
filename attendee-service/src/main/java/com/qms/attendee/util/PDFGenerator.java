@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -29,6 +30,8 @@ public class PDFGenerator {
 	private static Font COURIER_SMALL = new Font(Font.FontFamily.COURIER, 14, Font.BOLD);
 	private static Font COURIER_VERY_SMALL = new Font(Font.FontFamily.COURIER, 12, Font.NORMAL);
 	private static Font COURIER_FOOTER = new Font(Font.FontFamily.COURIER, 12, Font.BOLD);
+	private static Font COURIER_FOOTER_RED = new Font(Font.FontFamily.COURIER, 12, Font.BOLD, BaseColor.RED);
+	private static Font COURIER_FOOTER_GREEN = new Font(Font.FontFamily.COURIER, 12, Font.BOLD, BaseColor.GREEN);
 
 //	@Value("${pdfDir}")
 	private static final String pdfDir = "/home/ranosys/Desktop/"; // TODO: extract to constant file
@@ -131,23 +134,15 @@ public class PDFGenerator {
 //		font.setColor(CMYKColor.WHITE);
 
 		// TODO: extract all literals to constant file
-		final List<String> summaryContent = new ArrayList();
+
+		final List<String> summaryContent = new ArrayList<>();
 		summaryContent.add("Name: " + this.attendeeName.toUpperCase());
 		summaryContent.add("Right Answers: " + this.quizResult.getCorrectAnswersCount());
 		summaryContent.add("Email: " + this.attendeeEmail.toUpperCase());
 		summaryContent.add("Wrong Answers: " + this.quizResult.getWrongAnswersCount());
+		// TODO: extract to date util
 		summaryContent
-				.add("Exam Date: " + this.quizResult.getExamDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))); // TODO:
-																														// extract
-																														// to
-																														// date
-																														// util
-																														// and
-																														// extract
-																														// string
-																														// to
-																														// constant
-																														// file
+				.add("Exam Date: " + this.quizResult.getExamDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
 		summaryContent.add("Your score: " + this.quizResult.getTotalScore());
 
 		addDataToSummaryTable(table, summaryContent);
@@ -218,8 +213,15 @@ public class PDFGenerator {
 		Paragraph p4 = new Paragraph("(C) " + resultDetail.getOptionC(), COURIER_VERY_SMALL);
 		Paragraph p5 = new Paragraph("(D) " + resultDetail.getOptionD(), COURIER_VERY_SMALL);
 
-		Paragraph p6 = new Paragraph("Submitted Answer: (" + resultDetail.getSubmittedAnswer().toUpperCase() + ")",
-				COURIER_FOOTER);
+		Paragraph p6;
+		if (resultDetail.getSubmittedAnswer().equalsIgnoreCase(resultDetail.getCorrectAnswer())) {
+			p6 = new Paragraph("Submitted Answer: (" + resultDetail.getSubmittedAnswer().toUpperCase() + ")",
+					COURIER_FOOTER_GREEN);
+		} else {
+			p6 = new Paragraph("Submitted Answer: (" + resultDetail.getSubmittedAnswer().toUpperCase() + ")",
+					COURIER_FOOTER_RED);
+		}
+
 		Paragraph p7 = new Paragraph("Correct Answer: (" + resultDetail.getCorrectAnswer().toUpperCase() + ")",
 				COURIER_FOOTER);
 

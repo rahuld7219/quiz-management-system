@@ -43,7 +43,7 @@ public class QuizController {
 
 	@PutMapping("/{quizId}")
 	public ResponseEntity<ApiResponse> updateQuiz(@Valid @PathVariable final Long quizId,
-			@RequestBody final QuizRequest quizRequest) {
+		@Valid	@RequestBody final QuizRequest quizRequest) {
 
 		return ResponseEntity.ok(quizService.updateQuiz(quizId, quizRequest));
 	}

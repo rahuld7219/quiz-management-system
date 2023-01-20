@@ -1,5 +1,6 @@
 package com.qms.common.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,4 +43,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 	String getTitleById(Long quizId);
 
 	boolean existsByCategoryId(Long id);
+
+	Collection<Quiz> findAllByDeleted(Deleted deleted);
 }

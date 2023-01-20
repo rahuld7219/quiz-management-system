@@ -12,6 +12,7 @@ import lombok.Setter;
 public class RenewTokenRequest implements Serializable {
 
 	private static final long serialVersionUID = -9143204329252659667L;
+	
 	@NotBlank
 	private String refreshToken;
 }

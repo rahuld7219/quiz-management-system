@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import lombok.Data;
 
@@ -14,9 +15,11 @@ public class LoginRequest implements Serializable {
 
 	@NotBlank
 	@Email
+	@Size(max = 20)
 	private String emailId;
 
 	@NotBlank
+	@Size(min = 3, max = 20)
 	private String password;
 
 }

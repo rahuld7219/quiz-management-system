@@ -106,7 +106,7 @@ public class QuizServiceImpl implements QuizService {
 
 	@Override
 	public ListQuizResponse getQuizList() {
-		List<QuizDTO> quizzes = quizRepository.findAll().stream().map(this::mapToDTO)
+		List<QuizDTO> quizzes = quizRepository.findAllByDeleted(Deleted.N).stream().map(this::mapToDTO)
 				.collect(Collectors.toCollection(ArrayList::new));
 
 		ListQuizResponse response = new ListQuizResponse();
