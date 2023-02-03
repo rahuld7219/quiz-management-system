@@ -1,0 +1,45 @@
+ALTER TABLE `doco_reader_db`.`country` 
+DROP INDEX `unique_country_code_and_name` ,
+ADD UNIQUE INDEX `unique_country_code_and_name` (`name` ASC, `country_code` ASC) VISIBLE;
+;
+
+ALTER TABLE `doco_reader_db`.`state` 
+ADD UNIQUE INDEX `unique_country_id_and_state_name` (`name` ASC, `country_id` ASC) VISIBLE;
+;
+
+ALTER TABLE `doco_reader_db`.`city` 
+ADD UNIQUE INDEX `unique_state_id_and_city_name` (`name` ASC, `state_id` ASC) VISIBLE;
+;
+
+
+
+
+ALTER TABLE `doco_reader_db`.`document` 
+ADD COLUMN `purchasable` BIT(1) NOT NULL AFTER `public`;
+
+ALTER TABLE `doco_reader_db`.`document` 
+CHANGE COLUMN `public` `free` BIT(1) NOT NULL ;
+
+
+private class Singleton {
+
+    private Singleton() {}
+
+    public getInstance() {
+
+    }
+}
+
+
+TODOs:
+
+give alter queries to team
+
+handle exception
+validation
+unit test
+user from token
+
+update database figure
+
+change filename from originalfilename to random file name
