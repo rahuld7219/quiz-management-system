@@ -268,3 +268,125 @@ TODO: do we need to store all scores or only max one or all unique scores
 TODO: what if user submitted duplicate questions
 TODO: add doc comment
 TODO: optimize link question
+
+
+{
+    "responseTime": "01-23-2023 09:58:11",
+    "httpStatus": "BAD_REQUEST",
+    "message": "First name cannot be blank.",
+    "exception": "MethodArgumentNotValidException",
+    "fieldErrors": [
+        {
+            "field": "firstName",
+            "errorCode": "Size"
+        },
+        {
+            "field": "firstName",
+            "errorCode": "NotBlank"
+        }
+    ]
+}
+
+{
+    "firstName" : "",
+    "lastName" : ""
+}
+retype password
+add logout
+
+
+
+firstName last name validation for corrector check
+
+
+
+
+
+curl 'https://www.mooc.fi/en/' \
+  -H 'authority: www.mooc.fi' \
+  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
+  -H 'accept-language: en-GB,en-US;q=0.9,en;q=0.8' \
+  -H 'cache-control: no-cache' \
+  -H 'pragma: no-cache' \
+  -H 'referer: https://www.google.com/' \
+  -H 'sec-ch-ua: "Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  -H 'sec-fetch-dest: document' \
+  -H 'sec-fetch-mode: navigate' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'sec-fetch-user: ?1' \
+  -H 'upgrade-insecure-requests: 1' \
+  -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36' \
+  --compressed
+
+
+
+
+  curl 'https://www.amazon.in/' \
+  -H 'authority: www.amazon.in' \
+  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
+  -H 'accept-language: en-GB,en-US;q=0.9,en;q=0.8' \
+  -H 'sec-ch-ua: "Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  -H 'sec-fetch-dest: document' \
+  -H 'sec-fetch-mode: navigate' \
+  -H 'sec-fetch-site: none' \
+  -H 'sec-fetch-user: ?1' \
+  -H 'upgrade-insecure-requests: 1' \
+  -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36' \
+  --compressed
+
+
+
+
+  curl 'https://www.amazon.in/?language=hi_IN' \
+  -H 'authority: www.amazon.in' \
+  -H 'accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9' \
+  -H 'accept-language: en-GB,en-US;q=0.9,en;q=0.8' \
+  -H 'cookie: session-id=258-2482637-9269541; i18n-prefs=INR; ubid-acbin=259-9518556-8664320; session-token="SdEgs/MhlOtpHUyV+3NDS2hIsizJitvWXgwJABIjq9ZIQB2wz0sjXXOyZwktegr8xmARceKattgUMY+JzJ22/eKsz8nJ6u6ed0tksskJdyDbFlH+pETSl9H2h9yPEQgldBPb4ww5nFbypT/NtsMX5dYG/MKUPc25MWqfX1T2wu9wxgR3fcGZpxYNsyB+3vX3kQbKr1t9JKGVL5Jd76U3dzzrhCMeg6Vo4zxKKfP1kAg="; session-id-time=2082787201l; csm-hit=tb:304909V9TQKJMX8WDYPB+s-304909V9TQKJMX8WDYPB|1674544773645&t:1674544773645&adb:adblk_yes; lc-acbin=hi_IN' \
+  -H 'device-memory: 8' \
+  -H 'downlink: 10' \
+  -H 'dpr: 1' \
+  -H 'ect: 4g' \
+  -H 'referer: https://www.amazon.in/' \
+  -H 'rtt: 50' \
+  -H 'sec-ch-device-memory: 8' \
+  -H 'sec-ch-dpr: 1' \
+  -H 'sec-ch-ua: "Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  -H 'sec-ch-ua-platform-version: "5.15.0"' \
+  -H 'sec-ch-viewport-width: 1292' \
+  -H 'sec-fetch-dest: document' \
+  -H 'sec-fetch-mode: navigate' \
+  -H 'sec-fetch-site: same-origin' \
+  -H 'sec-fetch-user: ?1' \
+  -H 'upgrade-insecure-requests: 1' \
+  -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36' \
+  -H 'viewport-width: 1292' \
+  --compressed
+
+
+  curl 'https://dr3fr5q4g2ul9.cloudfront.net/?a901e7d2-ff02-a5f6-9b2c-62b309dc0a74' \
+  -H 'authority: dr3fr5q4g2ul9.cloudfront.net' \
+  -H 'accept: */*' \
+  -H 'accept-language: en-GB,en-US;q=0.9,en;q=0.8' \
+  -H 'referer: https://www.amazon.in/' \
+  -H 'sec-ch-ua: "Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: no-cors' \
+  -H 'sec-fetch-site: cross-site' \
+  -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36' \
+  --compressed
+
+
+  schema/structure not predefined
+  useful in cases where some fields are not applicable or don't have data for that fields
+  mongodb allows us to include only relevant information instead of a null return of a table query.
+  
+
+  

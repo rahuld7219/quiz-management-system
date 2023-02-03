@@ -24,7 +24,7 @@ public class AttendeeRestExceptionHandler {
 		final BindingResult bindingResult = exception.getBindingResult();
 		final List<FieldError> fieldErrors = bindingResult.getFieldErrors().stream().map(error -> {
 			final FieldError fieldError = new FieldError();
-			fieldError.setErrorCode(error.getCode());
+//			fieldError.setErrorCode(error.getCode());
 			fieldError.setField(error.getField());
 			return fieldError;
 		}).collect(Collectors.toList());
