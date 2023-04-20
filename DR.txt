@@ -11,15 +11,72 @@ ALTER TABLE `doco_reader_db`.`city`
 ADD UNIQUE INDEX `unique_state_id_and_city_name` (`name` ASC, `state_id` ASC) VISIBLE;
 ;
 
-
-
-
 ALTER TABLE `doco_reader_db`.`document` 
 ADD COLUMN `purchasable` BIT(1) NOT NULL AFTER `public`;
 
 ALTER TABLE `doco_reader_db`.`document` 
 CHANGE COLUMN `public` `free` BIT(1) NOT NULL ;
 
+set foreign_key_checks = 0;
+ALTER TABLE `doco_reader_db`.`document` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`comment` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`document_membership` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`document_views` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`friends_detail` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`group` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`membership` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`membership_detail` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`membership_group` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`membership_history` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`purchased_document` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`user_trial` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+ALTER TABLE `doco_reader_db`.`user_role` 
+CHANGE COLUMN `id` `id` INT NOT NULL AUTO_INCREMENT ;
+set foreign_key_checks = 1;
+
+
+CREATE TABLE `doco_reader_db`.`shared_document` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `document_id` INT NOT NULL,
+  `sender_id` INT NOT NULL,
+  `receiver_id` INT NOT NULL,
+  `shared_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `fk_shared_document_sender_id_idx` (`sender_id` ASC) VISIBLE,
+  INDEX `fk_shared_document_receiver_id_idx` (`receiver_id` ASC) VISIBLE,
+  INDEX `fk_shared_document_document_id_idx` (`document_id` ASC) VISIBLE,
+  CONSTRAINT `fk_shared_document_sender_id`
+    FOREIGN KEY (`sender_id`)
+    REFERENCES `doco_reader_db`.`user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_shared_document_receiver_id`
+    FOREIGN KEY (`receiver_id`)
+    REFERENCES `doco_reader_db`.`user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_shared_document_document_id`
+    FOREIGN KEY (`document_id`)
+    REFERENCES `doco_reader_db`.`document` (`id`)
+    ON DELETE RESTRICT
+    ON UPDATE RESTRICT);
+
+ALTER TABLE `doco_reader_db`.`friends_detail` 
+ADD COLUMN `updated_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `created_on`,
+CHANGE COLUMN `created_on` `created_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `status`,
+CHANGE COLUMN `status` `status` ENUM('PENDING', 'ACCEPTED', 'REJECTED', 'UNFRIEND') NOT NULL ;
 
 private class Singleton {
 
@@ -30,16 +87,459 @@ private class Singleton {
     }
 }
 
-
-TODOs:
-
-give alter queries to team
-
-handle exception
-validation
-unit test
-user from token
-
 update database figure
 
 change filename from originalfilename to random file name
+
+
+@Test
+	void testAddDocument_When_StatusCreated() throws Exception {
+		MockMultipartFile file = new MockMultipartFile("file", "test.pdf", MediaType.APPLICATION_PDF_VALUE,
+				"Add document test".getBytes());
+		AddDocumentRequest documentRequest = new AddDocumentRequest().setAuthor("author").setFile(file).setFree(true)
+				.setPrice(0.0).setPurchasable(false).setTitle("test");
+
+		BaseResponse response = new BaseResponse();
+		response.success(DocumentConstants.DOCUMENT_ADDED + documentRequest.getFile().getOriginalFilename());
+
+		given(documentService.addDocument(documentRequest, user)).willReturn(response);
+		
+		given(documentUtils.authorizeAndGetUser("xyz")).willReturn(user);
+		
+		this.mockMvc.perform(post("/api/v1/document").content(objectMapper.writeValueAsString(documentRequest))
+				.header(DocumentConstants.AUTHORIZATION, "xyz")).andExpect(status().isCreated()).andDo(print());
+	}
+
+
+
+
+
+
+
+
+
+TODO: change to find by id and deleted true
+
+TODO: create one validator
+TODO: add, cancel, upgrade/downgrade membership/trial
+TODO: add more validation to add document and update document request fields
+TODO: add more annotations to entity like created by cannot be updatable in document entity
+
+
+TODO: In test files cover throws and does not throws both cases, also cover all if paths of the code. (i.e. cover all yellow marked lines)
+TODO: split authorize and get user and authorize is ADMIN and is USER spearately
+TODO: modify CustomDocumentValidator for generic to handle bot update and add dcoument
+
+TODO:
+Create backlog sheet
+
+    Hosting analysis and implementation - (Target Date - 10 Feb 23)
+
+
+path variable/ query param
+Api gateway request object modification
+
+
+
+
+
+
+
+
+
+Extra useful readings:
+
+https://stackoverflow.com/questions/52152760/spring-boot-how-can-i-validate-a-multipart-form-in-springboot
+https://stackoverflow.com/questions/5567322/how-map-a-bit-type-in-mysql-to-hibernate
+https://stackoverflow.com/questions/15076463/another-repeated-column-in-mapping-for-entity-error
+
+-- To access properties values
+
+Environment
+MessageSource
+@Value
+@Configurationproperties
+
+
+
+ADD DOCUMENT -- code just for other ways
+
+    @SpringBootApplication
+public class DocumentServiceApplication implements CommandLineRunner {
+
+	@Resource
+	private FileStorageService storageService;
+
+	public static void main(String[] args) {
+		SpringApplication.run(DocumentServiceApplication.class, args);
+	}
+
+	@Override
+	public void run(String... arg) throws Exception {
+//	    storageService.deleteAll();
+		this.storageService.init();
+	}
+}
+
+//@SpringBootApplication
+//@EnableConfigurationProperties(StorageProperties.class)
+//public class UploadingFilesApplication {
+//
+//	public static void main(String[] args) {
+//		SpringApplication.run(UploadingFilesApplication.class, args);
+//	}
+//
+//	@Bean
+//	CommandLineRunner init(StorageService storageService) {
+//		return (args) -> {
+//			storageService.deleteAll();
+//			storageService.init();
+//		};
+//	}
+//}
+
+
+
+
+
+
+
+
+deleted
+cancel_on_end_date
+
+end_date
+
+
+set foreign_key_checks = 0;
+
+ALTER TABLE `doco_reader_db`.`membership_group` 
+ADD COLUMN `deleted` BIT(1) NOT NULL DEFAULT 0 AFTER `group_id`;
+
+ALTER TABLE `doco_reader_db`.`user_trial` 
+CHANGE COLUMN `expiry_date` `end_date` TIMESTAMP NOT NULL ;
+
+DROP TABLE IF EXISTS `membership_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `membership_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `membership_detail_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `cancel_on_end_date` bit(1) NOT NULL,
+  `active` bit(1) NOT NULL,
+  `end_date` timestamp NOT NULL,
+  `start_date` timestamp NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_membership_history_membership_detail_id_idx` (`membership_detail_id`),
+  KEY `fk_membership_history_user_id_idx` (`user_id`),
+  CONSTRAINT `fk_membership_history_membership_detail_id` FOREIGN KEY (`membership_detail_id`) REFERENCES `membership_detail` (`id`),
+  CONSTRAINT `fk_membership_history_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+set foreign_key_checks = 1;
+
+//		if (e.hasErrors()) {
+//			throw new InvalidRequestDataException(e);
+//		}
+
+	@Override
+	public ResponseEntity<Object> handleBindException(BindException exception, HttpHeaders headers, HttpStatus status,
+			WebRequest request) {
+		exception.printStackTrace();
+		BaseResponse response = new BaseResponse();
+		response.fail(DocumentConstants.INVALID_DATA);
+		Map<String, String> errorMap = new HashMap<>();
+		exception.getBindingResult().getFieldErrors().stream()
+				.forEach(error -> errorMap.put(error.getField(), error.getDefaultMessage()));
+		response.setFieldError(errorMap);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+	}
+
+  	@ExceptionHandler(InvalidRequestDataException.class)
+	public ResponseEntity<BaseResponse> handleInvalidRequestDataException(InvalidRequestDataException exception) {
+		exception.printStackTrace();
+		BaseResponse response = new BaseResponse();
+		response.fail(exception.getMessage());
+		final Errors errors = exception.getErrors();
+		final Map<String, String> errorMap = new HashMap<>();
+		errors.getFieldErrors().stream()
+				.forEach(error -> errorMap.put(error.getField(), messageService.getMessage(error.getDefaultMessage())));
+		response.setFieldError(errorMap);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+	}
+
+
+  	private void deleteDocumentMemberships(Long documentId) {
+		documentMembershipDao.deleteAllByDocumentId(documentId);
+		documentMembershipDao.flush();
+	}
+
+
+  	@Override
+	public BaseResponse updateDocument(final Long documentId, final DocumentRequest documentRequest, final User user) {
+		
+		Document document = documentDao.findByIdAndDeleted(documentId, false)
+				.orElseThrow(() -> new ResourceNotFoundException(DocumentConstants.DOCUMENT_NOT_EXIST));
+		if (!isDocumentOwner(document.getCreatedBy(), user)) {
+			throw new OwnershipException(DocumentConstants.NOT_DOCUMENT_OWNER);
+		}
+		storageService.delete(document.getPath());
+		document.setPath(storageService.store(documentRequest.getFile()));
+		mapToModel(document, documentRequest);
+
+		// TODO: optimize the below code for add and delete in document membership in
+		// different scenerios
+
+		deleteDocumentMemberships(documentId);
+
+		if (Objects.nonNull(documentRequest.getMembershipId())) {
+			addDocumentMemberships(document, documentRequest.getMembershipId());
+		}
+
+		documentDao.save(document);
+
+		BaseResponse response = new BaseResponse();
+		response.success(DocumentConstants.DOCUMENT_UPDATED);
+		return response;
+	}
+
+
+
+  	private void addDocumentMemberships(Document document, Long membershipId) {
+
+		Membership theMembership = membershipDao.findByIdAndDeleted(membershipId, false)
+				.orElseThrow(() -> new ResourceNotFoundException(DocumentConstants.MEMBERSHIP_NOT_EXIST));
+
+		// Lesser the priority number higher is the priority
+		List<Membership> memberships = membershipDao.findByDeletedAndPriorityLessThanEqual(false,
+				theMembership.getPriority());
+
+		List<DocumentMembership> documentMemberships = new ArrayList<>();
+		for (Membership membership : memberships) {
+			documentMemberships.add(new DocumentMembership().setMembership(membership).setDocument(document));
+		}
+
+		documentMembershipDao.saveAll(documentMemberships);
+	}
+
+
+
+
+
+
+
+  ALTER TABLE `doco_reader_db`.`user` 
+ADD UNIQUE INDEX `UK_USER_MOBILE` (`mobile_number` ASC) VISIBLE;
+ALTER TABLE `doco_reader_db`.`user` RENAME INDEX `email_UNIQUE` TO `UK_USER_EMAIL`;
+ALTER TABLE `doco_reader_db`.`user` ALTER INDEX `UK_USER_EMAIL` VISIBLE;
+
+
+ALTER TABLE `doco_reader_db`.`membership` 
+ADD COLUMN `created_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `priority`,
+ADD COLUMN `updated_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `created_on`;
+
+
+ALTER TABLE `doco_reader_db`.`membership_detail` 
+ADD COLUMN `created_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `membership_id`,
+ADD COLUMN `updated_on` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `created_on`;
+
+ALTER TABLE `doco_reader_db`.`user_trial` 
+ADD UNIQUE INDEX `user_id_UNIQUE` (`user_id` ASC) VISIBLE;
+;
+
+
+
+
+
+
+
+
+
+
+
+
+ALTER TABLE doco_reader_db.subscriptions 
+DROP FOREIGN KEY fk_membership_history_membership_detail_id;
+ALTER TABLE doco_reader_db.subscriptions 
+ADD CONSTRAINT fk_subscriptions_membership_detail_id
+  FOREIGN KEY (membership_detail_id)
+  REFERENCES doco_reader_db.membership_detail (id)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+ALTER TABLE `doco_reader_db`.`shared_document` 
+ADD UNIQUE INDEX `UQ_shared_document_document_id_sender_id_receiver_id` (`sender_id` ASC, `document_id` ASC, `receiver_id` ASC) VISIBLE;
+;
+
+  ALTER TABLE `doco_reader_db`.`membership_detail` 
+ADD UNIQUE INDEX `UQ_membership_detail_membership_id_tenure` (`tenure` ASC, `membership_id` ASC) VISIBLE;
+;
+
+ALTER TABLE `doco_reader_db`.`purchased_document` 
+ADD UNIQUE INDEX `UQ_purchased_document_user_id_document_id` (`user_id` ASC, `document_id` ASC) VISIBLE;
+;
+
+ALTER TABLE `doco_reader_db`.`subscriptions` 
+ADD UNIQUE INDEX `UQ_subscriptions_user_id_active` (`user_id` ASC, `active` ASC) VISIBLE;
+;
+
+ALTER TABLE `doco_reader_db`.`subscriptions` 
+;
+ALTER TABLE `doco_reader_db`.`subscriptions` RENAME INDEX `fk_membership_history_membership_detail_id_idx` TO `fk_subscriptions_membership_detail_id_idx`;
+ALTER TABLE `doco_reader_db`.`subscriptions` ALTER INDEX `fk_subscriptions_membership_detail_id_idx` VISIBLE;
+ALTER TABLE `doco_reader_db`.`subscriptions` RENAME INDEX `fk_membership_history_user_id_idx` TO `fk_subscriptions_user_id_idx`;
+ALTER TABLE `doco_reader_db`.`subscriptions` ALTER INDEX `fk_subscriptions_user_id_idx` VISIBLE;
+
+
+
+1 Mar
+
+ALTER TABLE doco_reader_db.user 
+CHANGE COLUMN email_verified email_verified BIT(1) NOT NULL DEFAULT 0 ;
+
+ALTER TABLE `doco_reader_db`.`document_views` 
+DROP FOREIGN KEY `fk_document_views_document_id`;
+ALTER TABLE `doco_reader_db`.`document_views` 
+ADD CONSTRAINT `fk_document_views_document_id`
+  FOREIGN KEY (`document_id`)
+  REFERENCES `doco_reader_db`.`document` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+2 Mar
+
+  ALTER TABLE `doco_reader_db`.`membership` 
+ADD UNIQUE INDEX `name_UNIQUE` (`name` ASC) VISIBLE;
+;
+
+
+
+
+
+TODO: handle if wrong data type provided in path variable, request body
+TODO: handle all contraint by database exception like unique, etc.
+TODO: handle more validations for -ve values, range, etc.
+TODO: file size, file limit, make read only
+TODO: optimize all the code written by you
+TODO: read others doco_reader code
+
+TODO: how to, if save fail then don't store files
+TODO: handle constraint fails with proper message
+TODO: while deleting document check for each depenedency(like document purchased, views etc.) and analyse
+TODO: handle update file problem
+TODO: handle add/update file problem when save to database fails(like unique title constraint) then the file should also not be saved on file system and vice versa also
+TODO: add doc comment
+TODO: check for each exception for which exception message to show at client which not to show to hide our backend info
+TODO: proper test method names and cover more cases
+TODO: cleanup Document util not needed mocks in test methods
+TODO: think of what to do with multiple views per page
+TODO: base response changes
+TODO: make properties file
+TODO: make tenure enum 3, 6, 12
+TODO: make role enum
+TODO: In get subscription detail also send current plan tenure
+TODO: Remove UQ_subscriptions_user_id_active in subscriptions or delete old subscriptions once they get inactive
+TODO: how to implement 2-factor OTP with google authenticator
+
+
+
+		<!--		<dependency>-->
+		<!--			<groupId>net.sf.cssbox</groupId>-->
+		<!--			<artifactId>pdf2dom</artifactId>-->
+		<!--			<version>2.0.1</version>-->
+		<!--		</dependency>-->
+
+
+
+
+TODO: compare write in file and console time taken
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+circular dependency
+ - circular dependencies allowed in setter and @Autowired if we set below properties (By default below property is false)
+ 	=>spring.main.allow-circular-references=true
+	But constructor injection doesn't allow circular dependency even if we set the above property
+
+setter injection can change dependency after object created (not immutable)
+  - With constructor injection once we create a bean, we cannot alter its dependencies anymore. With setter injection, it’s possible to inject the dependency after creation, thus leading to mutable objects which, among other things, may not be thread-safe in a multi-threaded environment and are harder to debug due to their mutability.
+
+@Autowired dependent on spring
+  - code fails when run outside spring (not a good reason though, but should be followed for business logic class like service, as business logic is hard to write and cannot change but technologies can change)
+
+null pointer exception possible if not constructor injection
+
+reveal code smell if constructor injection used and have many parameters
+
+prevent errors in unit tests if used constructor injection
+
+Field Injection uses reflection to set the values of private variables. Constructor Injection happens at the time of creating the object itself. Setter Injection uses setters to set the value.
+
+container-agnostic => means whether or not we use Spring(i.e. container) it doesn't matter
+
+
+
+share documents via unique link
+Users can organize their documents into folders and subfolders.
+The application will track the number of views on a particular document and display it to the document's owner, broken down by their 1st and 2nd connections.
+two-factor authentication to protect user data and transactions
+penetration testing
+Localization at frontend
+API gateway
+
+
+other file format support
+KYC
+Payment gateway
+analytics
+SSL
+GDPR
+
+
+
+
+
+
+ALTER TABLE `doco_reader_db`.`membership_detail` 
+CHANGE COLUMN `tenure` `tenure` ENUM('1', '3', '6', '12') NOT NULL ;
+
+ALTER TABLE `doco_reader_db`.`subscriptions` 
+DROP FOREIGN KEY `fk_membership_history_user_id`;
+ALTER TABLE `doco_reader_db`.`subscriptions` 
+ADD CONSTRAINT `fk_subscriptions_user_id`
+  FOREIGN KEY (`user_id`)
+  REFERENCES `doco_reader_db`.`user` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+
+
+
+[document.haveMembershipOrPurchasable.cannotFree.documentRequest.free, document.haveMembershipOrPurchasable.cannotFree.free, document.haveMembershipOrPurchasable.cannotFree.java.lang.Boolean, document.haveMembershipOrPurchasable.cannotFree]
+[typeMismatch.documentRequest.free, typeMismatch.free, typeMismatch.java.lang.Boolean, typeMismatch] => default code is the last one
+
+
+membership
+document update
+
+view document 
+
+TODO: solve unique and soft delete problem(may be need to create history table)
